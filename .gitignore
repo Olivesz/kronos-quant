@@ -2,7 +2,11 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.egg-link
+build/
+dist/
 .pytest_cache/
+.ruff_cache/
 
 # Virtual env (machine-specific; rebuild from requirements.txt)
 .venv/

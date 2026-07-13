@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use KRONOS in your work, please cite it as below."
+title: "KRONOS: A Regime-Aware Quantitative Alpha Platform and Market-Microstructure Research Lab"
+authors:
+  - family-names: "z"
+    given-names: "oliver"
+version: 1.0.0
+date-released: 2026-07-13
+license: MIT
+keywords:
+  - quantitative finance
+  - regime switching
+  - hidden Markov models
+  - rough volatility
+  - Hawkes processes
+  - market microstructure
+  - information theory
