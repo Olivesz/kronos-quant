@@ -34,7 +34,8 @@ dependencies = [
 data = ["yfinance>=0.2.40"]
 
 [project.urls]
-Documentation = "https://github.com/oliverz/kronos/tree/main/docs"
+Homepage = "https://github.com/Olivesz/kronos-quant"
+Documentation = "https://github.com/Olivesz/kronos-quant/tree/main/docs"
 
 [tool.setuptools]
 packages = ["kronos"]
