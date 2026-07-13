@@ -14,6 +14,8 @@ GATES = [
     "test_ensemble.py", "test_forensics.py",
     # KRONOS-X² gates
     "test_thmm.py", "test_infer.py", "test_rfsv.py",
+    # KRONOS-X² K-hallucination study (tails.py)
+    "test_tails.py",
     # KRONOS-LAWS gates
     "test_laws.py", "test_clock.py", "test_surge.py",
     # KRONOS-BITS gates
