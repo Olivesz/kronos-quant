@@ -60,8 +60,9 @@ def _pooled_simple(cl, gkw, day_idx):
 
 
 def window_quantities(close: pd.DataFrame, gk: pd.DataFrame, lo: str, hi: str,
-                      curve: dict, n_boot: int = 40) -> dict:
-    """Per-window pooled estimates + TIME-block-bootstrap sampling SDs."""
+                      curve: dict | None = None, n_boot: int = 40) -> dict:
+    """Per-window pooled estimates + TIME-block-bootstrap sampling SDs.
+    curve=None skips the (slow) Hawkes branching-ratio quantities."""
     cl = close.loc[lo:hi]
     gkw = gk.loc[lo:hi]
     T = len(cl)
@@ -80,7 +81,7 @@ def window_quantities(close: pd.DataFrame, gk: pd.DataFrame, lo: str, hi: str,
 
     # Hawkes branching ratios: per-asset, conservative cross-asset-std SD
     nr, nd = [], []
-    for c in cl.columns:
+    for c in (cl.columns if curve is not None else []):
         s = cl[c].dropna()
         if len(s) < 300:
             continue
@@ -89,8 +90,9 @@ def window_quantities(close: pd.DataFrame, gk: pd.DataFrame, lo: str, hi: str,
             nr.append(debias(fit_hawkes(ev["raw"], ev["T"])["n"], curve))
         if len(ev["deformed"]) > 25:
             nd.append(debias(fit_hawkes(ev["deformed"], ev["T"])["n"], curve))
-    out["n_raw"] = (float(np.nanmedian(nr)), float(np.nanstd(nr) / np.sqrt(3)))
-    out["n_def"] = (float(np.nanmedian(nd)), float(np.nanstd(nd) / np.sqrt(3)))
+    if curve is not None:
+        out["n_raw"] = (float(np.nanmedian(nr)), float(np.nanstd(nr) / np.sqrt(3)))
+        out["n_def"] = (float(np.nanmedian(nd)), float(np.nanstd(nd) / np.sqrt(3)))
 
     # cross-sectional clock commonality + block-bootstrap SD
     lv = 0.5 * np.log(gkw.where(gkw > 0)).rolling(10).mean().dropna(how="all")

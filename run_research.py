@@ -1344,6 +1344,58 @@ def exp_constants(force: bool = False) -> dict:
     return out
 
 
+def exp_transfer(force: bool = False) -> dict:
+    if not force and (c := load_cached("transfer")):
+        print("[transfer] cached")
+        return c
+    from kronos.transfer import (UNIVERSES, load_universe, battery,
+                                 transfer_tests, frozen_system)
+    from kronos.hawkes import recovery_curve
+
+    px, ohlc, gk, src = get_data()
+    t0 = time.time()
+    curve = recovery_curve(n_rep=8, T=float(len(px)), seed=0)
+
+    bats = {"US": battery(ohlc["close"], gk, curve)}
+    frozen = {"US": frozen_system(px, CFG.market, CFG)}
+    sources = {"US": src}
+    for name in UNIVERSES:
+        u = load_universe(name, CFG.start, CFG.end, seed=CFG.seed)
+        sources[name] = u["source"]
+        print(f"[transfer] {name}: {u['close'].shape[1]} tickers x "
+              f"{len(u['close'])} days ({u['source']})")
+        bats[name] = battery(u["close"], u["gk"], curve)
+        frozen[name] = frozen_system(u["close"], UNIVERSES[name]["market"], CFG)
+        f = frozen[name]["net"]
+        print(f"[transfer] {name}: frozen system Sharpe {f['sharpe']:.2f} "
+              f"MaxDD {f['max_dd']:.1%} | index Sharpe "
+              f"{frozen[name]['index']['sharpe']:.2f} "
+              f"MaxDD {frozen[name]['index']['max_dd']:.1%}")
+
+    rep = transfer_tests(bats, ref="US")
+    n_tr = sum(1 for q in rep if rep[q]["class"] == "TRANSFERS")
+    for q in rep:
+        print(f"[transfer] {q:12s} {rep[q]['class']:17s} VR={rep[q]['VR']} "
+              f"p={rep[q]['p']} values={rep[q]['values']}")
+
+    tr1 = n_tr >= 5
+    tr2a = all(frozen[n]["net"]["sharpe"] > 0 for n in UNIVERSES)
+    tr2b = all(frozen[n]["net"]["max_dd"] >= frozen[n]["index"]["max_dd"]
+               for n in UNIVERSES)  # max_dd is negative: >= means shallower
+    print(f"[transfer] TR1 (>=5/7 laws transfer): {tr1} ({n_tr}/{len(rep)})")
+    print(f"[transfer] TR2a (frozen Sharpe>0 everywhere): {tr2a} | "
+          f"TR2b (frozen MaxDD shallower than index everywhere): {tr2b}")
+
+    out = {"sources": sources, "laws": rep,
+           "n_transfer": n_tr, "n_laws": len(rep),
+           "frozen": frozen,
+           "hypotheses": {"TR1": bool(tr1), "TR2a": bool(tr2a),
+                          "TR2b": bool(tr2b)}}
+    print(f"[transfer] done in {time.time()-t0:.0f}s")
+    save("transfer", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -1357,6 +1409,7 @@ EXPERIMENTS = {
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,
+    "transfer": exp_transfer,
     "vollab": exp_vollab,
     "rough": exp_rough,
     "rmt": exp_rmt,

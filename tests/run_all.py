@@ -26,6 +26,8 @@ GATES = [
     "test_constants.py",
     # KRONOS-TRADE gate
     "test_trade.py",
+    # KRONOS-TRANSFER gate
+    "test_transfer.py",
 ]
 
 print("=" * 60)
