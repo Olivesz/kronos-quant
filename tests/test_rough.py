@@ -1,9 +1,12 @@
 """Gate X5: Hurst estimator recovers known H on exact fGn paths."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.rough import simulate_fgn, simulate_rough_logvol, scaling_moments
+
+from kronos.rough import scaling_moments, simulate_fgn, simulate_rough_logvol
 
 # fGn simulator sanity: variance 1, lag-1 autocorr matches the closed form
 # rho(1) = 0.5*(2^(2H) - 2)

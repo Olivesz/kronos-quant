@@ -1,10 +1,12 @@
 """Gate X6: MP edge finds the planted number of factors; denoising helps."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-import pandas as pd
-from kronos.rmt import denoise_corr, corr_from_cov, min_var_weights
+
+from kronos.rmt import corr_from_cov, denoise_corr, min_var_weights
 
 rng = np.random.default_rng(31)
 

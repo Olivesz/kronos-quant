@@ -119,8 +119,8 @@ def minvar_bakeoff(rets: pd.DataFrame, window: int = 252,
     methods = ["sample", "lw", "rmt", "lw_rmt"]
     port_rets = {m: np.zeros(T) for m in methods}
     n_factors_hist = []
-    turnover = {m: 0.0 for m in methods}
-    prev_w = {m: None for m in methods}
+    turnover = dict.fromkeys(methods, 0.0)
+    prev_w = dict.fromkeys(methods)
 
     for i in range(window, T, rebalance):
         sub = rets.iloc[i - window:i]

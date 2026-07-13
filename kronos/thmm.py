@@ -133,7 +133,7 @@ class StudentTHMM(GaussianHMM):
 
     # ---------------------------------------------------------------- admin
     def fit(self, X: np.ndarray, n_restarts: int = 3,
-            init_from: "StudentTHMM | None" = None) -> "StudentTHMM":
+            init_from: StudentTHMM | None = None) -> StudentTHMM:
         if init_from is not None and init_from.means_ is not None:
             self.means_ = init_from.means_.copy()
             self.covs_ = init_from.covs_.copy()

@@ -14,7 +14,6 @@ from scipy.optimize import minimize
 from scipy.special import gammaln
 from scipy.stats import norm
 
-
 # ---------------------------------------------------------------------------
 # forecasters
 # ---------------------------------------------------------------------------
@@ -32,7 +31,7 @@ def ewma_forecast(r2: np.ndarray, lam: float = 0.94) -> np.ndarray:
 class HAR:
     """log-HAR: log RV_{t} ~ 1 + log RV_d(t-1) + log RV_w(t-1) + log RV_m(t-1)."""
 
-    def fit(self, rv: np.ndarray) -> "HAR":
+    def fit(self, rv: np.ndarray) -> HAR:
         lrv = np.log(np.maximum(rv, 1e-12))
         d = lrv
         w = pd.Series(lrv).rolling(5).mean().to_numpy()
@@ -94,7 +93,7 @@ class GJRGARCH:
               - (nu + 1) / 2 * np.log1p(z2 / (nu - 2)))
         return -float(ll.sum())
 
-    def fit(self, r: np.ndarray) -> "GJRGARCH":
+    def fit(self, r: np.ndarray) -> GJRGARCH:
         uncond = float(r.var())
         bounds = [(1e-4, 0.30), (0.0, 0.30), (0.50, 0.995), (4.1, 30.0)]
         starts = [np.array([0.05, 0.08, 0.88, 8.0]),

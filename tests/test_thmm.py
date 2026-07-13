@@ -1,10 +1,14 @@
 """Gate X11: t-HMM recovers nu and beats Gaussian on t worlds, ties on
 Gaussian worlds — the prerequisites for the hallucination study."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 from scipy.special import logsumexp
+
 from kronos.regime import GaussianHMM
 from kronos.thmm import StudentTHMM
 

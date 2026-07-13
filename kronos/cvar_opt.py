@@ -86,8 +86,8 @@ def cvar_bakeoff(rets: pd.DataFrame, regime: pd.Series, cfg,
     T = len(dates)
     engines = ["hrp", "cvar_hist", "cvar_ewma", "cvar_regime"]
     port = {e: np.zeros(T) for e in engines}
-    prev = {e: None for e in engines}
-    turn = {e: 0.0 for e in engines}
+    prev = dict.fromkeys(engines)
+    turn = dict.fromkeys(engines, 0.0)
     realized = {e: [] for e in engines}
     cost_bps = 3.5
 

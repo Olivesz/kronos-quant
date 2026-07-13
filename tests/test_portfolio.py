@@ -1,13 +1,16 @@
 """Gates 4 & 5: HRP sanity + Black-Litterman behavioral checks."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
+
 from config import CFG
+from kronos.black_litterman import construct_portfolio
 from kronos.covariance import shrunk_cov
 from kronos.hrp import hrp_weights
-from kronos.black_litterman import bl_posterior, tilt_weights, construct_portfolio
 
 rng = np.random.default_rng(3)
 

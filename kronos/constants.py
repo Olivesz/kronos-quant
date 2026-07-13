@@ -10,9 +10,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from kronos.hawkes import debias, fit_hawkes, raw_and_deformed_events
 from kronos.rough import estimate_hurst
-from kronos.hawkes import fit_hawkes, raw_and_deformed_events, recovery_curve, debias
-
 
 ERA_EDGES = ["2010-01-01", "2013-04-01", "2016-07-01", "2019-10-01",
              "2023-01-01", "2026-07-01"]   # 5 non-overlapping ~3.25y windows

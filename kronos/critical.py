@@ -15,7 +15,6 @@ from scipy.optimize import minimize
 
 from kronos.forensics import stationary_bootstrap_indices
 
-
 # ---------------------------------------------------------------------------
 # early-warning indicators (critical slowing down), all causal
 # ---------------------------------------------------------------------------

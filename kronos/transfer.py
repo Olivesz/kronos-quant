@@ -16,10 +16,9 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
+from kronos.constants import variance_ratio_test, window_quantities
 from kronos.data import CACHE_DIR, clean_panel, fetch_yahoo_ohlc, generate_synthetic
 from kronos.volest import gk_variance
-from kronos.constants import window_quantities, variance_ratio_test
-
 
 # ---------------------------------------------------------------------------
 # universes: long-listed liquid large caps, one timezone block each,
@@ -163,9 +162,9 @@ def transfer_tests(batteries: dict[str, dict], ref: str = "US") -> dict:
 def frozen_system(px: pd.DataFrame, market: str, cfg_base) -> dict:
     """Run the core book (regimes -> signals -> HRP+BL -> risk overlay) on a
     universe with every hyperparameter exactly as tuned on the US."""
-    from kronos.regime import walkforward_regimes
-    from kronos.backtest import run_backtest
     from kronos import metrics as M
+    from kronos.backtest import run_backtest
+    from kronos.regime import walkforward_regimes
 
     cfg = replace(cfg_base, universe=list(px.columns), market=market)
     mkt = px[market].pct_change().dropna()

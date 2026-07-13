@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 
 from config import CFG, REGIME_NAMES
-from kronos.data import load_prices
-from kronos.regime import walkforward_regimes
-from kronos.backtest import run_backtest, sleeve_backtests
-from kronos.pairs import run_pairs_sleeve
-from kronos.risk import portfolio_greeks
 from kronos import metrics as M
+from kronos.backtest import run_backtest, sleeve_backtests
 from kronos.dashboard import render_dashboard
+from kronos.data import load_prices
+from kronos.pairs import run_pairs_sleeve
+from kronos.regime import walkforward_regimes
+from kronos.risk import portfolio_greeks
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 

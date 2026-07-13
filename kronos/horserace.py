@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 from scipy.special import logsumexp
 
-from kronos.regime import GaussianHMM
 from kronos.dhmm import DurationHMM
+from kronos.regime import GaussianHMM
 from kronos.sjm import JumpModel
 
 EVAL_START = "2019-01-01"

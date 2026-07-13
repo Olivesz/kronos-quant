@@ -10,13 +10,9 @@ import os
 import sys
 from datetime import date
 
-import numpy as np
-import pandas as pd
-
 from config import CFG
-from kronos.data import (fetch_yahoo, fetch_yahoo_ohlc, clean_panel,
-                         load_prices, load_ohlc)
-from kronos.trade import TradingSystem, TradeConfig
+from kronos.data import clean_panel, fetch_yahoo, fetch_yahoo_ohlc, load_ohlc, load_prices
+from kronos.trade import TradeConfig, TradingSystem
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 

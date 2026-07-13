@@ -13,11 +13,11 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from kronos.signals import combined_signal, SIGNAL_FNS
+from config import REGIME_NAMES
 from kronos.black_litterman import construct_portfolio
 from kronos.covariance import shrunk_cov
 from kronos.risk import exposure_series
-from config import REGIME_NAMES
+from kronos.signals import SIGNAL_FNS, combined_signal
 
 
 def _trade_costs(dw: pd.Series, daily_vol: pd.Series, cfg) -> float:

@@ -1,8 +1,11 @@
 """Gate X12: AG test size & power; MCS keeps truth, kills the bad."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
+
 from kronos.infer import amisano_giacomini, model_confidence_set
 
 rng = np.random.default_rng(81)

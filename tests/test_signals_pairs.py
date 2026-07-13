@@ -1,12 +1,15 @@
 """Gates 3 & 6: signal sanity + Kalman convergence on known cointegration."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
+
 from config import CFG
-from kronos.signals import momentum_signal, mean_reversion_signal, low_vol_signal, combined_signal
 from kronos.pairs import KalmanPair, _adf_tstat, select_pairs
+from kronos.signals import combined_signal, low_vol_signal, mean_reversion_signal, momentum_signal
 
 rng = np.random.default_rng(11)
 

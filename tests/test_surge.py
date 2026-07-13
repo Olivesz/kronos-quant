@@ -1,12 +1,17 @@
 """Gate X16: surge machinery — Zumbach size & power, S3 lift size & power."""
-import sys, os, time
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import numpy as np
-import pandas as pd
-from kronos.surge import (zumbach_with_ci, simulate_gjr_world,
-                          simulate_reversible_world, cascade_report,
-                          surge_intensity_lift, simulate_volofvol_world)
+from kronos.surge import (
+    cascade_report,
+    simulate_gjr_world,
+    simulate_reversible_world,
+    simulate_volofvol_world,
+    surge_intensity_lift,
+    zumbach_with_ci,
+)
 
 T = 6000
 

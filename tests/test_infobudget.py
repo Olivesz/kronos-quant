@@ -1,12 +1,21 @@
 """Gate X17: MI estimators against closed-form truth; size and power."""
-import sys, os, time
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.infobudget import (ksg_mi, ksg_mi_net, discrete_mi, direction_bits,
-                               gaussian_sharpe_ceiling, binary_sharpe_ceiling,
-                               bits_consumed_by)
+
+from kronos.infobudget import (
+    binary_sharpe_ceiling,
+    bits_consumed_by,
+    direction_bits,
+    discrete_mi,
+    gaussian_sharpe_ceiling,
+    ksg_mi,
+    ksg_mi_net,
+)
 
 rng = np.random.default_rng(91)
 N = 4000

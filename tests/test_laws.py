@@ -1,11 +1,19 @@
 """Gate X14: the law-screen machinery on worlds where the answer is known."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.laws import (simulate_sv_world, kurtosis_law, logvol_signal_variance,
-                         standardized_returns, tail_report, mrw_lambda2)
+
+from kronos.laws import (
+    kurtosis_law,
+    mrw_lambda2,
+    simulate_sv_world,
+    standardized_returns,
+    tail_report,
+)
 
 # --- L2 machinery: recovers the parameter-free law on a pure SV world ---------
 errs = []

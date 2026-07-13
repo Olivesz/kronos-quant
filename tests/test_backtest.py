@@ -1,16 +1,18 @@
 """Gate 7: backtester accounting integrity on real data (short window)."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import numpy as np
-import pandas as pd
 from dataclasses import replace
+
 from config import CFG
-from kronos.data import load_prices
-from kronos.regime import walkforward_regimes
 from kronos.backtest import run_backtest
-from kronos.risk import exposure_series, portfolio_greeks
+from kronos.data import load_prices
 from kronos.metrics import summary
+from kronos.regime import walkforward_regimes
+from kronos.risk import portfolio_greeks
 
 px, src = load_prices(CFG)
 px = px.iloc[-1800:]  # ~7 years for a fast gate

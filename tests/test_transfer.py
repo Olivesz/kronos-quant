@@ -2,11 +2,14 @@
 generative world, different seeds => laws classified TRANSFERS) and CONVICT
 different mechanisms (clock world vs iid-Gaussian world => the laws that
 genuinely differ classified UNIVERSE-SPECIFIC)."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
+
 from kronos.clock import simulate_clock_world
 from kronos.transfer import battery, transfer_tests
 

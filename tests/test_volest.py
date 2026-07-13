@@ -1,9 +1,12 @@
 """Gate X1: Garman-Klass beats close-to-close on synthetic GBM with known vol."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.volest import gk_variance, c2c_variance, simulate_gbm_ohlc
+
+from kronos.volest import c2c_variance, gk_variance, simulate_gbm_ohlc
 
 biases = {}
 for n_id in (78, 780):
@@ -38,6 +41,7 @@ if os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes"):
 
 from config import CFG
 from kronos.data import load_ohlc
+
 ohlc, src = load_ohlc(CFG)
 print("\nOHLC source:", src)
 gk_real = gk_variance(ohlc["open"], ohlc["high"], ohlc["low"], ohlc["close"])

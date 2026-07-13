@@ -1,13 +1,22 @@
 """Gate X20: the EWS test convicts a fold bifurcation, exonerates a shock."""
-import sys, os, time
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.critical import (ews_indicators, walkforward_incremental_auc,
-                             bootstrap_auc_gain, kappa_from_phi, _ar1_phi,
-                             simulate_fold_world, simulate_shock_world,
-                             jumps_to_labels)
+
+from kronos.critical import (
+    _ar1_phi,
+    bootstrap_auc_gain,
+    ews_indicators,
+    jumps_to_labels,
+    kappa_from_phi,
+    simulate_fold_world,
+    simulate_shock_world,
+    walkforward_incremental_auc,
+)
 
 # --- kappa estimator: OU with known mean reversion ------------------------------
 rng = np.random.default_rng(3)

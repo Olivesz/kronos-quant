@@ -9,11 +9,9 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from kronos.rough import estimate_hurst
 from kronos.entropyprod import ep_with_null
 from kronos.infobudget import direction_bits
-from kronos.surge import clock_innovations
-
+from kronos.rough import estimate_hurst
 
 # ---------------------------------------------------------------------------
 # the battery

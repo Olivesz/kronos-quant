@@ -14,9 +14,9 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import brentq
 from scipy.spatial import cKDTree
 from scipy.special import digamma
-from scipy.optimize import brentq
 
 LN2 = np.log(2.0)
 

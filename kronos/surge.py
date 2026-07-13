@@ -11,7 +11,6 @@ import pandas as pd
 
 from kronos.forensics import stationary_bootstrap_indices
 
-
 # ---------------------------------------------------------------------------
 # S1: the cascade
 # ---------------------------------------------------------------------------

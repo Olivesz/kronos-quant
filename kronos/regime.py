@@ -81,7 +81,7 @@ class GaussianHMM:
         return log_beta
 
     def fit(self, X: np.ndarray, n_restarts: int = 3,
-            init_from: "GaussianHMM | None" = None) -> "GaussianHMM":
+            init_from: GaussianHMM | None = None) -> GaussianHMM:
         """Full fit with restarts, or a fast warm-started refit."""
         if init_from is not None and init_from.means_ is not None:
             self.means_ = init_from.means_.copy()

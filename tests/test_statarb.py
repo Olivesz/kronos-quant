@@ -1,12 +1,15 @@
 """Gate X7: stat-arb extracts planted mean-reverting residuals, net of costs."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
+
 from config import CFG
-from kronos.statarb import (run_statarb_sleeve, eigenportfolios,
-                            fit_factor_model, ou_sscores)
+from kronos.statarb import fit_factor_model, ou_sscores, run_statarb_sleeve
 
 rng = np.random.default_rng(17)
 

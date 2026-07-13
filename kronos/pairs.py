@@ -9,9 +9,9 @@ bands, a structural-break stop, and a max holding period.
 from __future__ import annotations
 
 import itertools
+
 import numpy as np
 import pandas as pd
-
 
 # ---------------------------------------------------------------------------
 # Formation

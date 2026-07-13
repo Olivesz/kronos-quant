@@ -19,9 +19,9 @@ import numpy as np
 import pandas as pd
 from scipy.special import logsumexp
 
+from kronos.dhmm import DurationHMM
 from kronos.regime import GaussianHMM
 from kronos.thmm import StudentTHMM
-from kronos.dhmm import DurationHMM
 
 EVAL_START = "2019-01-01"
 

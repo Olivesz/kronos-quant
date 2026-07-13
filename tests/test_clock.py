@@ -1,11 +1,14 @@
 """Gate X15: the clock machinery can exonerate AND convict."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.clock import (GaussianNull, pair_tail_study, simulate_clock_world,
-                          clock_commonality)
-from kronos.laws import standardized_returns, mrw_lambda2
+
+from kronos.clock import GaussianNull, clock_commonality, pair_tail_study, simulate_clock_world
+from kronos.laws import mrw_lambda2, standardized_returns
 
 T = 4000
 t0 = time.time()
@@ -17,7 +20,6 @@ def deformed(world, lag=0):
     return z.dropna()
 
 def raw(world):
-    import pandas as pd
     return np.log(world["close"] / world["close"].shift(1)).dropna()
 
 # --- world 1: correlated clocks, NO contagion — must exonerate ---------------
@@ -53,6 +55,7 @@ z1 = deformed(w1)
 lam_raw = np.median([mrw_lambda2(w1["close"][c])["lambda2"]
                      for c in w1["close"].columns])
 import pandas as pd
+
 lam_z = []
 for c in z1.columns:
     fake_close = pd.Series(100 * np.exp(np.cumsum(z1[c].to_numpy() * 0.01)),

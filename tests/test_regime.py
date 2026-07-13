@@ -1,11 +1,14 @@
 """Gate 2: HMM recovers known parameters; real-data regimes match history."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-import pandas as pd
-from kronos.regime import GaussianHMM, walkforward_regimes
+
 from config import CFG
+from kronos.regime import GaussianHMM, walkforward_regimes
 
 rng = np.random.default_rng(7)
 
@@ -43,6 +46,7 @@ assert acc > 0.80, "filtered accuracy too low"
 
 # --- real data walk-forward --------------------------------------------------
 from kronos.data import load_prices
+
 px, src = load_prices(CFG)
 mkt = px[CFG.market].pct_change().dropna()
 t0 = time.time()

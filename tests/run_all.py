@@ -1,5 +1,8 @@
 """Run every KRONOS verification gate in sequence."""
-import subprocess, sys, os, time
+import os
+import subprocess
+import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Use the interpreter that launched this runner (works in the project .venv,

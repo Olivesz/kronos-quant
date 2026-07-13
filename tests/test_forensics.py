@@ -1,11 +1,13 @@
 """Gate X10: forensics validated on known-overfit and known-real worlds."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.forensics import (deflated_sharpe, cscv_pbo, bootstrap_sharpe_ci,
-                              expected_max_sharpe)
+
+from kronos.forensics import bootstrap_sharpe_ci, cscv_pbo, deflated_sharpe
 
 rng = np.random.default_rng(61)
 T, V = 3000, 200

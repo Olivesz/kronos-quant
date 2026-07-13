@@ -12,14 +12,13 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from config import REGIME_NAMES
+from kronos.black_litterman import construct_portfolio
+from kronos.covariance import shrunk_cov
+from kronos.regime import walkforward_regimes
+from kronos.signals import combined_signal
 from kronos.volest import gk_variance
 from kronos.vollab import HAR
-from kronos.regime import walkforward_regimes
-from kronos.covariance import shrunk_cov
-from kronos.black_litterman import construct_portfolio
-from kronos.signals import combined_signal
-from kronos import metrics as M
-from config import REGIME_NAMES
 
 
 @dataclass

@@ -18,8 +18,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from kronos.rmt import n_signal_factors, corr_from_cov
-
+from kronos.rmt import n_signal_factors
 
 # trading parameters (pre-registered; counted in the trials ledger)
 S_OPEN = 1.25

@@ -1,7 +1,6 @@
 """KRONOS configuration — every knob in one place."""
 from dataclasses import dataclass, field
 
-
 UNIVERSE = [
     # mega-caps across sectors
     "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META",

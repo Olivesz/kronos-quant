@@ -14,8 +14,6 @@ causal one-step-ahead predictive density as the HMMs.
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
-from scipy.stats import multivariate_normal
 
 
 class JumpModel:
@@ -72,7 +70,7 @@ class JumpModel:
     def _sq_dists(self, Z: np.ndarray) -> np.ndarray:
         return ((Z[:, None, :] - self.centers_[None, :, :]) ** 2).sum(axis=2)
 
-    def fit(self, X: np.ndarray) -> "JumpModel":
+    def fit(self, X: np.ndarray) -> JumpModel:
         Z = self._standardize(X, fit=True)
         rng = np.random.default_rng(self.seed)
         T, Dm = Z.shape

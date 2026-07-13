@@ -1,17 +1,23 @@
 """Gate X23: trading system is causal, weights valid, and forecast-vol
 targeting tracks risk better than realized-vol targeting on forecastable vol."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from dataclasses import replace
 
 import numpy as np
 import pandas as pd
-from dataclasses import replace
+
 from config import CFG
-from kronos.data import load_prices, load_ohlc
-from kronos.trade import TradingSystem, TradeConfig
-from kronos.vollab import HAR
-from kronos.surge import simulate_reversible_world
 from kronos import metrics as M
+from kronos.data import load_ohlc, load_prices
+from kronos.surge import simulate_reversible_world
+from kronos.trade import TradeConfig, TradingSystem
+from kronos.vollab import HAR
+
 
 # --- 1. forecast-vol targeting principle (the research-grounded edge) -----------
 def sized_vol_error(forecastable: bool, seed: int):

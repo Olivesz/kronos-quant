@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 
 from config import CFG
-from kronos.data import load_prices, load_ohlc
-from kronos.volest import gk_variance
 from kronos import metrics as M
+from kronos.data import load_ohlc, load_prices
+from kronos.volest import gk_variance
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(ROOT, "research")
@@ -62,8 +62,8 @@ def exp_horserace(force: bool = False) -> dict:
     if not force and (c := load_cached("horserace")):
         print("[horserace] cached")
         return c
-    from kronos.horserace import build_features_gk, run_horserace
     from kronos.backtest import run_backtest
+    from kronos.horserace import build_features_gk, run_horserace
 
     px, ohlc, gk, src = get_data()
     mkt = px[CFG.market].pct_change().dropna()
@@ -115,7 +115,7 @@ def exp_vollab(force: bool = False) -> dict:
     if not force and (c := load_cached("vollab")):
         print("[vollab] cached")
         return c
-    from kronos.vollab import walkforward_vol_forecasts, qlike, diebold_mariano
+    from kronos.vollab import diebold_mariano, qlike, walkforward_vol_forecasts
 
     px, ohlc, gk, src = get_data()
     r = px[CFG.market].pct_change().dropna()
@@ -155,7 +155,7 @@ def exp_rough(force: bool = False) -> dict:
     if not force and (c := load_cached("rough")):
         print("[rough] cached")
         return c
-    from kronos.rough import estimate_hurst, subwindow_hursts, block_bootstrap_ci
+    from kronos.rough import block_bootstrap_ci, estimate_hurst, subwindow_hursts
 
     px, ohlc, gk, src = get_data()
     gkv = gk[CFG.market].dropna()
@@ -198,7 +198,7 @@ def exp_rmt(force: bool = False) -> dict:
     if not force and (c := load_cached("rmt")):
         print("[rmt] cached")
         return c
-    from kronos.rmt import minvar_bakeoff, corr_from_cov, n_signal_factors, mp_pdf
+    from kronos.rmt import corr_from_cov, minvar_bakeoff, mp_pdf, n_signal_factors
 
     px, ohlc, gk, src = get_data()
     rets = px.pct_change().fillna(0.0).iloc[1:]
@@ -214,7 +214,7 @@ def exp_rmt(force: bool = False) -> dict:
                         "mp_grid": grid.tolist(),
                         "mp_pdf": mp_pdf(grid, corr.shape[0] / 252,
                                          1.0 - ev[:k].sum() / len(ev)).tolist()}
-    print(f"[rmt] min-var realized vol: " +
+    print("[rmt] min-var realized vol: " +
           " | ".join(f"{m}={v['realized_vol']:.2%}" for m, v in bake["methods"].items()) +
           f" | signal factors={k} ({time.time()-t0:.0f}s)")
     save("rmt", bake)
@@ -300,7 +300,7 @@ def exp_cvar(force: bool = False) -> dict:
     rets = px.pct_change().fillna(0.0).iloc[1:]
     t0 = time.time()
     out = cvar_bakeoff(rets, regime, CFG)
-    print(f"[cvar] " + " | ".join(
+    print("[cvar] " + " | ".join(
         f"{e}: SR {v['sharpe']:.2f} CVaR {v['cvar95']:.2%} DD {v['max_dd']:.0%}"
         for e, v in out.items()) + f" ({time.time()-t0:.0f}s)")
     save("cvar", out)
@@ -315,8 +315,8 @@ def exp_ensemble(force: bool = False) -> dict:
     if not force and (c := load_cached("ensemble")):
         print("[ensemble] cached")
         return c
-    from kronos.ensemble import run_meta, gates_blend
     from config import REGIME_STRATEGY_WEIGHTS
+    from kronos.ensemble import gates_blend, run_meta
 
     px, regime, sleeves, rg = get_sleeves_and_regime()
     core = sleeves[["momentum", "mean_reversion", "low_vol"]].loc["2014-01-01":]
@@ -345,7 +345,7 @@ def exp_ensemble(force: bool = False) -> dict:
            "regret": {"dates": [str(d.date()) for d in res_fs["regret"].index[::5]],
                       "fixed_share": res_fs["regret"].iloc[::5].round(2).tolist(),
                       "hedge": res_h["regret"].iloc[::5].round(2).tolist()}}
-    print(f"[ensemble] " + " | ".join(f"{m}: SR {v['sharpe']:.2f}"
+    print("[ensemble] " + " | ".join(f"{m}: SR {v['sharpe']:.2f}"
                                       for m, v in methods.items()) +
           f" | best static {best_static:.2f} -> verdict: {out['verdict']} "
           f"({time.time()-t0:.0f}s)")
@@ -361,10 +361,14 @@ def exp_forensics(force: bool = False) -> dict:
     if not force and (c := load_cached("forensics")):
         print("[forensics] cached")
         return c
-    from kronos.forensics import (build_variant_family, cscv_pbo,
-                                  deflated_sharpe, bootstrap_sharpe_ci,
-                                  bootstrap_equity_fan)
     from kronos.backtest import run_backtest
+    from kronos.forensics import (
+        bootstrap_equity_fan,
+        bootstrap_sharpe_ci,
+        build_variant_family,
+        cscv_pbo,
+        deflated_sharpe,
+    )
 
     px, regime, sleeves, rg = get_sleeves_and_regime()
     t0 = time.time()
@@ -472,8 +476,8 @@ def exp_tails(force: bool = False) -> dict:
     if not force and (c := load_cached("tails")):
         print("[tails] cached")
         return c
-    from kronos.tails import mc_khallucination, realdata_study
     from kronos.horserace import build_features_gk
+    from kronos.tails import mc_khallucination, realdata_study
 
     t0 = time.time()
     mc = mc_khallucination(n_seeds=8)
@@ -513,9 +517,9 @@ def exp_rfsv(force: bool = False) -> dict:
     if not force and (c := load_cached("rfsv")):
         print("[rfsv] cached")
         return c
-    from kronos.rfsv import walkforward_rfsv, RFSV
-    from kronos.vollab import walkforward_vol_forecasts, qlike
     from kronos.infer import amisano_giacomini, model_confidence_set
+    from kronos.rfsv import RFSV, walkforward_rfsv
+    from kronos.vollab import qlike, walkforward_vol_forecasts
 
     px, ohlc, gk, src = get_data()
     r = px[CFG.market].pct_change().dropna()
@@ -562,10 +566,15 @@ def exp_laws(force: bool = False) -> dict:
     if not force and (c := load_cached("laws")):
         print("[laws] cached")
         return c
-    from kronos.laws import (standardized_returns, tail_report,
-                             universality_collapse, kurtosis_law, mrw_lambda2)
-    from kronos.tails import generic_walkforward
+    from kronos.laws import (
+        kurtosis_law,
+        mrw_lambda2,
+        standardized_returns,
+        tail_report,
+        universality_collapse,
+    )
     from kronos.regime import GaussianHMM
+    from kronos.tails import generic_walkforward
     from kronos.thmm import StudentTHMM
 
     px, ohlc, gk, src = get_data()
@@ -679,9 +688,13 @@ def exp_clock(force: bool = False) -> dict:
     if not force and (c := load_cached("clock")):
         print("[clock] cached")
         return c
-    from kronos.clock import (GaussianNull, pair_tail_study,
-                              clock_commonality, market_clock_deformation)
-    from kronos.laws import standardized_returns, mrw_lambda2, tail_report
+    from kronos.clock import (
+        GaussianNull,
+        clock_commonality,
+        market_clock_deformation,
+        pair_tail_study,
+    )
+    from kronos.laws import mrw_lambda2, standardized_returns
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -753,8 +766,7 @@ def exp_surge(force: bool = False) -> dict:
     if not force and (c := load_cached("surge")):
         print("[surge] cached")
         return c
-    from kronos.surge import (cascade_report, zumbach_with_ci,
-                              leverage_kernel, surge_intensity_lift)
+    from kronos.surge import cascade_report, leverage_kernel, surge_intensity_lift, zumbach_with_ci
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -816,9 +828,15 @@ def exp_bits(force: bool = False) -> dict:
     if not force and (c := load_cached("bits")):
         print("[bits] cached")
         return c
-    from kronos.infobudget import (direction_bits, ksg_mi_net, causal_features,
-                                   binary_sharpe_ceiling, gaussian_sharpe_ceiling,
-                                   bits_consumed_by, LN2)
+    from kronos.infobudget import (
+        LN2,
+        binary_sharpe_ceiling,
+        bits_consumed_by,
+        causal_features,
+        direction_bits,
+        gaussian_sharpe_ceiling,
+        ksg_mi_net,
+    )
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -929,8 +947,8 @@ def exp_arrow(force: bool = False) -> dict:
         print("[arrow] cached")
         return c
     from kronos.entropyprod import ep_with_null
-    from kronos.surge import clock_innovations
     from kronos.laws import standardized_returns
+    from kronos.surge import clock_innovations
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -980,7 +998,7 @@ def exp_decathlon(force: bool = False) -> dict:
     if not force and (c := load_cached("decathlon")):
         print("[decathlon] cached")
         return c
-    from kronos.decathlon import run_decathlon, battery
+    from kronos.decathlon import battery, run_decathlon
 
     px, ohlc, gk, src = get_data()
     t0 = time.time()
@@ -1016,10 +1034,13 @@ def exp_critical(force: bool = False) -> dict:
     if not force and (c := load_cached("critical")):
         print("[critical] cached")
         return c
-    from kronos.critical import (ews_indicators, crash_labels,
-                                 walkforward_incremental_auc,
-                                 bootstrap_auc_gain, stratified_lift,
-                                 kappa_from_phi)
+    from kronos.critical import (
+        bootstrap_auc_gain,
+        crash_labels,
+        ews_indicators,
+        stratified_lift,
+        walkforward_incremental_auc,
+    )
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -1118,8 +1139,7 @@ def exp_critical(force: bool = False) -> dict:
     # precursor effect size (true-null vs low-power): real equities vs the
     # known fold world. If real shifts ~0 while the fold shows large phi
     # shift, the null is real, not underpowered.
-    from kronos.critical import (precursor_shift, simulate_fold_world,
-                                  jumps_to_labels, CSD_FEATURES)
+    from kronos.critical import CSD_FEATURES, jumps_to_labels, precursor_shift, simulate_fold_world
     eq_names = [k for k, v in per_asset.items() if v["cls"] == "equity"]
     shifts = {s: [] for s in CSD_FEATURES}
     for c in eq_names:
@@ -1180,8 +1200,13 @@ def exp_reflex(force: bool = False) -> dict:
     if not force and (c := load_cached("reflex")):
         print("[reflex] cached")
         return c
-    from kronos.hawkes import (fit_hawkes, raw_and_deformed_events,
-                               exceedance_times, recovery_curve, debias)
+    from kronos.hawkes import (
+        debias,
+        exceedance_times,
+        fit_hawkes,
+        raw_and_deformed_events,
+        recovery_curve,
+    )
 
     px, ohlc, gk, src = get_data()
     close = ohlc["close"]
@@ -1253,7 +1278,7 @@ def exp_reflex(force: bool = False) -> dict:
     f5 = None
     crit = load_cached("critical")
     if crit and "per_asset" in crit:
-        from kronos.critical import ews_indicators, crash_labels, precursor_shift
+        from kronos.critical import crash_labels, ews_indicators, precursor_shift
         xs, ys = [], []
         for c in [k for k in per_asset if per_asset[k]["cls"] == "equity"]:
             cl = close[c].dropna()
@@ -1300,8 +1325,13 @@ def exp_constants(force: bool = False) -> dict:
     if not force and (c := load_cached("constants")):
         print("[constants] cached")
         return c
-    from kronos.constants import (ERA_EDGES, window_quantities,
-                                  variance_ratio_test, trend_test, classify)
+    from kronos.constants import (
+        ERA_EDGES,
+        classify,
+        trend_test,
+        variance_ratio_test,
+        window_quantities,
+    )
     from kronos.hawkes import recovery_curve
 
     px, ohlc, gk, src = get_data()
@@ -1348,9 +1378,8 @@ def exp_transfer(force: bool = False) -> dict:
     if not force and (c := load_cached("transfer")):
         print("[transfer] cached")
         return c
-    from kronos.transfer import (UNIVERSES, load_universe, battery,
-                                 transfer_tests, frozen_system)
     from kronos.hawkes import recovery_curve
+    from kronos.transfer import UNIVERSES, battery, frozen_system, load_universe, transfer_tests
 
     px, ohlc, gk, src = get_data()
     t0 = time.time()

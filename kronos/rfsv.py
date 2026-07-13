@@ -20,7 +20,6 @@ import numpy as np
 import pandas as pd
 
 from kronos.rough import estimate_hurst
-from kronos.vollab import HAR
 
 
 def rfsv_kernel(H: float, horizon: int, lookback: int) -> np.ndarray:
@@ -54,7 +53,7 @@ class RFSV:
             out[i] = lam * out[i - 1] + (1 - lam) * x[i]
         return out
 
-    def fit(self, gkvar: np.ndarray) -> "RFSV":
+    def fit(self, gkvar: np.ndarray) -> RFSV:
         """Estimate H, pick the noise-filter halflife, OLS-calibrate.
 
         The exact fBm kernel is optimal for CLEAN observations, but a daily

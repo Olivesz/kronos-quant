@@ -1,12 +1,20 @@
 """Gate X21: Hawkes MLE recovers known branching ratio; Poisson -> 0;
 vol-clustering attributed correctly by the raw/deformed decomposition."""
-import sys, os, time
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.hawkes import (fit_hawkes, simulate_hawkes, recovery_curve, debias,
-                           raw_and_deformed_events)
+
+from kronos.hawkes import (
+    debias,
+    fit_hawkes,
+    raw_and_deformed_events,
+    recovery_curve,
+    simulate_hawkes,
+)
 
 # --- 1. recovery of known branching ratio (monotone, ordered) -------------------
 print("true n   mean n_hat (T=5000)")
@@ -40,6 +48,7 @@ assert 4 < fit["timescale"] < 25
 # A pure stochastic-vol world has NO self-excitation; raw |r| events cluster
 # (look endogenous), deformed |r/vol| events are ~Poisson (n~0).
 from kronos.surge import simulate_reversible_world
+
 r0, v0 = simulate_reversible_world(8000, seed=3)
 close = pd.Series(100 * np.exp(np.cumsum(r0.to_numpy())), index=r0.index)
 ev = raw_and_deformed_events(close, v0, q=0.95)

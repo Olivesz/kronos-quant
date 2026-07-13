@@ -1,8 +1,12 @@
 """Gate X2: SJM recovers planted regimes; lambda controls persistence."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
+
 from kronos.sjm import JumpModel
 
 rng = np.random.default_rng(7)

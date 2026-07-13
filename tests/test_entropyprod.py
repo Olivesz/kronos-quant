@@ -1,9 +1,12 @@
 """Gate X18: EP estimator — zero on reversible worlds, positive on GJR."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.entropyprod import ep_with_null, ngram_ep, symbolize
+
+from kronos.entropyprod import ep_with_null, ngram_ep
 from kronos.surge import simulate_gjr_world, simulate_reversible_world
 
 rng = np.random.default_rng(101)
@@ -39,7 +42,6 @@ s = np.zeros(T, dtype=int)
 for t in range(1, T):
     s[t] = rng.choice(3, p=P[s[t - 1]])
 # n-gram KL grows ~ (n-1)*EP_step, so /n recovers ~ (n-1)/n of truth
-from kronos.entropyprod import ngram_ep
 ep_est = ngram_ep(s, n=3) * 3 / 2            # slope correction for Markov
 # null via coin-flip block reversal (the corrected surrogate)
 rng2 = np.random.default_rng(7)

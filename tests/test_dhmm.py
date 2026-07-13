@@ -1,11 +1,14 @@
 """Gate X3: duration-HMM beats HMM on semi-Markov data, ties on geometric."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 from scipy.special import logsumexp
-from kronos.regime import GaussianHMM
+
 from kronos.dhmm import DurationHMM
+from kronos.regime import GaussianHMM
 
 rng = np.random.default_rng(13)
 

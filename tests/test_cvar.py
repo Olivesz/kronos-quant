@@ -1,9 +1,13 @@
 """Gate X8: min-CVaR LP correctness — beats equal-weight CVaR in-sample,
 avoids the fat-tailed asset, respects constraints."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
+
 from kronos.cvar_opt import min_cvar_weights
 
 rng = np.random.default_rng(41)

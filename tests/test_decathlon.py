@@ -1,12 +1,16 @@
 """Gate X19: battery dynamic range — SPY scores ~10, GBM scores ~3."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.decathlon import battery, simulate_abm
+
 from config import CFG
 from kronos.data import load_prices
+from kronos.decathlon import battery, simulate_abm
 
 # This gate calibrates the battery's DYNAMIC RANGE against the REAL market
 # (SPY must score ~10, GBM ~3), so it is meaningful only on real data. In the

@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from config import REGIME_STRATEGY_WEIGHTS, REGIME_NAMES
+from config import REGIME_NAMES, REGIME_STRATEGY_WEIGHTS
 
 
 def _xz(s: pd.Series, cap: float) -> pd.Series:

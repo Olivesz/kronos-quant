@@ -1,10 +1,13 @@
 """Gate X22: stability test has correct size (calls constants constant) and
 power (detects a known drift)."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.constants import variance_ratio_test, trend_test, classify
+
+from kronos.constants import classify, trend_test, variance_ratio_test
 
 rng = np.random.default_rng(7)
 n_win = 5

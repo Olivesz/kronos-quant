@@ -1,12 +1,16 @@
 """Gate X13: RFSV forecaster beats HAR on its home turf (true RFSV world),
 stays competitive on a GARCH world (graceful misspecification)."""
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
-from kronos.rfsv import RFSV, walkforward_rfsv, simulate_rfsv_world, rfsv_kernel
-from kronos.vollab import HAR, qlike, ewma_forecast
+
+from kronos.rfsv import RFSV, rfsv_kernel, simulate_rfsv_world, walkforward_rfsv
+from kronos.vollab import HAR, qlike
 
 # kernel sanity: weights positive, decreasing, sum to 1; rough H = slow decay
 w1 = rfsv_kernel(0.10, 1, 500)
