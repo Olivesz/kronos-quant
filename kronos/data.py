@@ -148,9 +148,19 @@ def clean_panel(px: pd.DataFrame, min_coverage: float, max_ffill: int) -> pd.Dat
     return px
 
 
+def _force_synthetic() -> bool:
+    """CI / offline hermetic mode: KRONOS_SYNTHETIC=1 skips cache and Yahoo and
+    runs the whole platform on the seeded synthetic market (deterministic,
+    network-free). Used by CI so the gates never depend on a live data feed."""
+    return os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes")
+
+
 def load_prices(cfg) -> tuple[pd.DataFrame, str]:
     """Returns (prices, source) where source is 'yahoo' or 'synthetic'."""
     os.makedirs(CACHE_DIR, exist_ok=True)
+    if _force_synthetic():
+        px = generate_synthetic(cfg.universe, cfg.start, cfg.end, cfg.seed)
+        return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "synthetic"
     cache = _cache_path(cfg.start, cfg.end)
     if os.path.exists(cache):
         px = pd.read_csv(cache, index_col=0, parse_dates=True)
@@ -191,6 +201,8 @@ def load_ohlc(cfg) -> tuple[dict, str]:
     """Returns ({open,high,low,close}, source); all frames aligned to the
     cleaned close panel from load_prices."""
     os.makedirs(CACHE_DIR, exist_ok=True)
+    if _force_synthetic():
+        return _synthetic_ohlc(cfg), "synthetic"
     paths = {f: os.path.join(CACHE_DIR, f"ohlc_{f}_{cfg.start}_{cfg.end}.csv")
              for f in ("open", "high", "low", "close")}
     if all(os.path.exists(p) for p in paths.values()):
@@ -204,12 +216,15 @@ def load_ohlc(cfg) -> tuple[dict, str]:
             out[f].to_csv(p)
         return out, "yahoo"
 
-    # synthetic fallback: build plausible OHLC around the synthetic closes
-    px = generate_synthetic(cfg.universe, cfg.start, cfg.end, cfg.seed)
+    return _synthetic_ohlc(cfg), "synthetic"
+
+
+def _synthetic_ohlc(cfg) -> dict:
+    """Plausible OHLC built around the seeded synthetic closes."""
+    c = generate_synthetic(cfg.universe, cfg.start, cfg.end, cfg.seed)
     rng = np.random.default_rng(cfg.seed + 1)
-    c = px
     o = c.shift(1) * np.exp(rng.normal(0, 0.003, c.shape))
     span = np.abs(rng.normal(0, 0.008, c.shape)) + 0.002
     h = np.maximum(o, c) * (1 + span / 2)
     low = np.minimum(o, c) * (1 - span / 2)
-    return {"open": o, "high": h, "low": low, "close": c}, "synthetic"
+    return {"open": o, "high": h, "low": low, "close": c}

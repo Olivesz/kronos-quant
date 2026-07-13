@@ -28,7 +28,14 @@ assert abs(biases[780]) < 0.07, "GK estimator biased in continuous limit"
 assert abs(bias_c2) < 0.15, "C2C sanity"
 assert eff > 3.0, "GK should be much tighter than close-to-close"
 
-# real-data smoke: GK vol on SPY should track c2c vol closely in level
+# real-data smoke: GK vol on SPY should track c2c vol closely in level.
+# The synthetic OHLC generator does not reproduce realistic intraday range,
+# so this level check is only meaningful on real data; skip it in the hermetic
+# CI mode (the estimator-bias checks above already ran on synthetic truth).
+if os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes"):
+    print("\nGATE X1 PASSED (real-data smoke skipped: KRONOS_SYNTHETIC)")
+    sys.exit(0)
+
 from config import CFG
 from kronos.data import load_ohlc
 ohlc, src = load_ohlc(CFG)

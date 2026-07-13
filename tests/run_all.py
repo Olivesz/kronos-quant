@@ -2,7 +2,9 @@
 import subprocess, sys, os, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PY = os.path.join(os.path.dirname(HERE), ".venv", "bin", "python")
+# Use the interpreter that launched this runner (works in the project .venv,
+# in CI, and anywhere the deps are importable) rather than a hardcoded path.
+PY = sys.executable
 GATES = [
     # v1 platform gates
     "test_regime.py", "test_signals_pairs.py", "test_portfolio.py", "test_backtest.py",

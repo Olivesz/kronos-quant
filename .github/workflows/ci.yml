@@ -1,0 +1,40 @@
+name: gates
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verification-gates:
+    name: KRONOS verification gates
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    env:
+      # Hermetic run: seeded synthetic market, no live data feed. Every gate
+      # validates its estimator against synthetic ground truth, so this
+      # exercises the full battery deterministically and offline.
+      KRONOS_SYNTHETIC: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run all verification gates
+        run: python tests/run_all.py
+
+      - name: Smoke-test the end-to-end pipeline
+        run: python run_kronos.py

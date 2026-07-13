@@ -8,6 +8,14 @@ from kronos.decathlon import battery, simulate_abm
 from config import CFG
 from kronos.data import load_prices
 
+# This gate calibrates the battery's DYNAMIC RANGE against the REAL market
+# (SPY must score ~10, GBM ~3), so it is meaningful only on real data. In the
+# hermetic synthetic-data mode used by CI, skip with a clear notice — the 26
+# synthetic-ground-truth gates cover the estimator methodology.
+if os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes"):
+    print("GATE X19 SKIPPED (KRONOS_SYNTHETIC: requires real market data)")
+    sys.exit(0)
+
 # --- real SPY (close-only) must pass nearly everything --------------------------
 px, src = load_prices(CFG)
 r_spy = px[CFG.market].pct_change().dropna()
