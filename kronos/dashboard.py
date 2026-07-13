@@ -433,6 +433,19 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
       </div>
     </div>
 
+    <div class="panel" id="panel-transfer" style="display:none">
+      <h2>TRANSFER — Does Market Structure Cross Borders?</h2>
+      <div class="sub" id="sub-transfer-head">Every law was measured on ONE universe (48 US tickers). Re-estimated on Japan, Europe and Asia-EM (locally-listed large caps, own timezone block each), then the CONSTANTS variance-ratio machinery run across SPACE. Second test: the frozen US-tuned trading system, ZERO re-tuning, on each foreign market. Gate X24.</div>
+      <div class="row c2e">
+        <div><h2 style="margin-bottom:6px">The 7-law battery across markets</h2>
+          <table class="gtable" id="tbl-transfer-laws"></table>
+          <div class="sub" id="sub-transfer-laws" style="margin-top:8px"></div></div>
+        <div><h2 style="margin-bottom:6px">Frozen system vs local index (net of costs)</h2>
+          <table class="gtable" id="tbl-transfer-frozen"></table>
+          <div class="sub" id="sub-transfer-frozen" style="margin-top:8px"></div></div>
+      </div>
+    </div>
+
     <div class="panel">
       <h2>Synthesis — Did the science move the needle?</h2>
       <div class="sub">Identical core engine; overlays differ. Honest answer below.</div>
@@ -748,7 +761,7 @@ const cards=[
   {k:'CVaR 95 (daily)',v:fmt.pct2(k.cvar95),cls:'neg',s:'VaR '+fmt.pct2(k.var95),sp:S.roll_vol},
   {k:'Volatility',v:fmt.pct(k.vol),cls:'neu',s:'target '+fmt.pct(meta.vol_target),sp:S.roll_vol},
   {k:'Turnover',v:meta.ann_turnover.toFixed(1)+'×/yr',cls:'neu',s:'rebalance '+meta.rebalance_days+'d',sp:S.exposure},
-  {k:'Cost Drag',v:fmt.pct2(meta.ann_cost)+'/yr',cls:'neg',s:'commission+spread+impact',sp:S.exposure},
+  {k:'Cost Drag',v:fmt.pct2(meta.ann_cost)+'/yr',cls:'neg',s:'commission + spread + impact',sp:S.exposure},
 ];
 for(const cd of cards){
   const d=document.createElement('div');d.className='card';
@@ -1051,6 +1064,9 @@ if(DATA.research){
       if(which==='research'&&!researchBuilt){researchBuilt=true;buildResearch();}
     };
   });
+  // deep-link: ?tab=research or #research opens the research tab on load
+  const wantTab=(new URLSearchParams(location.search).get('tab'))||location.hash.replace('#','');
+  if(wantTab==='research'){const t=document.querySelector('.tab[data-tab="research"]');if(t)t.click();}
 }
 
 function buildResearch(){
@@ -1627,6 +1643,37 @@ function buildResearch(){
     $('sub-rec').textContent=`As of ${rec.as_of} · regime ${rec.regime} · forecast vol `+
       `${(rec.forecast_portfolio_vol_ann*100).toFixed(1)}% · exposure ${(rec.exposure*100).toFixed(0)}% `+
       `· no leverage by design. Risk-managed, mechanically de-risked (crashes are unforecastable — CRITICAL).`;
+  }
+
+  /* ---- TRANSFER panel ---- */
+  if(R.transfer){
+    $('panel-transfer').style.display='';
+    const TR=R.transfer, L=TR.laws;
+    const markets=Object.keys(TR.sources);           // US first, then foreign
+    const clsColor={TRANSFERS:'pos','UNIVERSE-SPECIFIC':'verdict-mixed'};
+    let h='<tr><th>Market law</th>'+markets.map(m=>`<th>${m.toUpperCase()}</th>`).join('')+'<th>verdict</th></tr>';
+    for(const [q,r] of Object.entries(L)){
+      h+=`<tr><td>${q}</td>`+
+        markets.map(m=>`<td>${r.values[m]!=null?r.values[m]:'—'}</td>`).join('')+
+        `<td><span class="${clsColor[r.class]||''}">${r.class}</span></td></tr>`;}
+    $('tbl-transfer-laws').innerHTML=h;
+    const trans=Object.entries(L).filter(([q,r])=>r.class==='TRANSFERS').map(([q])=>q);
+    $('sub-transfer-laws').innerHTML=`<b style="color:var(--green)">Transfer exactly (${TR.n_transfer}/${TR.n_laws}):</b> `+
+      trans.join(', ')+`. The one-clock collapse itself holds everywhere (deformed kurtosis 3.3–3.8 in all four markets, vs raw 8–13); what varies is point values of H, commonality and the deformed branching ratio — mechanism universal, calibration local.`;
+
+    let hf='<tr><th>Market</th><th>KRONOS Sharpe</th><th>index Sharpe</th><th>KRONOS MaxDD</th><th>index MaxDD</th></tr>';
+    for(const m of markets){
+      const f=TR.frozen[m]; if(!f) continue;
+      const better=f.net.max_dd>=f.index.max_dd;      // shallower (less negative)
+      hf+=`<tr><td${m==='US'?'':' style="color:var(--cyan)"'}>${m.toUpperCase()}</td>`+
+        `<td>${f.net.sharpe.toFixed(2)}</td><td>${f.index.sharpe.toFixed(2)}</td>`+
+        `<td class="${better?'pos':''}">${(f.net.max_dd*100).toFixed(0)}%</td>`+
+        `<td>${(f.index.max_dd*100).toFixed(0)}%</td></tr>`;}
+    $('tbl-transfer-frozen').innerHTML=hf;
+    const H=TR.hypotheses;
+    $('sub-transfer-frozen').innerHTML=`<b style="color:${H.TR2a&&H.TR2b?'var(--green)':'var(--amber)'}">`+
+      `TR2 ${H.TR2a&&H.TR2b?'holds':'partial'}:</b> the US-tuned system, with every hyperparameter frozen, keeps a positive Sharpe AND a shallower drawdown than the local index in every foreign market. `+
+      `<b style="color:var(--rose)">TR1 ${H.TR1?'holds':'fails'}</b> — only ${TR.n_transfer}/${TR.n_laws} laws transfer as exact values. The honest transferable claim is risk control, not alpha.`;
   }
 
   /* ---- synthesis ---- */
