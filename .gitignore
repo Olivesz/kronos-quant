@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual env (machine-specific; rebuild from requirements.txt)
+.venv/
+
+# Data cache (large, regenerable from Yahoo / synthetic fallback)
+data/cache/
+
+# Generated outputs
+output/dashboard.html
+output/positions_*.json
+
+# OS / editor
+.DS_Store

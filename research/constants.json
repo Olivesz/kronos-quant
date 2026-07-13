@@ -1,0 +1,144 @@
+{
+ "eras": [
+  "2010-2013",
+  "2013-2016",
+  "2016-2019",
+  "2019-2023",
+  "2023-2026"
+ ],
+ "centers": [
+  2011.625,
+  2014.875,
+  2018.125,
+  2021.375,
+  2024.625
+ ],
+ "quantities": {
+  "H": {
+   "name": "roughness H",
+   "era_values": [
+    0.06,
+    0.058,
+    0.061,
+    0.115,
+    0.044
+   ],
+   "VR": 2.45,
+   "p": 0.083,
+   "slope": 0.0008,
+   "trend_ci": [
+    -0.0021,
+    0.0036
+   ],
+   "class": "REGIME-VARYING"
+  },
+  "kurt": {
+   "name": "fat tails (kurtosis)",
+   "era_values": [
+    5.834,
+    5.57,
+    7.005,
+    12.229,
+    9.003
+   ],
+   "VR": 3.48,
+   "p": 0.032,
+   "slope": 0.3999,
+   "trend_ci": [
+    0.1228,
+    0.6672
+   ],
+   "class": "DRIFTING"
+  },
+  "kurt_def": {
+   "name": "one-clock kurtosis",
+   "era_values": [
+    3.294,
+    3.297,
+    3.689,
+    3.206,
+    3.506
+   ],
+   "VR": 4.42,
+   "p": 0.006,
+   "slope": 0.0103,
+   "trend_ci": [
+    -0.0062,
+    0.0274
+   ],
+   "class": "REGIME-VARYING"
+  },
+  "leverage": {
+   "name": "leverage effect",
+   "era_values": [
+    -0.049,
+    -0.037,
+    -0.047,
+    -0.067,
+    -0.019
+   ],
+   "VR": 1.2,
+   "p": 0.285,
+   "slope": 0.001,
+   "trend_ci": [
+    -0.002,
+    0.004
+   ],
+   "class": "CONSTANT"
+  },
+  "commonality": {
+   "name": "clock commonality",
+   "era_values": [
+    0.735,
+    0.64,
+    0.68,
+    0.811,
+    0.531
+   ],
+   "VR": 2.65,
+   "p": 0.033,
+   "slope": -0.0073,
+   "trend_ci": [
+    -0.0199,
+    0.0056
+   ],
+   "class": "REGIME-VARYING"
+  },
+  "n_raw": {
+   "name": "branching ratio (raw)",
+   "era_values": [
+    0.682,
+    0.625,
+    0.633,
+    0.715,
+    0.628
+   ],
+   "VR": 0.13,
+   "p": 0.969,
+   "slope": -0.0005,
+   "trend_ci": [
+    -0.0229,
+    0.0226
+   ],
+   "class": "CONSTANT"
+  },
+  "n_def": {
+   "name": "branching ratio (deformed)",
+   "era_values": [
+    0.465,
+    0.2,
+    0.556,
+    0.2,
+    0.509
+   ],
+   "VR": 1.15,
+   "p": 0.325,
+   "slope": 0.0027,
+   "trend_ci": [
+    -0.0276,
+    0.0339
+   ],
+   "class": "CONSTANT"
+  }
+ }
+}

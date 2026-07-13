@@ -1,0 +1,10 @@
+{
+ "variant_family": 140,
+ "v1_manual_sweeps": 10,
+ "regime_models": 3,
+ "k_sweep": 8,
+ "sjm_lambda_grid": 6,
+ "cvar_engines": 4,
+ "ensemble_methods": 5,
+ "vol_forecasters": 3
+}

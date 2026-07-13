@@ -1,0 +1,81 @@
+{
+ "eval_start": "2019-01-01",
+ "models": {
+  "HMM-3": {
+   "logscore_oos": 3.16886989852119,
+   "refits": 161,
+   "switches_per_year": 8.360189573459715,
+   "median_dwell": 20.0,
+   "latency": {
+    "Aug-2015 flash": 8,
+    "Feb-2018 volmageddon": 6,
+    "COVID crash": 0,
+    "2022 bear": 0
+   },
+   "econ_sharpe_full": 0.9718301639204334,
+   "econ_sharpe_eval": 0.8527396659804634,
+   "econ_maxdd_full": -0.13931303468945322
+  },
+  "SJM-3": {
+   "logscore_oos": 3.152293925121236,
+   "refits": 161,
+   "switches_per_year": 7.912322274881516,
+   "median_dwell": 20.0,
+   "latency": {
+    "Aug-2015 flash": 9,
+    "Feb-2018 volmageddon": 7,
+    "COVID crash": 0,
+    "2022 bear": 0
+   },
+   "econ_sharpe_full": 0.975833179295306,
+   "econ_sharpe_eval": 0.8593898285591983,
+   "econ_maxdd_full": -0.13979613502408783
+  },
+  "DurHMM-3x3": {
+   "logscore_oos": 3.1668651739514835,
+   "refits": 161,
+   "switches_per_year": 8.509478672985782,
+   "median_dwell": 20.0,
+   "latency": {
+    "Aug-2015 flash": 9,
+    "Feb-2018 volmageddon": 6,
+    "COVID crash": 0,
+    "2022 bear": 0
+   },
+   "econ_sharpe_full": 0.9722542083617194,
+   "econ_sharpe_eval": 0.8533807702195817,
+   "econ_maxdd_full": -0.13931303468945322
+  }
+ },
+ "sjm_lambda": {
+  "grid_scores": {
+   "2.0": 3.4972985809730384,
+   "4.0": 3.4901665040381844,
+   "8.0": 3.4844008981315793,
+   "16.0": 3.4674290228202236,
+   "32.0": 3.457755331806505,
+   "64.0": 3.4434924755230716
+  },
+  "lam": 2.0
+ },
+ "ksweep": {
+  "HMM": {
+   "2": 3.1100673345927876,
+   "3": 3.16886989852119,
+   "4": 3.1706531843831818,
+   "5": 3.18884516915301
+  },
+  "SJM": {
+   "2": 3.0993667460478282,
+   "3": 3.152293925121236,
+   "4": 3.102344207921701,
+   "5": 3.123516840923597
+  }
+ },
+ "decision": {
+  "by_logscore": "HMM-3",
+  "by_econ": "SJM-3",
+  "winner": "HMM-3",
+  "econ_margin": 0.006650162578734964
+ }
+}

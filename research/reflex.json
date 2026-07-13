@@ -1,0 +1,302 @@
+{
+ "recovery_curve": {
+  "0.2": 0.15366587186033637,
+  "0.4": 0.37255335880046847,
+  "0.6": 0.5704300752596294,
+  "0.8": 0.734653179527301
+ },
+ "median_n_raw": 0.6826931042600034,
+ "median_n_def": 0.24594487303161253,
+ "ci_raw": [
+  0.6147292365073527,
+  0.7329643239577329
+ ],
+ "ci_def": [
+  0.2,
+  0.3037545686927124
+ ],
+ "sv_null_n_def": 0.35,
+ "clustering_share": 0.6397431415420529,
+ "per_asset": {
+  "AAPL": {
+   "n_raw": 0.519,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "ADBE": {
+   "n_raw": 0.492,
+   "n_def": 0.259,
+   "cls": "equity"
+  },
+  "AMZN": {
+   "n_raw": 0.585,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "BA": {
+   "n_raw": 0.78,
+   "n_def": 0.333,
+   "cls": "equity"
+  },
+  "BAC": {
+   "n_raw": 0.674,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "CAT": {
+   "n_raw": 0.613,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "CRM": {
+   "n_raw": 0.615,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "CSCO": {
+   "n_raw": 0.524,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "CVX": {
+   "n_raw": 0.8,
+   "n_def": 0.231,
+   "cls": "equity"
+  },
+  "DIA": {
+   "n_raw": 0.785,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "DIS": {
+   "n_raw": 0.721,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "DUK": {
+   "n_raw": 0.583,
+   "n_def": 0.259,
+   "cls": "equity"
+  },
+  "FDX": {
+   "n_raw": 0.634,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "GLD": {
+   "n_raw": 0.659,
+   "n_def": 0.2,
+   "cls": "gold"
+  },
+  "GOOGL": {
+   "n_raw": 0.578,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "GS": {
+   "n_raw": 0.719,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "HD": {
+   "n_raw": 0.567,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "HON": {
+   "n_raw": 0.733,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "HYG": {
+   "n_raw": 0.8,
+   "n_def": 0.2,
+   "cls": "bond"
+  },
+  "INTC": {
+   "n_raw": 0.8,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "IWM": {
+   "n_raw": 0.735,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "JNJ": {
+   "n_raw": 0.431,
+   "n_def": 0.274,
+   "cls": "equity"
+  },
+  "JPM": {
+   "n_raw": 0.686,
+   "n_def": 0.222,
+   "cls": "equity"
+  },
+  "KO": {
+   "n_raw": 0.626,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "LIN": {
+   "n_raw": 0.721,
+   "n_def": 0.367,
+   "cls": "equity"
+  },
+  "LQD": {
+   "n_raw": 0.8,
+   "n_def": 0.8,
+   "cls": "bond"
+  },
+  "MCD": {
+   "n_raw": 0.513,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "MSFT": {
+   "n_raw": 0.61,
+   "n_def": 0.238,
+   "cls": "equity"
+  },
+  "NEE": {
+   "n_raw": 0.793,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "NFLX": {
+   "n_raw": 0.679,
+   "n_def": 0.2,
+   "cls": "equity"
+  },
+  "NVDA": {
+   "n_raw": 0.674,
+   "n_def": 0.253,
+   "cls": "equity"
+  },
+  "ORCL": {
+   "n_raw": 0.767,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "PEP": {
+   "n_raw": 0.566,
+   "n_def": 0.366,
+   "cls": "equity"
+  },
+  "PFE": {
+   "n_raw": 0.686,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "PG": {
+   "n_raw": 0.527,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "QQQ": {
+   "n_raw": 0.8,
+   "n_def": 0.304,
+   "cls": "equity_index"
+  },
+  "SPY": {
+   "n_raw": 0.789,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "T": {
+   "n_raw": 0.611,
+   "n_def": 0.752,
+   "cls": "equity"
+  },
+  "TLT": {
+   "n_raw": 0.8,
+   "n_def": 0.2,
+   "cls": "bond"
+  },
+  "UNH": {
+   "n_raw": 0.533,
+   "n_def": 0.379,
+   "cls": "equity"
+  },
+  "UPS": {
+   "n_raw": 0.795,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "VZ": {
+   "n_raw": 0.388,
+   "n_def": 0.8,
+   "cls": "equity"
+  },
+  "WMT": {
+   "n_raw": 0.501,
+   "n_def": 0.291,
+   "cls": "equity"
+  },
+  "XLE": {
+   "n_raw": 0.8,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "XLF": {
+   "n_raw": 0.777,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "XLK": {
+   "n_raw": 0.8,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "XLU": {
+   "n_raw": 0.716,
+   "n_def": 0.2,
+   "cls": "equity_index"
+  },
+  "XOM": {
+   "n_raw": 0.8,
+   "n_def": 0.28,
+   "cls": "equity"
+  }
+ },
+ "trend": {
+  "pre": {
+   "n_raw": 0.6287153752578221,
+   "n_def": 0.5223664195854771
+  },
+  "post": {
+   "n_raw": 0.6431974402455986,
+   "n_def": 0.2346300101083987
+  }
+ },
+ "systemic": {
+  "n": 0.2068263067623196,
+  "median_single": 0.24594487303161253
+ },
+ "classes": {
+  "equity": {
+   "n_raw": 0.6204106641021726,
+   "n_def": 0.27702596521158307
+  },
+  "equity_index": {
+   "n_raw": 0.7872802689097769,
+   "n_def": 0.2
+  },
+  "bond": {
+   "n_raw": 0.8,
+   "n_def": 0.2
+  },
+  "gold": {
+   "n_raw": 0.6585087339828511,
+   "n_def": 0.2
+  }
+ },
+ "f5": {
+  "corr_nraw_phishift": 0.03622525987166392,
+  "n": 36
+ },
+ "spy": {
+  "n_raw": 0.7893426276013895,
+  "n_def": 0.2
+ }
+}

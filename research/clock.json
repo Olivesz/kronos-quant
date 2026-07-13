@@ -1,0 +1,99 @@
+{
+ "versions": {
+  "raw": {
+   "all": {
+    "n_pairs": 1128,
+    "q50": {
+     "median_excess": 0.10868248970695084,
+     "frac_above95": 0.9308510638297872
+    },
+    "q25": {
+     "median_excess": 0.12974085735044805,
+     "frac_above95": 0.8865248226950354
+    },
+    "asym_median_excess": 0.029887629238545894,
+    "asym_frac_above95": 0.07535460992907801
+   },
+   "equities": {
+    "n_pairs": 630,
+    "q50": {
+     "median_excess": 0.10646645676919347,
+     "frac_above95": 0.9714285714285714
+    },
+    "q25": {
+     "median_excess": 0.12153063695810123,
+     "frac_above95": 0.9317460317460318
+    },
+    "asym_median_excess": 0.024625334779308047,
+    "asym_frac_above95": 0.07142857142857142
+   }
+  },
+  "same_day": {
+   "all": {
+    "n_pairs": 1128,
+    "q50": {
+     "median_excess": 0.012266892710099273,
+     "frac_above95": 0.1453900709219858
+    },
+    "q25": {
+     "median_excess": 0.0018164204407846996,
+     "frac_above95": 0.06294326241134751
+    },
+    "asym_median_excess": 0.06435233863952608,
+    "asym_frac_above95": 0.11347517730496454
+   },
+   "equities": {
+    "n_pairs": 630,
+    "q50": {
+     "median_excess": 0.014434487769435678,
+     "frac_above95": 0.1365079365079365
+    },
+    "q25": {
+     "median_excess": 0.003802373456042632,
+     "frac_above95": 0.06666666666666667
+    },
+    "asym_median_excess": 0.06104618553038142,
+    "asym_frac_above95": 0.09841269841269841
+   }
+  },
+  "lagged": {
+   "all": {
+    "n_pairs": 1128,
+    "q50": {
+     "median_excess": 0.058034180886582354,
+     "frac_above95": 0.7074468085106383
+    },
+    "q25": {
+     "median_excess": 0.044276684114795406,
+     "frac_above95": 0.5230496453900709
+    },
+    "asym_median_excess": 0.07494081509262832,
+    "asym_frac_above95": 0.125
+   },
+   "equities": {
+    "n_pairs": 630,
+    "q50": {
+     "median_excess": 0.051215774304856576,
+     "frac_above95": 0.6555555555555556
+    },
+    "q25": {
+     "median_excess": 0.038937500337679204,
+     "frac_above95": 0.44761904761904764
+    },
+    "asym_median_excess": 0.07695053669163783,
+    "asym_frac_above95": 0.1
+   }
+  }
+ },
+ "c1": {
+  "lambda2_raw_median": 0.0792790338714077,
+  "lambda2_z_median": -0.005757835736641012,
+  "ratio": -0.07262747104083465
+ },
+ "c3": {
+  "eig1_share": 0.6930962959395307,
+  "eig2_share": 0.04781428892328149,
+  "mkt_clock_share_equities": -0.1336377867332626,
+  "mkt_clock_share_other": 0.7851500018686903
+ }
+}

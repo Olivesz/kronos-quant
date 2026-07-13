@@ -1,0 +1,369 @@
+{
+ "verdict": "shock_dominated",
+ "per_asset": {
+  "AAPL": {
+   "auc_vol": 0.504,
+   "auc_all": 0.465,
+   "gain": -0.0385,
+   "cls": "equity"
+  },
+  "ADBE": {
+   "auc_vol": 0.569,
+   "auc_all": 0.583,
+   "gain": 0.0132,
+   "cls": "equity"
+  },
+  "AMZN": {
+   "auc_vol": 0.327,
+   "auc_all": 0.363,
+   "gain": 0.0356,
+   "cls": "equity"
+  },
+  "BA": {
+   "auc_vol": 0.523,
+   "auc_all": 0.514,
+   "gain": -0.0093,
+   "cls": "equity"
+  },
+  "BAC": {
+   "auc_vol": 0.395,
+   "auc_all": 0.402,
+   "gain": 0.0071,
+   "cls": "equity"
+  },
+  "CAT": {
+   "auc_vol": 0.423,
+   "auc_all": 0.413,
+   "gain": -0.0099,
+   "cls": "equity"
+  },
+  "CRM": {
+   "auc_vol": 0.486,
+   "auc_all": 0.468,
+   "gain": -0.0185,
+   "cls": "equity"
+  },
+  "CSCO": {
+   "auc_vol": 0.552,
+   "auc_all": 0.544,
+   "gain": -0.0082,
+   "cls": "equity"
+  },
+  "CVX": {
+   "auc_vol": 0.396,
+   "auc_all": 0.41,
+   "gain": 0.0144,
+   "cls": "equity"
+  },
+  "DIA": {
+   "auc_vol": 0.312,
+   "auc_all": 0.42,
+   "gain": 0.1082,
+   "cls": "equity_index"
+  },
+  "DIS": {
+   "auc_vol": 0.421,
+   "auc_all": 0.485,
+   "gain": 0.0632,
+   "cls": "equity"
+  },
+  "DUK": {
+   "auc_vol": 0.443,
+   "auc_all": 0.391,
+   "gain": -0.052,
+   "cls": "equity"
+  },
+  "FDX": {
+   "auc_vol": 0.387,
+   "auc_all": 0.378,
+   "gain": -0.0099,
+   "cls": "equity"
+  },
+  "GLD": {
+   "auc_vol": 0.652,
+   "auc_all": 0.556,
+   "gain": -0.0959,
+   "cls": "gold"
+  },
+  "GOOGL": {
+   "auc_vol": 0.394,
+   "auc_all": 0.41,
+   "gain": 0.0159,
+   "cls": "equity"
+  },
+  "GS": {
+   "auc_vol": 0.433,
+   "auc_all": 0.431,
+   "gain": -0.0018,
+   "cls": "equity"
+  },
+  "HD": {
+   "auc_vol": 0.576,
+   "auc_all": 0.589,
+   "gain": 0.0127,
+   "cls": "equity"
+  },
+  "HON": {
+   "auc_vol": 0.474,
+   "auc_all": 0.548,
+   "gain": 0.0733,
+   "cls": "equity"
+  },
+  "HYG": {
+   "auc_vol": 0.309,
+   "auc_all": 0.256,
+   "gain": -0.0532,
+   "cls": "bond"
+  },
+  "INTC": {
+   "auc_vol": 0.519,
+   "auc_all": 0.492,
+   "gain": -0.027,
+   "cls": "equity"
+  },
+  "IWM": {
+   "auc_vol": 0.513,
+   "auc_all": 0.496,
+   "gain": -0.0171,
+   "cls": "equity_index"
+  },
+  "JNJ": {
+   "auc_vol": 0.426,
+   "auc_all": 0.472,
+   "gain": 0.0458,
+   "cls": "equity"
+  },
+  "JPM": {
+   "auc_vol": 0.462,
+   "auc_all": 0.505,
+   "gain": 0.0432,
+   "cls": "equity"
+  },
+  "KO": {
+   "auc_vol": 0.521,
+   "auc_all": 0.509,
+   "gain": -0.0112,
+   "cls": "equity"
+  },
+  "LIN": {
+   "auc_vol": 0.43,
+   "auc_all": 0.429,
+   "gain": -0.0018,
+   "cls": "equity"
+  },
+  "LQD": {
+   "auc_vol": 0.46,
+   "auc_all": 0.43,
+   "gain": -0.0296,
+   "cls": "bond"
+  },
+  "MCD": {
+   "auc_vol": 0.487,
+   "auc_all": 0.559,
+   "gain": 0.0727,
+   "cls": "equity"
+  },
+  "MSFT": {
+   "auc_vol": 0.512,
+   "auc_all": 0.506,
+   "gain": -0.0058,
+   "cls": "equity"
+  },
+  "NEE": {
+   "auc_vol": 0.512,
+   "auc_all": 0.47,
+   "gain": -0.0417,
+   "cls": "equity"
+  },
+  "NFLX": {
+   "auc_vol": 0.559,
+   "auc_all": 0.556,
+   "gain": -0.0034,
+   "cls": "equity"
+  },
+  "NVDA": {
+   "auc_vol": 0.545,
+   "auc_all": 0.535,
+   "gain": -0.0099,
+   "cls": "equity"
+  },
+  "ORCL": {
+   "auc_vol": 0.697,
+   "auc_all": 0.662,
+   "gain": -0.0353,
+   "cls": "equity"
+  },
+  "PEP": {
+   "auc_vol": 0.49,
+   "auc_all": 0.519,
+   "gain": 0.0285,
+   "cls": "equity"
+  },
+  "PFE": {
+   "auc_vol": 0.493,
+   "auc_all": 0.473,
+   "gain": -0.0198,
+   "cls": "equity"
+  },
+  "PG": {
+   "auc_vol": 0.35,
+   "auc_all": 0.374,
+   "gain": 0.0233,
+   "cls": "equity"
+  },
+  "QQQ": {
+   "auc_vol": 0.321,
+   "auc_all": 0.342,
+   "gain": 0.0209,
+   "cls": "equity_index"
+  },
+  "SPY": {
+   "auc_vol": 0.312,
+   "auc_all": 0.347,
+   "gain": 0.0355,
+   "cls": "equity_index"
+  },
+  "T": {
+   "auc_vol": 0.506,
+   "auc_all": 0.546,
+   "gain": 0.0402,
+   "cls": "equity"
+  },
+  "TLT": {
+   "auc_vol": 0.516,
+   "auc_all": 0.527,
+   "gain": 0.0104,
+   "cls": "bond"
+  },
+  "UNH": {
+   "auc_vol": 0.655,
+   "auc_all": 0.651,
+   "gain": -0.004,
+   "cls": "equity"
+  },
+  "UPS": {
+   "auc_vol": 0.479,
+   "auc_all": 0.46,
+   "gain": -0.019,
+   "cls": "equity"
+  },
+  "VZ": {
+   "auc_vol": 0.414,
+   "auc_all": 0.465,
+   "gain": 0.0513,
+   "cls": "equity"
+  },
+  "WMT": {
+   "auc_vol": 0.416,
+   "auc_all": 0.579,
+   "gain": 0.1636,
+   "cls": "equity"
+  },
+  "XLE": {
+   "auc_vol": 0.357,
+   "auc_all": 0.451,
+   "gain": 0.0936,
+   "cls": "equity_index"
+  },
+  "XLF": {
+   "auc_vol": 0.383,
+   "auc_all": 0.388,
+   "gain": 0.0046,
+   "cls": "equity_index"
+  },
+  "XLK": {
+   "auc_vol": 0.419,
+   "auc_all": 0.404,
+   "gain": -0.0149,
+   "cls": "equity_index"
+  },
+  "XLU": {
+   "auc_vol": 0.422,
+   "auc_all": 0.403,
+   "gain": -0.0181,
+   "cls": "equity_index"
+  },
+  "XOM": {
+   "auc_vol": 0.375,
+   "auc_all": 0.45,
+   "gain": 0.0743,
+   "cls": "equity"
+  }
+ },
+ "equity_mean_gain": 0.012536111111111112,
+ "equity_ci": [
+  0.00014138888888888909,
+  0.026770208333333326
+ ],
+ "median_gain": -0.0018,
+ "frac_pos": 0.4791666666666667,
+ "sign_test_p": 0.6672670939616906,
+ "spy": {
+  "gain": 0.035536064658378386,
+  "ci": [
+   -0.06922702939167485,
+   0.1468333275555154
+  ],
+  "auc_vol": 0.3116253098177179,
+  "auc_all": 0.3471613744760963,
+  "phi_lift_midvol": 7.0
+ },
+ "classes": {
+  "equity": {
+   "median_gain": -0.0018,
+   "frac_pos": 0.4722222222222222,
+   "n": 36
+  },
+  "equity_index": {
+   "median_gain": 0.01275,
+   "frac_pos": 0.625,
+   "n": 8
+  },
+  "bond": {
+   "median_gain": -0.0296,
+   "frac_pos": 0.3333333333333333,
+   "n": 3
+  },
+  "gold": {
+   "median_gain": -0.0959,
+   "frac_pos": 0.0,
+   "n": 1
+  }
+ },
+ "hsweep": {
+  "10": {
+   "median": -0.0014911027149989986,
+   "frac_pos": 0.4722222222222222
+  },
+  "20": {
+   "median": -0.0017954104605600874,
+   "frac_pos": 0.4722222222222222
+  },
+  "60": {
+   "median": 0.010803543965994228,
+   "frac_pos": 0.5833333333333334
+  }
+ },
+ "gate": {
+  "fold_gain": 0.631,
+  "shock_gain": 0.03
+ },
+ "precursor": {
+  "real": {
+   "phi": 0.0967338313302349,
+   "ac1_x": 0.10138465482784367,
+   "spectral": 0.052981474208336196,
+   "skew_dx": 0.013926653827278115
+  },
+  "fold": {
+   "phi": 0.8423764255063895,
+   "ac1_x": 0.6133526397874913,
+   "spectral": 0.23385886665834807,
+   "skew_dx": -0.16527951582829273
+  }
+ },
+ "asymmetry": {
+  "down": -0.0018,
+  "up": -0.013940889978055898
+ }
+}

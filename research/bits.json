@@ -1,0 +1,252 @@
+{
+ "direction": {
+  "1": {
+   "bits": 0.006333978289609422,
+   "null_mean": 0.0056770079430475085,
+   "null_p95": 0.009000656846403988,
+   "bits_net": 0.0006569703465619135,
+   "significant": false,
+   "n": 4108
+  },
+  "5": {
+   "bits": 0.004840559305950092,
+   "null_mean": 0.002056695018031823,
+   "null_p95": 0.005640133413081392,
+   "bits_net": 0.002783864287918269,
+   "significant": false,
+   "n": 4104
+  },
+  "21": {
+   "bits": 0.01816978627201206,
+   "null_mean": 0.0019088049378891663,
+   "null_p95": 0.00497812005035491,
+   "bits_net": 0.016260981334122893,
+   "significant": true,
+   "n": 4088
+  }
+ },
+ "direction_cross": {
+  "median_bits": 0.0008550000000000001,
+  "n_sig": 6,
+  "n_assets": 48,
+  "per_asset": {
+   "AAPL": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "ADBE": {
+    "bits_net": 0.00247,
+    "sig": true
+   },
+   "AMZN": {
+    "bits_net": 0.00083,
+    "sig": false
+   },
+   "BA": {
+    "bits_net": 0.00141,
+    "sig": false
+   },
+   "BAC": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "CAT": {
+    "bits_net": 0.00047,
+    "sig": false
+   },
+   "CRM": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "CSCO": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "CVX": {
+    "bits_net": 0.00025,
+    "sig": false
+   },
+   "DIA": {
+    "bits_net": 0.00028,
+    "sig": false
+   },
+   "DIS": {
+    "bits_net": 0.00307,
+    "sig": true
+   },
+   "DUK": {
+    "bits_net": 0.00187,
+    "sig": false
+   },
+   "FDX": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "GLD": {
+    "bits_net": 0.00229,
+    "sig": false
+   },
+   "GOOGL": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "GS": {
+    "bits_net": 0.00055,
+    "sig": false
+   },
+   "HD": {
+    "bits_net": 0.00132,
+    "sig": false
+   },
+   "HON": {
+    "bits_net": 0.00142,
+    "sig": false
+   },
+   "HYG": {
+    "bits_net": 0.00169,
+    "sig": false
+   },
+   "INTC": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "IWM": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "JNJ": {
+    "bits_net": 0.00103,
+    "sig": false
+   },
+   "JPM": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "KO": {
+    "bits_net": 0.00257,
+    "sig": true
+   },
+   "LIN": {
+    "bits_net": 0.00278,
+    "sig": false
+   },
+   "LQD": {
+    "bits_net": 0.00134,
+    "sig": false
+   },
+   "MCD": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "MSFT": {
+    "bits_net": 0.00115,
+    "sig": false
+   },
+   "NEE": {
+    "bits_net": 0.00088,
+    "sig": false
+   },
+   "NFLX": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "NVDA": {
+    "bits_net": 0.0013,
+    "sig": false
+   },
+   "ORCL": {
+    "bits_net": 0.00178,
+    "sig": false
+   },
+   "PEP": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "PFE": {
+    "bits_net": 0.00225,
+    "sig": false
+   },
+   "PG": {
+    "bits_net": 0.00414,
+    "sig": true
+   },
+   "QQQ": {
+    "bits_net": 0.0005,
+    "sig": false
+   },
+   "SPY": {
+    "bits_net": 0.00066,
+    "sig": false
+   },
+   "T": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "TLT": {
+    "bits_net": 0.00326,
+    "sig": true
+   },
+   "UNH": {
+    "bits_net": 0.00162,
+    "sig": false
+   },
+   "UPS": {
+    "bits_net": 0.00134,
+    "sig": false
+   },
+   "VZ": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "WMT": {
+    "bits_net": 0.00184,
+    "sig": false
+   },
+   "XLE": {
+    "bits_net": 0.00151,
+    "sig": false
+   },
+   "XLF": {
+    "bits_net": 0.0,
+    "sig": false
+   },
+   "XLK": {
+    "bits_net": 0.00243,
+    "sig": true
+   },
+   "XLU": {
+    "bits_net": 0.00024,
+    "sig": false
+   },
+   "XOM": {
+    "bits_net": 0.0,
+    "sig": false
+   }
+  }
+ },
+ "magnitude": {
+  "spy_bits": 0.39723122467762795,
+  "spy_nats": 0.275339703415672,
+  "cross_median_bits": 0.3125961224746487
+ },
+ "total_bits": 0.19905124878382036,
+ "eras": {
+  "magnitude": {
+   "pre": 0.33332363781419394,
+   "post": 0.40321396779308366
+  },
+  "direction": {
+   "pre": 0.009192716328893381,
+   "post": 0.0
+  }
+ },
+ "ceilings": {
+  "direction_sr": 0.4790357400985326,
+  "total_sr": 8.948683693487894,
+  "vol_channel_sr": 13.604286548212507
+ },
+ "utilization": {
+  "kronos_bits": 0.0025543694701211325,
+  "kronos_sr": 0.945484558795118
+ }
+}
