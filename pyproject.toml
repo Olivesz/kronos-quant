@@ -32,6 +32,8 @@ dependencies = [
 # Real Yahoo Finance data path. Omit it and the platform runs end-to-end on a
 # seeded synthetic regime-switching market (see KRONOS_SYNTHETIC).
 data = ["yfinance>=0.2.40"]
+# Development tooling (linting).
+dev = ["ruff>=0.5"]
 
 [project.urls]
 Homepage = "https://github.com/Olivesz/kronos-quant"
