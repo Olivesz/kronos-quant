@@ -1,0 +1,235 @@
+{
+ "source": "yahoo",
+ "coins": [
+  "ADA-USD",
+  "BCH-USD",
+  "BTC-USD",
+  "DOGE-USD",
+  "ETC-USD",
+  "ETH-USD",
+  "LINK-USD",
+  "LTC-USD",
+  "XLM-USD",
+  "XRP-USD"
+ ],
+ "span": [
+  "2017-11-09",
+  "2026-06-04"
+ ],
+ "equity_markets": [
+  "US",
+  "japan",
+  "europe",
+  "asia_em"
+ ],
+ "laws": {
+  "kurt": {
+   "values": {
+    "US": 13.143,
+    "japan": 8.878,
+    "europe": 11.319,
+    "asia_em": 8.418,
+    "crypto": 16.574
+   },
+   "sds": {
+    "US": 2.86,
+    "japan": 0.858,
+    "europe": 1.929,
+    "asia_em": 0.687,
+    "crypto": 3.173
+   },
+   "VR": 2.41,
+   "p": 0.069,
+   "z_vs_ref": {
+    "japan": -1.43,
+    "europe": -0.53,
+    "asia_em": -1.61,
+    "crypto": 0.8
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "kurt_def": {
+   "values": {
+    "US": 3.439,
+    "japan": 3.346,
+    "europe": 3.553,
+    "asia_em": 3.765,
+    "crypto": 4.498
+   },
+   "sds": {
+    "US": 0.046,
+    "japan": 0.042,
+    "europe": 0.038,
+    "asia_em": 0.054,
+    "crypto": 0.199
+   },
+   "VR": 22.27,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": -1.49,
+    "europe": 1.91,
+    "asia_em": 4.6,
+    "crypto": 5.18
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "leverage": {
+   "values": {
+    "US": -0.047,
+    "japan": -0.039,
+    "europe": -0.046,
+    "asia_em": -0.03,
+    "crypto": 0.031
+   },
+   "sds": {
+    "US": 0.015,
+    "japan": 0.008,
+    "europe": 0.017,
+    "asia_em": 0.01,
+    "crypto": 0.016
+   },
+   "VR": 5.79,
+   "p": 0.001,
+   "z_vs_ref": {
+    "japan": 0.47,
+    "europe": 0.04,
+    "asia_em": 0.94,
+    "crypto": 3.59
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "H": {
+   "values": {
+    "US": 0.069,
+    "japan": 0.015,
+    "europe": 0.055,
+    "asia_em": 0.048,
+    "crypto": 0.077
+   },
+   "sds": {
+    "US": 0.008,
+    "japan": 0.007,
+    "europe": 0.007,
+    "asia_em": 0.004,
+    "crypto": 0.009
+   },
+   "VR": 10.75,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": -5.08,
+    "europe": -1.32,
+    "asia_em": -2.35,
+    "crypto": 0.62
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "n_raw": {
+   "values": {
+    "US": 0.693,
+    "japan": 0.58,
+    "europe": 0.727,
+    "asia_em": 0.626,
+    "crypto": 0.687
+   },
+   "sds": {
+    "US": 0.068,
+    "japan": 0.062,
+    "europe": 0.069,
+    "asia_em": 0.078,
+    "crypto": 0.036
+   },
+   "VR": 0.84,
+   "p": 0.474,
+   "z_vs_ref": {
+    "japan": -1.23,
+    "europe": 0.35,
+    "asia_em": -0.65,
+    "crypto": -0.08
+   },
+   "class": "TRANSFERS"
+  },
+  "n_def": {
+   "values": {
+    "US": 0.241,
+    "japan": 0.455,
+    "europe": 0.8,
+    "asia_em": 0.32,
+    "crypto": 0.2
+   },
+   "sds": {
+    "US": 0.147,
+    "japan": 0.133,
+    "europe": 0.145,
+    "asia_em": 0.151,
+    "crypto": 0.027
+   },
+   "VR": 3.5,
+   "p": 0.013,
+   "z_vs_ref": {
+    "japan": 1.08,
+    "europe": 2.71,
+    "asia_em": 0.37,
+    "crypto": -0.27
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "commonality": {
+   "values": {
+    "US": 0.693,
+    "japan": 0.903,
+    "europe": 0.667,
+    "asia_em": 0.413,
+    "crypto": 0.795
+   },
+   "sds": {
+    "US": 0.038,
+    "japan": 0.034,
+    "europe": 0.037,
+    "asia_em": 0.034,
+    "crypto": 0.029
+   },
+   "VR": 27.95,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": 4.12,
+    "europe": -0.49,
+    "asia_em": -5.49,
+    "crypto": 2.13
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  }
+ },
+ "leverage_contrast": {
+  "crypto_leverage": 0.0312,
+  "crypto_sd": 0.0158,
+  "equity_mean": -0.0405,
+  "equity_spread": 0.0079,
+  "equity_values": {
+   "US": -0.047,
+   "japan": -0.039,
+   "europe": -0.046,
+   "asia_em": -0.03
+  },
+  "z_vs_equities": 4.06,
+  "verdict": "INVERTED"
+ },
+ "per_coin_leverage": {
+  "ADA-USD": 0.04201905209208884,
+  "BCH-USD": 0.026206951827085583,
+  "BTC-USD": -0.042654845733169626,
+  "DOGE-USD": 0.07752566297969694,
+  "ETC-USD": 0.03620811274070661,
+  "ETH-USD": -0.018688842757788666,
+  "LINK-USD": 0.00482985790120461,
+  "LTC-USD": 0.0017910020787017574,
+  "XLM-USD": 0.058823166663092466,
+  "XRP-USD": 0.038397414118894205
+ },
+ "branching_still_collapses": true,
+ "hypotheses": {
+  "C1": true,
+  "C2": true,
+  "C3": false,
+  "C4": true
+ }
+}

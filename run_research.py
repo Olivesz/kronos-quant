@@ -1425,6 +1425,77 @@ def exp_transfer(force: bool = False) -> dict:
     return out
 
 
+def exp_crypto(force: bool = False) -> dict:
+    if not force and (c := load_cached("crypto")):
+        print("[crypto] cached")
+        return c
+    from kronos.crypto import (CRYPTO_UNIVERSE, leverage_contrast, load_crypto,
+                               per_asset_leverage)
+    from kronos.hawkes import recovery_curve
+    from kronos.transfer import battery, transfer_tests
+
+    # Equity cohort: reuse the EXACT batteries TRANSFER already reported, so the
+    # two studies share one equity baseline. (Run `run_research.py transfer` first.)
+    tj = load_cached("transfer")
+    if tj is None:
+        exp_transfer(force=False)
+        tj = load_cached("transfer")
+    eq_markets = list(tj["sources"].keys())          # US + 3 equity regions
+    laws = tj["laws"]
+    batteries = {m: {q: (laws[q]["values"][m], laws[q]["sds"][m])
+                     for q in laws if m in laws[q]["values"]}
+                 for m in eq_markets}
+
+    t0 = time.time()
+    cu = load_crypto()
+    print(f"[crypto] {cu['close'].shape[1]} coins x {len(cu['close'])} days "
+          f"({cu['source']}, {cu['close'].index[0].date()} -> "
+          f"{cu['close'].index[-1].date()})")
+    curve = recovery_curve(n_rep=8, T=float(len(cu["close"])), seed=0)
+    batteries["crypto"] = battery(cu["close"], cu["gk"], curve)
+
+    rep = transfer_tests(batteries, ref="US")
+    lev = leverage_contrast(batteries, eq_markets)
+    per_coin = per_asset_leverage(cu["close"], cu["gk"])
+
+    def eqmed(q):
+        return float(np.median([laws[q]["values"][m] for m in eq_markets]))
+
+    C = batteries["crypto"]
+    c1 = C["kurt_def"][0] < 5.0
+    c2 = lev["verdict"] in ("INVERTED", "WEAKER")
+    # C3 requires crypto to be SIGNIFICANTLY more reflexive, not just nominally:
+    # a nominal-only edge means near-critical branching simply transfers.
+    c3 = (rep["n_raw"]["class"] == "UNIVERSE-SPECIFIC"
+          and C["n_raw"][0] > eqmed("n_raw"))
+    c4 = C["kurt"][0] > eqmed("kurt")
+    n_inv = sum(1 for v in per_coin.values() if v > 0)
+
+    for q in rep:
+        cv = rep[q]["values"].get("crypto")
+        print(f"[crypto] {q:12s} crypto={cv} vs equity-median={round(eqmed(q),3)} "
+              f"| {rep[q]['class']}  z={rep[q]['z_vs_ref'].get('crypto')}")
+    print(f"[crypto] LEVERAGE: crypto {lev['crypto_leverage']:+.3f} vs equity "
+          f"{lev['equity_mean']:+.3f} (z={lev['z_vs_equities']}) -> {lev['verdict']}; "
+          f"{n_inv}/{len(per_coin)} coins individually inverted")
+    print(f"[crypto] C1 one-clock survives: {c1} (kurt_def={C['kurt_def'][0]:.2f}) | "
+          f"C2 leverage differs: {c2} ({lev['verdict']}) | "
+          f"C3 more reflexive: {c3} (n_raw {C['n_raw'][0]:.2f} vs {eqmed('n_raw'):.2f}) | "
+          f"C4 fatter tails: {c4} (kurt {C['kurt'][0]:.1f} vs {eqmed('kurt'):.1f})")
+
+    out = {"source": cu["source"], "coins": list(cu["close"].columns),
+           "span": [str(cu["close"].index[0].date()),
+                    str(cu["close"].index[-1].date())],
+           "equity_markets": eq_markets, "laws": rep,
+           "leverage_contrast": lev, "per_coin_leverage": per_coin,
+           "branching_still_collapses": bool(C["n_def"][0] < C["n_raw"][0]),
+           "hypotheses": {"C1": bool(c1), "C2": bool(c2),
+                          "C3": bool(c3), "C4": bool(c4)}}
+    print(f"[crypto] done in {time.time()-t0:.0f}s")
+    save("crypto", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -1439,6 +1510,7 @@ EXPERIMENTS = {
     "reflex": exp_reflex,
     "constants": exp_constants,
     "transfer": exp_transfer,
+    "crypto": exp_crypto,
     "vollab": exp_vollab,
     "rough": exp_rough,
     "rmt": exp_rmt,

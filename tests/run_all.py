@@ -35,6 +35,8 @@ GATES = [
     "test_trade.py",
     # KRONOS-TRANSFER gate
     "test_transfer.py",
+    # KRONOS-CRYPTO gate (leverage-sign recovery)
+    "test_crypto.py",
 ]
 
 print("=" * 60)
