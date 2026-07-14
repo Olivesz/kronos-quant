@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-28%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-29%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -36,7 +36,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 28 such gates run in
+passes a gate on data where the answer is already known.** 29 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -68,7 +68,7 @@ python run_research.py all        # 21 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 28 verification gates (~75s)
+python tests/run_all.py           # all 29 verification gates (~95s)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -77,9 +77,10 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **28 synthetic-ground-truth gates**, each proving an estimator has correct
-  *size* (doesn't fire on null worlds) and *power* (detects planted effects)
-  before any real-data claim is made.
+- **29 verification gates** — 27 proving an estimator has correct *size*
+  (doesn't fire on null worlds) and *power* (detects planted effects) on
+  synthetic ground truth, plus 2 calibrating the battery against the real
+  market — all before any real-data claim is made.
 - **Strictly causal throughout** — filtered (not smoothed) HMM probabilities,
   frozen betas, walk-forward refits, T+1 execution, full transaction costs
   (commission + spread + square-root impact).
@@ -195,7 +196,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    28 gates, each on synthetic ground truth first
+tests/                    29 gates (27 synthetic ground truth + 2 real-data calibration)
 docs/                     ATLAS (open-problem map), design notes, FINDINGS, research index
 ```
 
