@@ -19,6 +19,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-DECATHLON — the minimal market](#kronos-decathlon--the-minimal-market)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
+- [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
 
 ---
 
@@ -308,3 +309,57 @@ Mechanism is universal (fat tails, leverage, near-criticality, the one-clock
 collapse all reappear); calibration is local (H, commonality, deformed
 branching differ). The honest transferable claim is **risk control, not
 alpha** — and it survives contact with markets it was never tuned on.
+
+## KRONOS-CRYPTO — do the laws survive outside equities?
+
+TRANSFER showed the laws reappear across equity markets that all share one
+microstructure. Crypto breaks four equity assumptions at once — 24/7 (no
+overnight gap), retail-momentum flow, no financial leverage, no close auction —
+so it is the sharpest test of whether the laws are properties of *markets* or of
+the *equity* microstructure. The same 7-law battery, run on 10 majors (BTC, ETH,
+XRP, LTC, BCH, ADA, DOGE, LINK, XLM, ETC; Yahoo daily OHLC 2017–2026, 100% of
+days with a real intraday range so Garman-Klass is valid), placed beside the
+four equity universes from TRANSFER.
+
+| Law | equity cohort | **crypto** | vs equities |
+|---|---|---|---|
+| fat tails (kurt) | 8.4 – 13.1 | **16.6** | differs (fatter) |
+| one-clock kurtosis | 3.3 – 3.8 | **4.5** | differs (but still collapsed) |
+| **leverage effect** | **−0.03 to −0.05** | **+0.031** | **differs — SIGN FLIPS** |
+| roughness H | 0.015 – 0.069 | 0.077 | differs (mildly) |
+| branching (raw) | 0.58 – 0.73 | 0.687 | **transfers** |
+| branching (deformed) | 0.24 – 0.80 | 0.20 | differs |
+| clock commonality | 0.41 – 0.90 | 0.795 | differs (high, as expected) |
+
+**The pre-registered scorecard:**
+
+- **C1 — the One-Clock law survives. ✓** Raw kurtosis 16.6 collapses to a
+  deformed 4.5 after vol-standardization. The *collapse* is universal — crypto
+  returns are conditionally ~Gaussian given their own vol path, just like
+  equities/bonds/gold — even though the floor (4.5) sits a little above the
+  equity ~3.5.
+- **C2 — the leverage effect INVERTS. ✓ (the headline)** Crypto's leverage
+  effect is **+0.031**, *positive*, versus the equity cohort's **−0.041**
+  (z = 4.06). **8 of the 10 coins individually flip to positive** — only BTC
+  (−0.043) and ETH (−0.019) keep the equity-style negative sign; the
+  retail/meme end (DOGE +0.078, XLM +0.059, ADA +0.042) is most inverted. A law
+  that held across every equity market, bonds, and gold **reverses sign** under
+  crypto's microstructure. Mechanistically consistent: no financial leverage,
+  no institutional de-risking cascade, and a retail FOMO dynamic where *rallies*
+  (not crashes) spike volatility.
+- **C3 — more reflexive? ✗ refuted.** Raw branching 0.687 ≈ the equity median
+  0.659 (not significant) — crypto is **not** meaningfully more self-exciting.
+  And it *still* collapses to 0.20 after vol-deformation, so REFLEX's finding
+  (the market's apparent near-criticality is mostly a volatility-clustering
+  illusion) is **asset-class-universal** too.
+- **C4 — fatter raw tails. ✓** Kurtosis 16.6 vs the equity median 10.1.
+
+**Verdict.** The mechanism is remarkably portable — the one-clock collapse,
+near-critical branching and its vol-clustering illusion, roughness, and fat
+tails all reappear in a market that shares none of equities' plumbing. But the
+**leverage effect is not a market universal at all; it is a property of the
+equity microstructure**, and it cleanly inverts where that microstructure is
+absent. Gate X26 licenses the sign reading: on synthetic worlds with a known
+leverage sign (equity-negative, inverted-positive, symmetric-zero), the
+estimator recovers each with wide separation, so the crypto inversion is a real
+property of the data, not an artifact.

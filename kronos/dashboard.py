@@ -446,6 +446,19 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
       </div>
     </div>
 
+    <div class="panel" id="panel-crypto" style="display:none">
+      <h2>CRYPTO — Do the Mechanism Laws Survive Outside Equities?</h2>
+      <div class="sub" id="sub-crypto-head">The sharpest stress test: crypto breaks four equity assumptions at once — 24/7 (no overnight gap), retail-momentum flow, no financial leverage, no close auction. The same 7-law battery, run on 10 majors and placed beside the equity cohort. The differentiating prediction (C2): the leverage effect may INVERT. Gate X26 licenses the sign reading.</div>
+      <div class="row c2e">
+        <div><h2 style="margin-bottom:6px">The battery: crypto vs the equity cohort</h2>
+          <table class="gtable" id="tbl-crypto-laws"></table>
+          <div class="sub" id="sub-crypto-laws" style="margin-top:8px"></div></div>
+        <div><h2 style="margin-bottom:6px">The leverage effect flips sign</h2>
+          <div class="chart" id="ch-crypto-lev"></div>
+          <table class="gtable" id="tbl-crypto-hyp" style="margin-top:10px"></table></div>
+      </div>
+    </div>
+
     <div class="panel">
       <h2>Synthesis — Did the science move the needle?</h2>
       <div class="sub">Identical core engine; overlays differ. Honest answer below.</div>
@@ -741,6 +754,8 @@ function divColor(v,lim){
 
 /* ================================ build ui ================================= */
 const $=id=>document.getElementById(id);
+// set element markup from our own generated payload (numeric research data)
+const setHTML=(id,html)=>{const e=$(id);if(e){e.replaceChildren();e.insertAdjacentHTML('afterbegin',html);}};
 const meta=DATA.meta, S=DATA.series, ST=DATA.stats;
 
 $('b-src').textContent=meta.source+' DATA';
@@ -1674,6 +1689,45 @@ function buildResearch(){
     $('sub-transfer-frozen').innerHTML=`<b style="color:${H.TR2a&&H.TR2b?'var(--green)':'var(--amber)'}">`+
       `TR2 ${H.TR2a&&H.TR2b?'holds':'partial'}:</b> the US-tuned system, with every hyperparameter frozen, keeps a positive Sharpe AND a shallower drawdown than the local index in every foreign market. `+
       `<b style="color:var(--rose)">TR1 ${H.TR1?'holds':'fails'}</b> — only ${TR.n_transfer}/${TR.n_laws} laws transfer as exact values. The honest transferable claim is risk control, not alpha.`;
+  }
+
+  /* ---- CRYPTO panel ---- */
+  if(R.crypto){
+    $('panel-crypto').style.display='';
+    const CR=R.crypto, L=CR.laws;
+    const markets=[...CR.equity_markets,'crypto'];
+    const clsColor={TRANSFERS:'pos','UNIVERSE-SPECIFIC':'verdict-mixed'};
+    let h='<tr><th>law</th>'+markets.map(m=>`<th${m==='crypto'?' style="color:var(--amber)"':''}>${m==='asia_em'?'ASIA':m.toUpperCase()}</th>`).join('')+'<th>vs equities</th></tr>';
+    for(const [q,r] of Object.entries(L)){
+      const isLev=q==='leverage';
+      h+=`<tr${isLev?' style="background:rgba(245,158,11,.10)"':''}><td>${q}</td>`+
+        markets.map(m=>`<td${m==='crypto'?' style="color:var(--amber);font-weight:600"':''}>${r.values[m]!=null?r.values[m]:'—'}</td>`).join('')+
+        `<td><span class="${clsColor[r.class]||''}">${r.class==='TRANSFERS'?'transfers':'differs'}</span></td></tr>`;}
+    setHTML('tbl-crypto-laws',h);
+    setHTML('sub-crypto-laws',`<b style="color:var(--green)">One-clock survives:</b> raw kurtosis ${L.kurt.values.crypto} collapses to ${L.kurt_def.values.crypto} after vol-deformation (equities ~3.5). Near-critical branching ${L.n_raw.values.crypto} matches equities and still collapses to ${L.n_def.values.crypto} — the reflexivity illusion (REFLEX) is asset-class-universal. Mechanism transfers; one law flips.`);
+
+    const pc=CR.per_coin_leverage, lv=CR.leverage_contrast;
+    const entries=Object.entries(pc).sort((a,b)=>a[1]-b[1]);
+    const mx=Math.max(...entries.map(([,v])=>Math.abs(v)),0.05);
+    let bars='<div style="font-size:11px">';
+    for(const [coin,v] of entries){
+      const w=Math.abs(v)/mx*48, pos=v>0;
+      bars+=`<div style="display:flex;align-items:center;gap:8px;margin:3px 0">`+
+        `<span style="width:48px;color:var(--faint);text-align:right">${coin.replace('-USD','')}</span>`+
+        `<div style="flex:1;position:relative;height:12px;background:var(--panel2);border-radius:3px">`+
+        `<div style="position:absolute;left:50%;top:0;width:1px;height:12px;background:var(--line)"></div>`+
+        `<div style="position:absolute;${pos?'left:50%':'right:50%'};top:1px;height:10px;width:${w}%;background:${pos?'var(--green)':'var(--rose)'};border-radius:2px"></div>`+
+        `</div><span style="width:50px;color:${pos?'var(--green)':'var(--rose)'}">${v>=0?'+':''}${v.toFixed(3)}</span></div>`;}
+    const nInv=entries.filter(([,v])=>v>0).length;
+    bars+=`</div><div class="sub" style="margin-top:6px"><b style="color:var(--green)">green = inverted (positive leverage)</b>, rose = equity-like. Crypto ${lv.crypto_leverage>=0?'+':''}${lv.crypto_leverage} vs equity cohort ${lv.equity_mean} (z=${lv.z_vs_equities}) — <b style="color:var(--amber)">${lv.verdict}, ${nInv}/${entries.length} coins flipped.</b></div>`;
+    setHTML('ch-crypto-lev',bars);
+
+    const HY=CR.hypotheses;
+    const hyp=[['C1','One-clock collapse survives',HY.C1],['C2','Leverage weakens / inverts',HY.C2],['C3','More reflexive than equities',HY.C3],['C4','Fatter raw tails',HY.C4]];
+    let ht='<tr><th>#</th><th>pre-registered prediction</th><th>verdict</th></tr>';
+    for(const [id,desc,ok] of hyp)
+      ht+=`<tr><td>${id}</td><td>${desc}</td><td><span class="${ok?'pos':'neg'}">${ok?'✓ holds':'✗ refuted'}</span></td></tr>`;
+    setHTML('tbl-crypto-hyp',ht);
   }
 
   /* ---- synthesis ---- */

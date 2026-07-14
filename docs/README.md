@@ -26,6 +26,7 @@ arc, or jump to a finding.
 | 11 | [DESIGN11.md](design/DESIGN11.md) | Which laws are constant? | The market's *mechanism* constants are constant; what varies is **crisis intensity**, peaking in 2020 and reverting — no Adaptive-Markets secular drift. |
 | 12 | [DESIGN12.md](design/DESIGN12.md) | The deployable system | `run_trade.py` — the trading system the research actually licenses (forecast-vol targeting; risk control, not direction timing). |
 | 13 | [DESIGN13.md](design/DESIGN13.md) | Cross-market transfer | The mechanism laws (fat tails, leverage, near-critical branching) reappear abroad; the frozen US-tuned system holds its risk edge in Japan/Europe/Asia-EM. |
+| 14 | [DESIGN14.md](design/DESIGN14.md) | Crypto: laws outside equities | The mechanism transfers to crypto (one-clock collapse, branching), but the **leverage effect inverts** — it's a property of the equity microstructure, not a market universal. |
 
 ## How the research maps to code
 
@@ -45,5 +46,6 @@ before real data ever touches the estimator:
 | Constants (11) | `kronos/constants.py` | `tests/test_constants.py` (X22) |
 | Trade (12) | `kronos/trade.py` | `tests/test_trade.py` (X23) |
 | Transfer (13) | `kronos/transfer.py` | `tests/test_transfer.py` (X24) |
+| Crypto (14) | `kronos/crypto.py` | `tests/test_crypto.py` (X26) |
 
 See the top-level [README](../README.md) for the full results tables.

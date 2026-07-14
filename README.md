@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-29%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-30%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -28,7 +28,7 @@ KRONOS is two things at once:
    **net Sharpe of 0.94 at −14% max drawdown**, matching the S&P's risk-adjusted
    return at *less than half* its drawdown.
 
-2. **A research program that treats markets like physics.** 21 pre-registered
+2. **A research program that treats markets like physics.** 22 pre-registered
    experiments ask what quant finance genuinely does not know — *is volatility
    rough? how many bits/day does the past leak about the future? are crashes
    critical transitions or shocks? is the market's near-criticality real?* —
@@ -36,7 +36,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 29 such gates run in
+passes a gate on data where the answer is already known.** 30 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -64,11 +64,11 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[data]"          # or: pip install -r requirements.txt
 
 python run_kronos.py              # full pipeline -> output/dashboard.html  (~25s)
-python run_research.py all        # 21 research experiments, cached to research/*.json
+python run_research.py all        # 22 research experiments, cached to research/*.json
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 29 verification gates (~95s)
+python tests/run_all.py           # all 30 verification gates (~100s)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -77,7 +77,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **29 verification gates** — 27 proving an estimator has correct *size*
+- **30 verification gates** — 28 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -131,7 +131,7 @@ claim the research licenses.*
 
 ## The research program
 
-21 experiments, each pre-registered in [`docs/design/`](docs/design) and gated
+22 experiments, each pre-registered in [`docs/design/`](docs/design) and gated
 before real data. The one-line answers — **full write-ups, tables, and methods
 in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 
@@ -149,6 +149,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [DECATHLON](docs/FINDINGS.md#kronos-decathlon--the-minimal-market) | Smallest market that looks real? | A **vol-targeting spiral** buys the wild facts; the ceiling is 5/10 and the missing organ is **expectation** (anticipatory agents). |
 | [TRADE](docs/FINDINGS.md#kronos-trade--the-deployable-system) | What system does the science license? | Forecast-vol targeting + regime-gated risk parity + mechanical crash control — risk control, never direction timing. |
 | [TRANSFER](docs/FINDINGS.md#kronos-transfer--does-market-structure-cross-borders) | Do the laws cross borders? | **Mechanism universal, calibration local** — see below. |
+| [CRYPTO](docs/FINDINGS.md#kronos-crypto--do-the-laws-survive-outside-equities) | Do the laws survive outside equities? | Mostly yes — but the **leverage effect inverts** (crypto +0.03 vs equities −0.04; 8/10 coins flip). Mechanism universal; one law is equity-specific. |
 
 ## Cross-market transfer
 
@@ -167,6 +168,26 @@ local index in all three foreign markets** — but the exact law *values* (H,
 clock commonality, deformed branching) are market-specific. **Universality of
 mechanism; locality of calibration.** The transferable claim is risk control,
 not alpha.
+
+### Frontier: does the leverage law survive crypto?
+
+If the laws are properties of *markets*, they should survive a market that
+shares none of equities' plumbing. KRONOS-CRYPTO runs the same 7-law battery on
+10 crypto majors — 24/7, no overnight gap, retail-driven, no financial leverage
+— alongside the equity cohort.
+
+<p align="center">
+  <img src="docs/assets/dashboard-crypto.png" alt="KRONOS crypto mechanism-transfer panel" width="100%">
+</p>
+
+The mechanism is portable — the one-clock collapse (kurtosis 16.6 → 4.5),
+near-critical branching and its vol-clustering illusion, roughness, and fat
+tails all reappear. But the **leverage effect cleanly inverts**: crypto reads
+**+0.03** versus the equity cohort's **−0.04** (z = 4.06), and **8 of 10 coins
+individually flip positive** — only BTC and ETH keep the equity sign. The
+leverage effect is not a market universal; it is a property of the *equity*
+microstructure, and it reverses where that microstructure is absent. (Gate X26
+licenses the sign reading.)
 
 ## Architecture
 
@@ -193,10 +214,11 @@ kronos/                   37 modules, ~7,500 LOC
   constants.py            cross-era law-stability tests
   decathlon.py            agent-based minimal market + the stylized-fact battery
   transfer.py             cross-market law battery + frozen-system backtest
+  crypto.py               crypto universe + cross-asset-class leverage contrast
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    29 gates (27 synthetic ground truth + 2 real-data calibration)
+tests/                    30 gates (28 synthetic ground truth + 2 real-data calibration)
 docs/                     ATLAS (open-problem map), design notes, FINDINGS, research index
 ```
 
