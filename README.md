@@ -219,12 +219,16 @@ kronos/                   37 modules, ~7,500 LOC
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
 tests/                    30 gates (28 synthetic ground truth + 2 real-data calibration)
-docs/                     ATLAS (open-problem map), design notes, FINDINGS, research index
+docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 
 ## Research integrity
 
-The discipline that makes the results worth reading:
+The discipline that makes the results worth reading — and a blog-style deep-dive
+into all of it in **[docs/METHODS.md](docs/METHODS.md)** (*"How do you know
+you're not fooling yourself?"* — the gate philosophy, look-ahead control, the
+volatility clock, bootstraps, out-of-sample model comparison, overfitting
+forensics, and information-theoretic ceilings):
 
 - **No look-ahead anywhere** — filtered probabilities, frozen betas, T+1
   execution, walk-forward refits. Look-ahead-sensitive code carries a causality

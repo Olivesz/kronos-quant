@@ -5,6 +5,12 @@ Each was written **before** the code and the data run, so the negative results
 carry the same weight as the positive ones. Read them in order for the full
 arc, or jump to a finding.
 
+- [**METHODS.md**](METHODS.md) — *How do you know you're not fooling yourself?*
+  A blog-style deep-dive into the statistical machinery shared across every
+  experiment: the gate philosophy, look-ahead control, the volatility clock,
+  block bootstraps, out-of-sample model comparison, overfitting forensics,
+  information-theoretic ceilings, and the stability/transfer tests. **Start here
+  if you want to understand *how* the findings are trustworthy.**
 - [**ATLAS.md**](ATLAS.md) — *The Atlas of Ignorance*: the open-problem map
   that scopes the whole research program (what quant finance does not know,
   and which questions KRONOS is actually equipped to attack).
