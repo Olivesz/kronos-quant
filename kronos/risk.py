@@ -20,6 +20,41 @@ def historical_cvar(rets: np.ndarray, alpha: float) -> float:
     return float(-tail.mean()) if len(tail) else 0.0
 
 
+def har_vol_forecast(port_rets: pd.Series, refit_every: int = 21,
+                     min_train: int = 252) -> pd.Series:
+    """Causal walk-forward HAR forecast of the book's own vol (annualized).
+
+    Value at index t is the forecast of t+1's vol using data through t only:
+    features are the 1/5/22-day mean squared returns at t; OLS is refit every
+    `refit_every` days on an expanding window of (features_s, r²_{s+1}) pairs
+    with s+1 <= t. Before `min_train` observations, falls back to EWMA.
+    (DESIGN16 V1 — HAR beats EWMA decisively on QLIKE per the vol lab; gate
+    X28 pins that the lever inherits that edge without inventing one.)
+    """
+    r = port_rets.fillna(0.0).to_numpy()
+    T = len(r)
+    r2 = r ** 2
+    rv1 = r2
+    rv5 = pd.Series(r2).rolling(5).mean().to_numpy()
+    rv22 = pd.Series(r2).rolling(22).mean().to_numpy()
+    X = np.column_stack([np.ones(T), rv1, rv5, rv22])
+
+    ann = np.sqrt(252)
+    ewma = pd.Series(r, index=port_rets.index).ewm(halflife=21).std() * ann
+    fc_var = np.full(T, np.nan)
+    beta = None
+    for t in range(T):
+        if t >= min_train and (beta is None or t % refit_every == 0):
+            # train rows s with features at s and target r²_{s+1}, s+1 <= t
+            rows = np.arange(22, t)          # rv22 defined from index 21
+            Xtr, ytr = X[rows - 1], r2[rows]
+            beta, *_ = np.linalg.lstsq(Xtr, ytr, rcond=None)
+        if beta is not None and np.isfinite(X[t]).all():
+            fc_var[t] = max(float(X[t] @ beta), 1e-10)
+    fvol = pd.Series(np.sqrt(fc_var * 252), index=port_rets.index)
+    return fvol.fillna(ewma)
+
+
 def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
     """Causal exposure multipliers from the portfolio's own trailing returns.
 
@@ -30,8 +65,13 @@ def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
     ann = np.sqrt(252)
     max_exp = getattr(cfg, "max_exposure", 1.0)
 
-    ewma_vol = r.ewm(halflife=21).std() * ann
-    m_vol = (cfg.vol_target / ewma_vol.replace(0, np.nan)).clip(upper=max_exp).fillna(1.0)
+    # the LEVER: target / vol-estimate. lever_mode "har" sizes ahead of vol
+    # with a causal HAR forecast (DESIGN16 V1); "ewma" reacts to trailing vol.
+    if getattr(cfg, "lever_mode", "ewma") == "har":
+        lever_vol = har_vol_forecast(r)
+    else:
+        lever_vol = r.ewm(halflife=21).std() * ann
+    m_vol = (cfg.vol_target / lever_vol.replace(0, np.nan)).clip(upper=max_exp).fillna(1.0)
 
     cvar = r.rolling(252).apply(lambda x: historical_cvar(x.to_numpy(), cfg.cvar_alpha),
                                 raw=False)
