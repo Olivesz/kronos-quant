@@ -179,13 +179,52 @@ def _ant_target(sig2: np.ndarray, p: dict) -> float:
     return float(np.clip(p["kA"] * f_hat, -p["capA"], p["capA"]))
 
 
+def _ant_target_fp(sig2: np.ndarray, p: dict, iters: int) -> float:
+    """Fixed-point anticipation stack (DESIGN20): the anticipation operator
+    iterated `iters` times. Layer k front-runs the RESIDUAL forecastable
+    total flow — the mechanical flow PLUS the deterministic future unwind of
+    the k-1 layers beneath it (a layer holding J contributes future flow -J
+    as the episode resolves):
+
+        I_0 = 0;  I_k = I_{k-1} + kA * (F_hat - I_{k-1})
+                      = (1 - (1-kA)^k) * F_hat
+
+    so the model-implied forecastable residual of TOTAL flow contracts
+    geometrically, (1-kA)^k -> 0 — the fixed-point claim. The operator is
+    linear with contraction factor |1-kA| = 0.75 < 1 (and per-layer clipping
+    only shrinks it), so the pre-registered divergence damping
+    (0.5/iteration) is provably unreachable. Capital bound: each layer is a
+    DECA2-capitalized cohort — its holding clipped at ±capA — so the stack
+    is bounded by iters*capA. (The first formulation clipped the TOTAL at
+    ±capA; it failed X32c's pre-specified contraction test on the toy world
+    because the shared cap made K=5 identical to K=1 whenever it bound —
+    DESIGN20 amendment, recorded before any battery run.) iters <= 1
+    delegates to the untouched single-layer target (bit-identical to DECA2 —
+    gate X32a's contract); still a pure function of the CURRENT vol state
+    (causality, gate X32b)."""
+    if iters <= 1:
+        return _ant_target(sig2, p)
+    L = np.minimum(p["Lmax"],
+                   p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
+    f_hat = p["kV"] * float((min(p["Lmax"], 1.0) - L).mean())
+    resid, I = f_hat, 0.0
+    for _ in range(iters):
+        J = float(np.clip(p["kA"] * resid, -p["capA"], p["capA"]))
+        I += J
+        resid -= J
+    return I
+
+
 def anticipator_flows(r: np.ndarray, params: dict | None = None,
-                      hetero: bool = False) -> np.ndarray:
+                      hetero: bool = False,
+                      fixed_point_iters: int = 0) -> np.ndarray:
     """Deterministic trade path of the anticipatory agent against an
     EXOGENOUS return series. flow[t] depends on r[:t] only — the time-t trade
     is decided before r[t] exists (same alignment as simulate_abm, where the
     vol state has absorbed returns through t-1 when flows are formed).
-    Gate X30b tampers with the future and requires the prefix unchanged."""
+    Gate X30b tampers with the future and requires the prefix unchanged;
+    fixed_point_iters iterates the anticipation stack (DESIGN20; 0 and 1 are
+    both the legacy single layer) and X32b extends the tamper test to it."""
     p = dict(DEFAULTS)
     if params:
         p.update(params)
@@ -194,7 +233,7 @@ def anticipator_flows(r: np.ndarray, params: dict | None = None,
     I_prev = 0.0
     out = np.empty(len(r))
     for t in range(len(r)):
-        I_star = _ant_target(sig2, p)
+        I_star = _ant_target_fp(sig2, p, fixed_point_iters)
         out[t] = I_star - I_prev
         I_prev = I_star
         sig2 = (1 - s_speeds) * sig2 + s_speeds * r[t] ** 2
@@ -205,8 +244,16 @@ def simulate_abm(T: int = 6000, seed: int = 0,
                  fundamentalists: bool = True, chartists: bool = True,
                  voltargeters: bool = True, marketmakers: bool = True,
                  hetero: bool = False, anticipators: bool = False,
+                 fixed_point_iters: int = 0,
                  params: dict | None = None) -> pd.Series:
-    """Returns a pd.Series of daily returns from the minimal market."""
+    """Returns a pd.Series of daily returns from the minimal market.
+
+    fixed_point_iters (DESIGN20): iterations of the mutual-anticipation
+    operator when anticipators=True. Default 0 = exactly today's behavior
+    (0 and 1 are both DECA2's single layer); K=5 is the pre-registered
+    fixed-point approximation. Adds no RNG draws, so the noise world is
+    identical across K and flag-off output is byte-identical to the
+    pre-DESIGN20 simulator (gates X30a/X32a)."""
     p = dict(DEFAULTS)
     if params:
         p.update(params)
@@ -251,7 +298,7 @@ def simulate_abm(T: int = 6000, seed: int = 0,
             # draw happens ONLY behind this flag: with anticipators=False
             # the draw sequence, and hence the output, is byte-identical
             # to the pre-DESIGN18 simulator (gate X30a).
-            I_star = _ant_target(sig2, p)
+            I_star = _ant_target_fp(sig2, p, fixed_point_iters)
             D += (I_star - I_ant) + p["sA"] * rng.normal()
             I_ant = I_star
         r = p["lam"] * D
@@ -293,9 +340,28 @@ CONFIGS2 = {
 }
 
 
+# DESIGN20 ablation: the mutual-anticipation FIXED POINT. K=0 is FCVM (the
+# 5/10 flow-only ceiling), K=1 is DECA2's single layer (byte-identical rows),
+# K=5 is the pre-registered fixed-point approximation. K is the ONLY thing
+# that varies.
+CONFIGS3 = {
+    "K0_FCVM":       dict(fundamentalists=True, chartists=True,
+                          voltargeters=True, marketmakers=True),
+    "K1_DECA2":      dict(fundamentalists=True, chartists=True,
+                          voltargeters=True, marketmakers=True,
+                          anticipators=True, fixed_point_iters=1),
+    "K5_FIXEDPOINT": dict(fundamentalists=True, chartists=True,
+                          voltargeters=True, marketmakers=True,
+                          anticipators=True, fixed_point_iters=5),
+}
+
+
 def run_decathlon(n_seeds: int = 8, T: int = 6000,
-                  configs: dict | None = None, seed0: int = 100) -> dict:
-    """Ablation table: per config, the majority-vote event passes."""
+                  configs: dict | None = None, seed0: int = 100,
+                  per_seed: bool = False) -> dict:
+    """Ablation table: per config, the majority-vote event passes.
+    per_seed=True additionally records each seed's raw statistics
+    (DESIGN20 needs the E9 direction-bits trace, not just the median)."""
     results = {}
     for name, cfg in (configs or CONFIGS).items():
         votes = None
@@ -311,4 +377,9 @@ def run_decathlon(n_seeds: int = 8, T: int = 6000,
                for k in stats_acc[0] if isinstance(stats_acc[0][k], (int, float))}
         results[name] = {"events": passed, "score": int(sum(passed.values())),
                          "median_stats": med}
+        if per_seed:
+            results[name]["seed_stats"] = [
+                {k: float(v) for k, v in st.items()
+                 if isinstance(v, (int, float, np.floating, np.bool_))}
+                for st in stats_acc]
     return results
