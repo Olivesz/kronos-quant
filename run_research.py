@@ -396,6 +396,7 @@ def exp_forensics(force: bool = False) -> dict:
         "cvar_engines": 4, "ensemble_methods": 5, "vol_forecasters": 3,
         "design15_edge_variants": 2,   # fix-only + fix+lev1.5 (DESIGN15)
         "design16_variants": 3,        # HAR lever + t-HMM engine + joint (DESIGN16)
+        "design21_momtilt": 1,         # momentum exposure tilt (DESIGN21)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:

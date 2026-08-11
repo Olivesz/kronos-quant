@@ -94,6 +94,9 @@ class Config:
     financing_rate_ann: float = 0.035 # charged daily on the levered portion
     lever_mode: str = "har"           # DESIGN16 V1: forecast-vol lever (survived
                                       # its kill criterion; "ewma" = control)
+    mom_tilt: float = 0.15            # DESIGN21: +/-15% exposure tilt on 21d
+                                      # market momentum (survived kill criteria;
+                                      # 0 = control)
 
     # backtest
     rebalance_every: int = 21

@@ -95,7 +95,13 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
 
     # risk overlay: exposure from trailing gross book, applied T+1.
     # Leverage above 1 pays financing daily on the levered portion (DESIGN15).
-    expo = exposure_series(gross_rets, cfg)
+    # DESIGN21: optional bounded market-momentum tilt (causal, inside the cap).
+    tilt = None
+    mt = getattr(cfg, "mom_tilt", 0.0)
+    if mt > 0:
+        logr = np.log(px[cfg.market] / px[cfg.market].shift(1))
+        tilt = 1.0 + mt * np.sign(logr.rolling(21).sum()).fillna(0.0)
+    expo = exposure_series(gross_rets, cfg, tilt=tilt)
     exposure_lag = expo["exposure"].shift(1).fillna(1.0)
     fin_rate = getattr(cfg, "financing_rate_ann", 0.0)
     financing = (exposure_lag - 1.0).clip(lower=0.0) * (fin_rate / 252.0)
