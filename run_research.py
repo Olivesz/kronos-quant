@@ -1497,6 +1497,100 @@ def exp_crypto(force: bool = False) -> dict:
     return out
 
 
+def exp_edge(force: bool = False) -> dict:
+    """DESIGN15 before/after, reproducible: reconstructs the LEGACY (inverted-
+    throttle) overlay inline for the baseline row, then measures fix-only and
+    fix+leverage, with split-half robustness and regime/stress exposure."""
+    if not force and (c := load_cached("edge")):
+        print("[edge] cached")
+        return c
+    from dataclasses import replace
+
+    import kronos.backtest as B
+    from config import REGIME_NAMES
+    from kronos.pairs import run_pairs_sleeve
+    from kronos.regime import walkforward_regimes
+    from kronos.risk import historical_cvar
+
+    px, _, _, src = get_data()
+    mkt = px[CFG.market].pct_change().dropna()
+    t0 = time.time()
+    rg = walkforward_regimes(mkt, CFG)
+    pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
+
+    def legacy_exposure(port_rets, cfg):
+        """The pre-DESIGN15 overlay, verbatim: inverted m_dd, min() combiner,
+        hard cap at 1. Kept ONLY to reproduce the baseline row."""
+        r = port_rets.fillna(0.0)
+        ann = np.sqrt(252)
+        ewma_vol = r.ewm(halflife=21).std() * ann
+        m_vol = (cfg.vol_target / ewma_vol.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
+        cvar = r.rolling(252).apply(
+            lambda x: historical_cvar(x.to_numpy(), cfg.cvar_alpha), raw=False)
+        m_cvar = (cfg.cvar_target / cvar.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
+        nav = (1 + r).cumprod()
+        dd = nav / nav.cummax() - 1.0
+        span = cfg.dd_floor_at - cfg.dd_start
+        m_dd = (1.0 + (dd - cfg.dd_start) * (1 - cfg.dd_min_exposure) / span) \
+            .clip(cfg.dd_min_exposure, 1.0)
+        raw = pd.concat([m_vol, m_cvar, m_dd], axis=1).min(axis=1)
+        exposure = raw.ewm(span=cfg.risk_smooth_days).mean().clip(0.0, 1.0)
+        return pd.DataFrame({"m_vol": m_vol, "m_cvar": m_cvar, "m_dd": m_dd,
+                             "exposure": exposure})
+
+    def run(cfg, patch_legacy=False):
+        orig = B.exposure_series
+        if patch_legacy:
+            B.exposure_series = legacy_exposure
+        try:
+            bt = B.run_backtest(px, rg["regime"], cfg)
+        finally:
+            B.exposure_series = orig
+        start = bt["warmup_end"]
+        net = (bt["net"] + pairs).loc[start:]
+        halves = {}
+        for lo, hi in (("2013-01-01", "2019-12-31"), ("2020-01-01", "2026-12-31")):
+            seg = net.loc[lo:hi]
+            halves[f"{lo[:4]}-{hi[:4]}"] = {
+                "sharpe": M.sharpe(seg),
+                "cagr": float((1 + seg).prod() ** (252 / len(seg)) - 1),
+                "max_dd": float(((1 + seg).cumprod()
+                                 .pipe(lambda n: n / n.cummax() - 1)).min())}
+        fin_ann = float(bt["financing"].loc[start:].sum() / (len(net) / 252)) \
+            if "financing" in bt else 0.0
+        return bt, {"full": M.summary(net, ""), "halves": halves,
+                    "fin_ann": fin_ann}
+
+    _, base = run(replace(CFG, max_exposure=1.0), patch_legacy=True)
+    _, fix = run(replace(CFG, max_exposure=1.0))
+    bt_lev, lev = run(CFG)
+
+    # regime / stress behavior of the levered default
+    ex = bt_lev["exposure_applied"].loc[bt_lev["warmup_end"]:]
+    reg = rg["regime"].reindex(ex.index).ffill().fillna(1).astype(int)
+    regime_expo = {REGIME_NAMES[rid]: {"mean": float(ex[reg == rid].mean()),
+                                       "levered_frac": float((ex[reg == rid] > 1).mean())}
+                   for rid in REGIME_NAMES}
+    stress = {}
+    for lo, hi, label in (("2020-02-15", "2020-04-30", "COVID crash"),
+                          ("2022-01-01", "2022-10-31", "2022 bear")):
+        w = ex.loc[lo:hi]
+        stress[label] = {"mean": float(w.mean()), "min": float(w.min())}
+
+    variants = {"baseline (bug, cap 1)": base, "fix-only (cap 1)": fix,
+                "fix + lever 1.5": lev}
+    for name, v in variants.items():
+        f = v["full"]
+        print(f"[edge] {name:22s} CAGR {f['cagr']:+.1%} SR {f['sharpe']:.2f} "
+              f"DD {f['max_dd']:.1%} fin {v['fin_ann']:.2%}/yr")
+    out = {"variants": variants, "regime_exposure": regime_expo,
+           "stress": stress, "financing_rate_ann": CFG.financing_rate_ann,
+           "max_exposure": CFG.max_exposure}
+    print(f"[edge] done in {time.time()-t0:.0f}s")
+    save("edge", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -1512,6 +1606,7 @@ EXPERIMENTS = {
     "constants": exp_constants,
     "transfer": exp_transfer,
     "crypto": exp_crypto,
+    "edge": exp_edge,
     "vollab": exp_vollab,
     "rough": exp_rough,
     "rmt": exp_rmt,

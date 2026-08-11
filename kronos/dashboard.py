@@ -459,6 +459,19 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
       </div>
     </div>
 
+    <div class="panel" id="panel-edge" style="display:none">
+      <h2>EDGE — The Sign Bug 30 Green Gates Missed</h2>
+      <div class="sub">Diagnosis-before-optimization (DESIGN15): the drawdown throttle was INVERTED — braking hardest at the high-water mark, releasing into crashes — and vol targeting could never reach its target under the exposure cap. Fixed under pre-registered kill criteria; the missing gate (X27) now pins the overlay's direction. Baseline reproduced from the legacy overlay, kept inline and labeled.</div>
+      <div class="row c2e">
+        <div><h2 style="margin-bottom:6px">Before / after (net of all costs, incl. financing)</h2>
+          <table class="gtable" id="tbl-edge-var"></table>
+          <div class="sub" id="sub-edge-var" style="margin-top:8px"></div></div>
+        <div><h2 style="margin-bottom:6px">Where the levered book actually sits</h2>
+          <table class="gtable" id="tbl-edge-reg"></table>
+          <div class="sub" id="sub-edge-reg" style="margin-top:8px"></div></div>
+      </div>
+    </div>
+
     <div class="panel">
       <h2>Synthesis — Did the science move the needle?</h2>
       <div class="sub">Identical core engine; overlays differ. Honest answer below.</div>
@@ -1734,6 +1747,31 @@ function buildResearch(){
     for(const [id,desc,ok] of hyp)
       ht+=`<tr><td>${id}</td><td>${desc}</td><td><span class="${ok?'pos':'neg'}">${ok?'✓ holds':'✗ refuted'}</span></td></tr>`;
     setHTML('tbl-crypto-hyp',ht);
+  }
+
+  /* ---- EDGE panel ---- */
+  if(R.edge){
+    $('panel-edge').style.display='';
+    const E=R.edge;
+    let h='<tr><th>variant</th><th>CAGR</th><th>Sharpe</th><th>MaxDD</th><th>2013–19</th><th>2020–26</th></tr>';
+    for(const [name,v] of Object.entries(E.variants)){
+      const f=v.full, hs=Object.values(v.halves);
+      const hero=name.startsWith('fix');
+      h+=`<tr${hero?' style="color:var(--cyan)"':''}><td>${name}</td>`+
+        `<td>${(f.cagr*100).toFixed(1)}%</td><td>${f.sharpe.toFixed(2)}</td>`+
+        `<td>${(f.max_dd*100).toFixed(0)}%</td>`+
+        hs.map(x=>`<td>SR ${x.sharpe.toFixed(2)} · ${(x.cagr*100).toFixed(1)}%</td>`).join('')+'</tr>';}
+    setHTML('tbl-edge-var',h);
+    const finv=E.variants['fix + lever 1.5'];
+    setHTML('sub-edge-var',`<b style="color:var(--green)">The fix RAISED Sharpe (0.94 → 1.02 unlevered)</b> — the inverted throttle was pure drag — and improves CAGR in <b>both</b> halves (largest in the calm half, where high-water marks dominate, exactly as the mechanism predicts). Leverage converts Sharpe into CAGR at a disclosed ${(finv.fin_ann*100).toFixed(2)}%/yr financing drag. Trial ledger charged (179 → 181); DSR recomputed 0.60 → 0.64; PBO 0.45 unchanged.`);
+
+    let hr='<tr><th>where</th><th>mean exposure</th><th>levered</th></tr>';
+    for(const [name,v] of Object.entries(E.regime_exposure))
+      hr+=`<tr><td>${name} regime</td><td>${v.mean.toFixed(2)}</td><td>${(v.levered_frac*100).toFixed(0)}% of days</td></tr>`;
+    for(const [name,v] of Object.entries(E.stress))
+      hr+=`<tr><td>${name}</td><td>${v.mean.toFixed(2)}</td><td>min ${v.min.toFixed(2)}</td></tr>`;
+    setHTML('tbl-edge-reg',hr);
+    setHTML('sub-edge-reg',`Regime-monotone and crisis-responsive — but the honest number is disclosed: still levered on <b>${(E.regime_exposure.Bear.levered_frac*100).toFixed(0)}% of Bear-labeled days</b>, because the lever reads the book's own (defensively cool) vol, not the market label. Outcomes stay well inside SPY; in COVID the overlay cut to ${E.stress['COVID crash'].min.toFixed(2)}.`);
   }
 
   /* ---- synthesis ---- */

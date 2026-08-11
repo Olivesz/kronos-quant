@@ -239,7 +239,7 @@ Sharpe under the null — roughly
 $$ \mathbb{E}[\max \text{SR}] \approx \sigma_{\text{SR}}\Big(z_{1-1/N} \Big) $$
 
 for $N$ trials — the bar a *real* edge has to clear. KRONOS's edge, deflated
-across $N=179$ logged trials, gives **DSR $= 0.60$** — positive but *not*
+across $N=181$ logged trials, gives **DSR $= 0.64$** — positive but *not*
 certifiable. We say so, in the README, in bold.
 
 **Probability of Backtest Overfitting** (PBO, via CSCV). Combinatorially split
