@@ -359,6 +359,41 @@ already known.
 
 ---
 
+## 8. Running a programme, not a backtest
+
+Everything above is about one claim at a time. The final discipline is about
+the *sequence* of claims — because the deadliest overfitting doesn't happen
+inside an experiment, it happens *between* experiments, when you quietly run
+ten and publish the two that worked.
+
+KRONOS's research programme runs under four conditions, all required, for any
+arm that touches the trading system:
+
+1. **Pre-registered, with a kill criterion.** An arm that cannot say in
+   advance what would kill it is not an experiment; it is a search for
+   confirmation.
+2. **A mechanism gate** — not a test that the outcome occurred, but a test
+   that the edge *disappears where the mechanism cannot help* (the HAR lever
+   must tie on iid-vol worlds; the momentum tilt must tie on driftless
+   worlds). Outcome tests confirm luck as readily as skill; mechanism tests
+   do not.
+3. **Split-half survival in both eras**, with era-concentration disclosed
+   rather than averaged away.
+4. **A mechanism statable in one sentence.** A correlation you cannot explain
+   is a future retraction.
+
+And one number decides whether anything was *discovered*: the **deflated
+Sharpe after the trial is charged to the ledger**. Raw Sharpe cannot count —
+every additional look raises the bar a real edge must clear, so an arm that
+lifts Sharpe while leaving DSR flat has found nothing but its own search. In
+one representative night this programme ran eight arms: four survived (each
+raising DSR while N grew — 0.60 → 0.75 across the arc), three were killed and
+reported as loudly as the wins, one landed as a pre-registered partial. That
+kill rate is not a failure statistic; it is the evidence that the bar exists.
+A programme that reports success on everything is measuring its own
+permissiveness, and the moment a parameter is being adjusted to get an arm
+over its threshold, that arm is dead by definition.
+
 ## Postscript: the bug the gates missed
 
 Everything above could read as "write enough tests and you're safe." Reality
