@@ -612,3 +612,18 @@ longest episodes).
 The upgrades stack — they touch different organs (sizing vs labeling). All
 three DESIGN16 ledger entries are spent (N=184); DSR 0.73; PBO 0.45 and the
 selection caveat stands unchanged.
+
+**Split-half robustness (vs the EDGE baseline, EWMA + Gaussian):**
+
+| Configuration | 2013–2019 | 2020–2026 |
+|---|---|---|
+| EDGE baseline | SR 1.26, +14.4% | SR 0.64, +7.2% |
+| V1 (HAR lever) | SR 1.27, +14.4% | SR **0.78**, +8.8% |
+| V1+V2 joint | SR **1.31**, +14.9% | SR 0.78, +8.8% |
+
+Neither variant loses in either era, and the era-concentration is disclosed
+rather than averaged away: **V1's edge lives almost entirely in the second
+half** — mechanistically coherent, since a forecast lever earns its keep
+where vol actually moves (2020, 2022), while calm 2013–2019 gives it little
+to forecast — and **V2's increment lives in the first half**. The upgrades
+are complementary in time, which is exactly why they stack.
