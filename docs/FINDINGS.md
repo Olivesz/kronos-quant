@@ -35,11 +35,12 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 | Q4 | Does online learning beat hand-made regime gates? | **All tie (Sharpe ≈ 0.99).** The sleeves are too correlated through the shared HRP backbone for blend weights to matter — the backbone does the work. |
 | Q5a | Does RMT denoising beat Ledoit-Wolf? | **No** on this universe (LW 5.84% vs RMT 6.04% realized min-var vol): with N=48, T=252 the noise is mild; RMT is built for far wider universes. |
 | Q5b | Does a min-CVaR LP beat HRP? | **Marginally yes**: it delivers what it optimizes (realized CVaR 1.24% vs 1.34%) at comparable Sharpe (1.07 vs 1.03). |
-| Q6 | Is the strategy statistically real? | **Returns yes, selection no.** Bootstrap Sharpe CI [0.47, 1.45] excludes zero, but DSR = 0.60 after N=179 trials and PBO = 0.45: the edge over sibling configurations is not certifiable — the test most backtests never run, run on ourselves. |
+| Q6 | Is the strategy statistically real? | **Returns yes, selection no.** Bootstrap Sharpe CI [0.47, 1.45] excludes zero, but DSR = 0.60 after N=179 trials and PBO = 0.45: the edge over sibling configurations is not certifiable — the test most backtests never run, run on ourselves. *(Recomputed after [EDGE](#kronos-edge--fixing-the-engines-structural-drag): DSR 0.64, N=181, PBO unchanged.)* |
 | — | Does classic stat-arb still work? | **No — alpha decayed.** Avellaneda-Lee eigenportfolio stat-arb: −1.3%/yr (SR −0.24) despite the implementation extracting planted OU residuals at Sharpe 2.4 in its gate. Replicates the documented post-2008 decay. |
 
-**Synthesis:** the regime-gated HRP core (Sharpe 0.95, maxDD −14%) beats both
-stat-arb overlays; vs SPY it matches Sharpe at less than half the drawdown.
+**Synthesis:** the regime-gated HRP core (Sharpe 0.95, maxDD −14% at the time
+of this study — pre-[EDGE](#kronos-edge--fixing-the-engines-structural-drag))
+beats both stat-arb overlays; vs SPY it matches Sharpe at half the drawdown.
 The science's biggest wins: HAR-RV for vol, the rough-vol replication, and the
 forensic honesty about what is and isn't certifiable.
 
@@ -374,6 +375,10 @@ result, we diagnosed **where the return goes** ([DESIGN15](design/DESIGN15.md),
 pre-registered with expectations and kill criteria before the repaired system
 was run).
 
+<p align="center">
+  <img src="assets/dashboard-edge.png" alt="EDGE dashboard panel — before/after and exposure behavior" width="100%">
+</p>
+
 **The diagnosis:**
 
 - The underlying signal book is strong: **Sharpe 1.04 at 10.45% vol** at
@@ -416,9 +421,13 @@ robustness (the reviewer's first question, answered before being asked):
 
 | Variant | 2013–2019 | 2020–2026 |
 |---|---|---|
-| baseline (bug) | SR 1.39, CAGR +7.6%, DD −8% | SR 0.66, CAGR +5.2%, DD −14% |
-| **fix-only** | SR 1.39, CAGR **+11.7%**, DD −11% | SR 0.67, CAGR **+6.0%**, DD −16% |
-| **fix + lever 1.5** | SR 1.27, CAGR **+14.5%**, DD −14% | SR 0.64, CAGR **+7.2%**, DD −21% |
+| baseline (bug) | SR 1.37, CAGR +7.6%, DD −8% | SR 0.66, CAGR +5.2%, DD −14% |
+| **fix-only** | SR 1.39, CAGR **+11.6%**, DD −11% | SR 0.67, CAGR **+5.9%**, DD −16% |
+| **fix + lever 1.5** | SR 1.26, CAGR **+14.4%**, DD −14% | SR 0.64, CAGR **+7.2%**, DD −21% |
+
+*(All EDGE tables are reproducible artifacts: `run_research.py edge` rebuilds
+the baseline row from the legacy overlay — kept inline, clearly labeled — and
+writes `research/edge.json`, which also feeds the dashboard's EDGE panel.)*
 
 The fix adds CAGR in *both* halves at flat Sharpe, with the larger gain in the
 calm 2013–2019 half — exactly what the mechanism predicts, since calm markets
