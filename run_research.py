@@ -392,6 +392,7 @@ def exp_forensics(force: bool = False) -> dict:
         "regime_models": 3, "k_sweep": 8, "sjm_lambda_grid": 6,
         "cvar_engines": 4, "ensemble_methods": 5, "vol_forecasters": 3,
         "design15_edge_variants": 2,   # fix-only + fix+lev1.5 (DESIGN15)
+        "design16_variants": 2,        # HAR-vs-EWMA lever + t-HMM engine (DESIGN16)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:
@@ -1561,9 +1562,11 @@ def exp_edge(force: bool = False) -> dict:
         return bt, {"full": M.summary(net, ""), "halves": halves,
                     "fin_ann": fin_ann}
 
-    _, base = run(replace(CFG, max_exposure=1.0), patch_legacy=True)
-    _, fix = run(replace(CFG, max_exposure=1.0))
-    bt_lev, lev = run(CFG)
+    # DESIGN15 predates the HAR lever (DESIGN16 V1): pin the era's EWMA lever
+    # so this study's record stays stable as defaults evolve.
+    _, base = run(replace(CFG, max_exposure=1.0, lever_mode="ewma"), patch_legacy=True)
+    _, fix = run(replace(CFG, max_exposure=1.0, lever_mode="ewma"))
+    bt_lev, lev = run(replace(CFG, lever_mode="ewma"))
 
     # regime / stress behavior of the levered default
     ex = bt_lev["exposure_applied"].loc[bt_lev["warmup_end"]:]
