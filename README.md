@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-31%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-32%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -25,8 +25,9 @@ KRONOS is two things at once:
 1. **A production-shaped quant platform** — data → regime detection → alpha
    sleeves → cost-aware portfolio construction → risk overlay → a
    self-contained interactive dashboard. It runs end-to-end in ~25s and posts a
-   **net Sharpe of 0.95 at 10.9% CAGR** (or Sharpe **1.02** unlevered) — beating
-   the S&P's Sharpe at roughly *two-thirds of its drawdown*.
+   **net Sharpe of 1.03 at 11.7% CAGR** — beating the S&P's in-sample Sharpe
+   at well under two-thirds of its drawdown, sized by a forecast of its own
+   volatility rather than a trailing estimate.
 
 2. **A research program that treats markets like physics.** 22 pre-registered
    experiments ask what quant finance genuinely does not know — *is volatility
@@ -36,7 +37,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 31 such gates run in
+passes a gate on data where the answer is already known.** 32 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -68,7 +69,7 @@ python run_research.py all        # 22 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 31 verification gates (~100s)
+python tests/run_all.py           # all 32 verification gates (~110s)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -77,7 +78,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **31 verification gates** — 29 proving an estimator has correct *size*
+- **32 verification gates** — 30 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -128,14 +129,15 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 
 | Strategy | CAGR | Vol | Sharpe | Max DD | CVaR95 |
 |---|---|---|---|---|---|
-| **KRONOS (net of costs)** | +10.9% | 11.6% | **0.95** | **−21.3%** | 1.76% |
-| KRONOS unlevered (cap 1.0) | +8.8% | 8.7% | **1.02** | −16.4% | 1.31% |
+| **KRONOS (net, HAR lever)** | +11.7% | 11.4% | **1.03** | **−19.4%** | 1.70% |
+| KRONOS (EWMA-lever control) | +10.9% | 11.6% | 0.95 | −21.3% | 1.76% |
+| KRONOS unlevered (cap 1.0) | +8.8% | 8.7% | 1.02 | −16.4% | 1.31% |
 | SPY (buy & hold) | +15.0% | 16.8% | 0.91 | −33.7% | 2.55% |
 
 *The honest read: KRONOS still does **not** beat the S&P on raw return — and
 says so. The edge is risk-adjusted: a better Sharpe at two-thirds of the
 drawdown, with financing costs on leverage disclosed (1.26%/yr) and the
-selection-risk caveats (DSR 0.64, PBO 0.45, N=181 logged trials) restated
+selection-risk caveats (DSR 0.73, PBO 0.45, N=183 logged trials) restated
 rather than hidden.*
 
 ## The research program
@@ -228,7 +230,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    31 gates (29 synthetic ground truth + 2 real-data calibration)
+tests/                    32 gates (30 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 
