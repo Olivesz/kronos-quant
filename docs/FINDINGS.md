@@ -20,6 +20,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
+- [KRONOS-EDGE — fixing the engine's structural drag](#kronos-edge--fixing-the-engines-structural-drag)
 
 ---
 
@@ -251,14 +252,15 @@ by the research, not by hope:
 - **Mechanical crash control** (drawdown throttle + CVaR cap), because CRITICAL
   proved crashes are unforecastable — you can't predict them, only de-risk.
 
-**Walk-forward backtest (net of costs), 2013–2026:**
+**Walk-forward backtest (net of costs), 2013–2026** (post-DESIGN15 throttle
+fix; no leverage, per this system's own pre-registration):
 
 | Strategy | CAGR | Sharpe | MaxDD | CVaR95 |
 |---|---|---|---|---|
-| **KRONOS-TRADE (forecast-vol)** | 6.4% | **0.94** | **−14%** | 1.04% |
-| Realized-vol control | 6.3% | 0.91 | −14% | 1.06% |
-| SPY (buy & hold) | 15.0% | 0.91 | −34% | 2.55% |
-| Equal-weight | 16.6% | 1.10 | −31% | 2.24% |
+| **KRONOS-TRADE (forecast-vol)** | 9.3% | **1.05** | **−16.5%** | 1.31% |
+| Realized-vol control | 9.0% | 1.01 | −16.7% | 1.34% |
+| SPY (buy & hold) | 15.0% | 0.91 | −33.7% | 2.55% |
+| Equal-weight | 16.6% | 1.10 | −30.5% | 2.24% |
 
 **Verdict (honest, as the research demands):** forecast-vol targeting beats the
 realized-vol control (the magnitude channel *is* the edge); the system matches
@@ -363,3 +365,59 @@ absent. Gate X26 licenses the sign reading: on synthetic worlds with a known
 leverage sign (equity-negative, inverted-positive, symmetric-zero), the
 estimator recovers each with wide separation, so the crypto inversion is a real
 property of the data, not an artifact.
+
+## KRONOS-EDGE — fixing the engine's structural drag
+
+The flagship book posted Sharpe 0.94 at only 6.9% realized vol against a 13%
+target — good risk-adjusted, weak CAGR. Rather than tune parameters at the
+result, we diagnosed **where the return goes** ([DESIGN15](design/DESIGN15.md),
+pre-registered with expectations and kill criteria before the repaired system
+was run).
+
+**The diagnosis:**
+
+- The underlying signal book is strong: **Sharpe 1.04 at 10.45% vol** at
+  exposure 1. The overlay, not the alpha, was the drag.
+- **The drawdown throttle had an inverted sign** — a genuine bug, duplicated in
+  both `risk.py` and `trade.py`. `m_dd = 1 + (dd - dd_start)(1-floor)/span`
+  with a negative `span` yields **0.50 at the high-water mark** (maximum
+  braking at the peak) and **1.0 at −20% drawdown** (brake fully released in a
+  crash) — the intended crash insurance, exactly reversed, with the wrong side
+  hidden by a `clip(…, 1.0)`. Measured: binding on **93.6% of days**, mean
+  multiplier 0.64. The gate suite missed it because no gate tested the
+  overlay's *direction* — that gap is now closed by **gate X27**, which pins
+  m_dd = 1 at the high-water mark, monotone decline to the floor, vol-target
+  attainment, the leverage cap, and financing.
+- **Vol targeting couldn't reach its own target**: a 10.45%-vol book, a 13%
+  target, and an exposure cap of 1.0 — structurally unreachable. Fixed by
+  making the vol multiplier the *lever* (up to `max_exposure = 1.5`, one
+  pre-chosen value, not scanned; **3.5%/yr financing charged daily on the
+  levered portion**) with the CVaR cap and repaired throttle as *brakes*.
+
+**The result (real data, 2013–2026, net of all costs):**
+
+| Variant | CAGR | Vol | Sharpe | MaxDD | financing |
+|---|---|---|---|---|---|
+| baseline (bug, cap 1.0) | 6.4% | 6.9% | 0.94 | −14.0% | — |
+| **fix-only (cap 1.0)** | 8.8% | 8.7% | **1.02** | −16.4% | — |
+| **fix + lever 1.5** | 10.9% | 11.6% | 0.95 | −21.3% | 1.26%/yr |
+| SPY | 15.0% | 16.8% | 0.91 | −33.7% | — |
+
+Every pre-registered expectation landed in its stated range, and both kill
+criteria passed: the fix *raised* Sharpe (the inverted throttle was pure drag —
+it was systematically de-risking at equity highs), and financing consumed ~37%
+of the leverage variant's CAGR gain (under the 50% kill line). The
+DESIGN12 TRADE system, which stays unlevered per its own pre-registration,
+improved to **Sharpe 1.05 at −16.5% MaxDD** from the throttle fix alone — and
+its pre-registered T1 (forecast-vol beats realized-vol targeting) still holds.
+
+**Trial accounting:** exactly two variants were run and both are reported
+above; the ledger grew 179 → 181 and the deflated Sharpe was recomputed:
+**DSR 0.64** (up from 0.60), PBO unchanged at 0.45. The selection-risk caveat
+stands: this is a bug fix plus one structural repair, not a certified edge.
+
+**The meta-lesson** is the project's thesis in miniature: the "mediocre"
+backtest was not weak alpha but a *sign error the test suite had no gate for*.
+The fix came with the missing gate (X27), the change was pre-registered with
+kill criteria, the trial ledger was charged, and the old numbers remain in the
+table above. That is what "optimizing a backtest" should look like.

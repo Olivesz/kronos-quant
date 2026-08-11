@@ -33,6 +33,7 @@ arc, or jump to a finding.
 | 12 | [DESIGN12.md](design/DESIGN12.md) | The deployable system | `run_trade.py` — the trading system the research actually licenses (forecast-vol targeting; risk control, not direction timing). |
 | 13 | [DESIGN13.md](design/DESIGN13.md) | Cross-market transfer | The mechanism laws (fat tails, leverage, near-critical branching) reappear abroad; the frozen US-tuned system holds its risk edge in Japan/Europe/Asia-EM. |
 | 14 | [DESIGN14.md](design/DESIGN14.md) | Crypto: laws outside equities | The mechanism transfers to crypto (one-clock collapse, branching), but the **leverage effect inverts** — it's a property of the equity microstructure, not a market universal. |
+| 15 | [DESIGN15.md](design/DESIGN15.md) | The engine's structural drag | Diagnosis found an **inverted drawdown throttle** (a sign bug braking at peaks) and an unreachable vol target; both fixed under pre-registered kill criteria — Sharpe 0.94 → 1.02 unlevered. |
 
 ## How the research maps to code
 
@@ -53,5 +54,6 @@ before real data ever touches the estimator:
 | Trade (12) | `kronos/trade.py` | `tests/test_trade.py` (X23) |
 | Transfer (13) | `kronos/transfer.py` | `tests/test_transfer.py` (X24) |
 | Crypto (14) | `kronos/crypto.py` | `tests/test_crypto.py` (X26) |
+| Edge (15) | `kronos/risk.py`, `kronos/backtest.py` | `tests/test_risk.py` (X27) |
 
 See the top-level [README](../README.md) for the full results tables.
