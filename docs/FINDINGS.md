@@ -3,8 +3,10 @@
 The full write-ups behind every experiment. Each was pre-registered in
 [`docs/design/`](design/) and validated on synthetic ground truth (a numbered
 `GATE X*`) before touching real data. For the map of which module and gate
-backs each study, see [the research index](README.md). Results are on ~48
-liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
+backs each study, see [the research index](README.md). The core results are on
+~48 liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC; the transfer
+studies extend the battery to Japan, Europe, Asia-EM, crypto (2017–2026), and
+13 FX crosses.
 
 - [KRONOS-X — the six pre-registered questions](#kronos-x--the-six-pre-registered-questions)
 - [KRONOS-X² — regimes or fat tails?](#regimes-or-fat-tails)

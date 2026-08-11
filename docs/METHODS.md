@@ -49,7 +49,8 @@ Only after a test convicts the guilty and clears the innocent on synthetic data
 do we point it at the real market. When the same test then reads **≈0** on real
 crashes, we can *trust* that zero — because we proved the test isn't blind.
 That is the difference between "we found nothing" and "there is nothing to
-find." KRONOS runs **31 such gates** on every commit.
+find." Every commit runs the full gate suite in CI — 37 gates at this
+writing, and the number only grows: new claims arrive with new gates.
 
 > **Why this is rare.** Most backtests are a single number computed once on one
 > history. They have no size, no power, no ground truth — there is nothing to
