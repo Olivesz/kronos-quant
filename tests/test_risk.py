@@ -80,16 +80,20 @@ bt_lev = run_backtest(px, regime, cfg_lev)
 bt_nolev = run_backtest(px, regime, cfg_nolev)
 
 lev_days = (bt_lev["exposure_applied"] > 1.0)
-fin_implied = (bt_lev["gross"] * bt_lev["exposure_applied"]
-               - bt_lev["costs"] - bt_lev["net"])
+fin = bt_lev["financing"]
 print(f"levered days: {lev_days.mean():.0%}; financing on levered days "
-      f"~{fin_implied[lev_days].mean()*1e4:.2f} bp/day; on unlevered days "
-      f"{fin_implied[~lev_days].abs().max()*1e4:.4f} bp max")
+      f"~{fin[lev_days].mean()*1e4:.2f} bp/day; on unlevered days "
+      f"{fin[~lev_days].abs().max()*1e4:.4f} bp max")
 assert lev_days.any(), "leverage never engaged on a calm synthetic world"
-assert (fin_implied[lev_days] > 0).all(), "no financing charged while levered"
-assert (fin_implied[~lev_days].abs() < 1e-12).all(), "financing charged while unlevered"
+assert (fin[lev_days] > 0).all(), "no financing charged while levered"
+assert (fin[~lev_days].abs() < 1e-12).all(), "financing charged while unlevered"
 exp_fin = ((bt_lev["exposure_applied"][lev_days] - 1) * 0.035 / 252)
-assert np.allclose(fin_implied[lev_days], exp_fin, atol=1e-12), "financing rate wrong"
+assert np.allclose(fin[lev_days], exp_fin, atol=1e-12), "financing rate wrong"
+# accounting identity: net = gross*exposure - costs - financing, exactly
+resid = (bt_lev["gross"] * bt_lev["exposure_applied"]
+         - bt_lev["costs"] - fin - bt_lev["net"])
+assert resid.abs().max() < 1e-12, "cost accounting identity broken"
 assert (bt_nolev["exposure_applied"] <= 1.0 + 1e-9).all(), "cap=1 config leaks leverage"
+assert bt_nolev["financing"].abs().max() < 1e-12, "financing nonzero in cap=1 config"
 
 print("\nGATE X27 PASSED")

@@ -778,7 +778,8 @@ const cards=[
   {k:'CVaR 95 (daily)',v:fmt.pct2(k.cvar95),cls:'neg',s:'VaR '+fmt.pct2(k.var95),sp:S.roll_vol},
   {k:'Volatility',v:fmt.pct(k.vol),cls:'neu',s:'target '+fmt.pct(meta.vol_target),sp:S.roll_vol},
   {k:'Turnover',v:meta.ann_turnover.toFixed(1)+'×/yr',cls:'neu',s:'rebalance '+meta.rebalance_days+'d',sp:S.exposure},
-  {k:'Cost Drag',v:fmt.pct2(meta.ann_cost)+'/yr',cls:'neg',s:'commission + spread + impact',sp:S.exposure},
+  {k:'Cost Drag',v:fmt.pct2(meta.ann_cost+(meta.ann_financing||0))+'/yr',cls:'neg',
+   s:'commission + spread + impact'+((meta.ann_financing||0)>0.0005?' + financing':''),sp:S.exposure},
 ];
 for(const cd of cards){
   const d=document.createElement('div');d.className='card';

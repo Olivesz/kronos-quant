@@ -411,6 +411,22 @@ DESIGN12 TRADE system, which stays unlevered per its own pre-registration,
 improved to **Sharpe 1.05 at −16.5% MaxDD** from the throttle fix alone — and
 its pre-registered T1 (forecast-vol beats realized-vol targeting) still holds.
 
+**Is the improvement concentrated in one lucky window?** No — split-half
+robustness (the reviewer's first question, answered before being asked):
+
+| Variant | 2013–2019 | 2020–2026 |
+|---|---|---|
+| baseline (bug) | SR 1.39, CAGR +7.6%, DD −8% | SR 0.66, CAGR +5.2%, DD −14% |
+| **fix-only** | SR 1.39, CAGR **+11.7%**, DD −11% | SR 0.67, CAGR **+6.0%**, DD −16% |
+| **fix + lever 1.5** | SR 1.27, CAGR **+14.5%**, DD −14% | SR 0.64, CAGR **+7.2%**, DD −21% |
+
+The fix adds CAGR in *both* halves at flat Sharpe, with the larger gain in the
+calm 2013–2019 half — exactly what the mechanism predicts, since calm markets
+spend the most time at high-water marks, where the inverted throttle braked
+hardest. Leverage adds CAGR in both halves at a modest, consistent Sharpe
+cost. (Both halves also show every variant's Sharpe falling H1 → H2 alongside
+SPY's 1.13 → 0.83 — the era got harder for everyone; no variant escapes it.)
+
 **Does the levered overlay behave sensibly in stress?** Verified on the real
 book rather than assumed — exposure is regime-monotone and crisis-responsive:
 
