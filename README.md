@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-35%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-36%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -25,9 +25,10 @@ KRONOS is two things at once:
 1. **A production-shaped quant platform** — data → regime detection → alpha
    sleeves → cost-aware portfolio construction → risk overlay → a
    self-contained interactive dashboard. It runs end-to-end in ~25s and posts a
-   **net Sharpe of 1.05 at 12.0% CAGR** — beating the S&P's in-sample Sharpe
-   at just over half its drawdown, sized by a forecast of its own volatility
-   and gated by a fat-tail-aware Student-t regime engine.
+   **net Sharpe of 1.07 at −17.9% max drawdown** — beating the S&P's in-sample
+   Sharpe at just over half its drawdown, sized by a forecast of its own
+   volatility, gated by a fat-tail-aware Student-t regime engine, and tilted
+   by the measured monthly-momentum information budget.
 
 2. **A research program that treats markets like physics.** 26 pre-registered
    experiments ask what quant finance genuinely does not know — *is volatility
@@ -37,7 +38,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 35 such gates run in
+passes a gate on data where the answer is already known.** 36 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -69,7 +70,7 @@ python run_research.py all        # 26 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 35 verification gates (~3min)
+python tests/run_all.py           # all 36 verification gates (~3min)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -78,7 +79,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **35 verification gates** — 33 proving an estimator has correct *size*
+- **36 verification gates** — 34 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -130,7 +131,8 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 
 | Strategy | CAGR | Vol | Sharpe | Max DD | CVaR95 |
 |---|---|---|---|---|---|
-| **KRONOS (HAR lever + t-HMM regimes)** | +12.0% | 11.3% | **1.05** | **−18.8%** | 1.70% |
+| **KRONOS (+ momentum tilt, shipped)** | +11.8% | 11.2% | **1.07** | **−17.9%** | 1.65% |
+| KRONOS (HAR lever + t-HMM regimes) | +12.0% | 11.3% | 1.05 | −18.8% | 1.70% |
 | KRONOS (HAR lever, Gaussian regimes) | +11.7% | 11.4% | 1.03 | −19.4% | 1.70% |
 | KRONOS (EDGE baseline: EWMA + Gaussian) | +10.9% | 11.6% | 0.95 | −21.3% | 1.76% |
 | SPY (buy & hold) | +15.0% | 16.8% | 0.91 | −33.7% | 2.55% |
@@ -138,7 +140,7 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 *The honest read: KRONOS still does **not** beat the S&P on raw return — and
 says so. The edge is risk-adjusted: a better Sharpe at two-thirds of the
 drawdown, with financing costs on leverage disclosed (1.26%/yr) and the
-selection-risk caveats (DSR 0.73, PBO 0.45, N=184 logged trials) restated
+selection-risk caveats (DSR 0.75, PBO 0.45, N=185 logged trials) restated
 rather than hidden.*
 
 ## The research program
@@ -234,7 +236,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    35 gates (33 synthetic ground truth + 2 real-data calibration)
+tests/                    36 gates (34 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

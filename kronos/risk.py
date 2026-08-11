@@ -55,7 +55,8 @@ def har_vol_forecast(port_rets: pd.Series, refit_every: int = 21,
     return fvol.fillna(ewma)
 
 
-def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
+def exposure_series(port_rets: pd.Series, cfg,
+                    tilt: pd.Series | None = None) -> pd.DataFrame:
     """Causal exposure multipliers from the portfolio's own trailing returns.
 
     Returns DataFrame[m_vol, m_cvar, m_dd, exposure]; exposure at date t is
@@ -90,6 +91,8 @@ def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
     # the old min() of all three could never exceed 1 (gate X27).
     brakes = pd.concat([m_cvar, m_dd], axis=1).min(axis=1)
     raw = m_vol * brakes
+    if tilt is not None:                     # DESIGN21: bounded momentum tilt,
+        raw = raw * tilt.reindex(raw.index).fillna(1.0)  # inside the cap (X33)
     exposure = raw.ewm(span=cfg.risk_smooth_days).mean().clip(0.0, max_exp)
     return pd.DataFrame({"m_vol": m_vol, "m_cvar": m_cvar, "m_dd": m_dd,
                          "exposure": exposure})

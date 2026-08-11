@@ -25,6 +25,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-FX — the third vertex of the microstructure triangle](#kronos-fx--the-third-vertex-of-the-microstructure-triangle)
 - [KRONOS-EDGE2 — the research-licensed performance program](#kronos-edge2--the-research-licensed-performance-program)
 - [KRONOS-HARVEST — is the monthly direction channel fully harvested?](#kronos-harvest--is-the-monthly-direction-channel-fully-harvested)
+- [KRONOS-MOMTILT — harvesting the monthly direction bits](#kronos-momtilt--harvesting-the-monthly-direction-bits)
 
 ---
 
@@ -716,3 +717,36 @@ draw so composite-code cardinality cannot fake a gap. **What this licenses:**
 proposing (not running) a market-timing tilt arm with its own pre-registration,
 kill criterion, and Sharpe-ledger entry — beside which PBO 0.45 will be
 restated, per the standing rule.
+
+## KRONOS-MOMTILT — harvesting the monthly direction bits
+
+The Sharpe arm HARVEST licensed and the orchestrator cleared
+([DESIGN21](design/DESIGN21.md), one ledger entry, tilt form frozen before any
+run): a **±15% exposure tilt on the sign of trailing 21-day market momentum**
+— moving the unharvested monthly trend bits into the book as market-level
+sizing, inside the existing 1.5× cap. **Gate X33** is the mechanism-disappears
+test: +0.23 Sharpe on worlds where momentum genuinely predicts sign, an exact
+tie on driftless worlds with identical vol dynamics, the cap verified under
+extreme tilt (not assumed — an inverted overlay hid in this codebase once),
+and bit-exact causality.
+
+**Result (vs the shipped joint system — HAR lever + t-HMM regimes, same data,
+same pairs sleeve):**
+
+| Configuration | CAGR | Sharpe | MaxDD | CVaR95 | H1 SR | H2 SR |
+|---|---|---|---|---|---|---|
+| joint (control) | 12.0% | 1.05 | −18.8% | 1.70% | 1.31 | 0.78 |
+| **joint + momtilt (shipped)** | 11.8% | **1.07** | **−17.9%** | **1.65%** | 1.32 | **0.81** |
+
+Both kill criteria pass: Sharpe improves, and **both eras improve** — the
+pre-declared honest prior (post-2018 direction-bit decay might kill H2) was
+wrong; the H2 gain (+0.032) exceeds H1's. The honest shape: CAGR *falls*
+slightly — this is a **defensive** tilt that cuts exposure in downtrends
+faster than it adds in uptrends, paying in drawdown and tail risk, not raw
+return. Max realized exposure 1.500 exactly — the cap held on real data.
+
+**The bar that matters: DSR 0.73 → 0.75 after charging the ledger (N=185)** —
+Sharpe up net of the search. PBO remains **0.45** and is restated here per the
+standing rule: the edge over sibling configurations is still not certifiable;
+this arm's claim rests on its pre-registration, its mechanism gate, and its
+split-half — not on the point estimate alone.
