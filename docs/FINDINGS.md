@@ -18,6 +18,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-CONSTANTS — which market laws are actually constant?](#kronos-constants--which-market-laws-are-actually-constant)
 - [KRONOS-DECATHLON — the minimal market](#kronos-decathlon--the-minimal-market)
 - [KRONOS-DECATHLON-2 — is expectation the missing organ?](#kronos-decathlon-2--is-expectation-the-missing-organ)
+- [KRONOS-DECATHLON-3 — the fixed point of mutual anticipation](#kronos-decathlon-3--the-fixed-point-of-mutual-anticipation)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
@@ -295,6 +296,73 @@ rational expectations), not a fifth flow you can bolt on. A refutation with a
 working gate — DECATHLON's ceiling stands, and it now says something sharper:
 the five missing events cannot be bought by any single boundedly-capitalized
 agent trading against public state.
+
+## KRONOS-DECATHLON-3 — the fixed point of mutual anticipation
+
+DECATHLON-2's refutation named its own successor: if one anticipator merely
+re-leaks the sign one derivative earlier — its inventory rides the same
+public vol state as the flow it front-runs — then maybe information-free
+prices require the **fixed point of mutual anticipation**: anticipators who
+also anticipate *each other's* flows, the anticipation operator iterated
+until the forecastable component of TOTAL flow goes to zero. We built it
+([DESIGN20](design/DESIGN20.md), budgets fixed before any run: K=5
+iterations exactly, DECA2's frozen parameters per layer, the same eval seeds
+so the ablation is comparable). Layer k front-runs the residual forecastable
+flow left by the k−1 layers beneath it, so the stack's model-implied
+residual contracts geometrically, `(1−kA)^K → 0`. Gate **X32** licenses the
+mechanism first: flag-off and K∈{0,1} are byte-identical to the DECA2
+simulator (pinned hashes — X19 and DECA2's published rows both protected),
+the iterated path is causal under future-tampering, and on the deterministic
+toy world the operator *provably contracts* — the forecastable-flow fraction
+falls **1.000 → 0.750 → 0.237** at K = 0 → 1 → 5, exactly the `(1−kA)^K`
+theory. The operator works. The hypothesis dies on its own terms:
+
+| Config | Score | Event pattern | E9 bits (median) |
+|---|---|---|---|
+| K=0 (FCVM, control) | 5/10 | fails E3 E4 E7 E8 E9 | 0.0184 |
+| K=1 (DECA2's layer, byte-identical) | 5/10 | fails E3 E4 E7 E8 E9 | 0.0200 |
+| **K=5 frozen carry-over** | **3/10** | fails E1 E3 E4 **E5** E7 E8 E9 | **0.0257** |
+| K=5 tuned (contingent pass) | 5/10 | fails E3 E4 E7 E8 E9 | 0.0168 |
+
+**D3-1 REFUTED — the kill criterion fires.** The sign leak does not close at
+the fixed point; it *grows monotonically in K* (bits 0.0184 → 0.0200 →
+0.0257) while the model-space forecastable flow shrinks toward zero. The
+frozen stack is a two-event **regression**: it breaks E1 (its unwind adds
+reversal, ac1 −0.075 → −0.247) and kills E5 (leverage −0.095 → −0.030 — it
+absorbs the very spiral that generates the leverage effect), while tails
+erode (kurt 6.8 → 5.3) and crash asymmetry collapses (tail ratio 45 → 4.3).
+So **D3-2 is REFUTED too**: at carry-over strength, rational front-running
+*does* kill the wild facts — E5 outright, E2/E10 by erosion. The regression
+triggered the pre-registered contingent pass (6 candidates, tuning seeds
+900–903): best 5/10, tied across the three weakest settings, and the
+pre-declared tie-break again picked the weakest — kA=0.05, effective stack
+strength 0.226, *weaker than DECA2's single layer*. Read once on the eval
+seeds: 5/10, failing exactly FCVM's five events, E9 at 0/8. The DECA2
+selection pattern repeats one level up: the battery pays for less
+anticipation at every opportunity, never more. D3-3 (what flow-rationality
+cannot buy) is thereby not evaluable as posed — but its answer is the whole
+table: the residual failure set at the market-preferred stack is
+**identical to FCVM's**; depth bought nothing.
+
+**Why it fails is the finding, again — and it is sharper than DECA2's.**
+Away from the caps, the K-layer stack is algebraically equivalent to ONE
+anticipator of strength `1−(1−kA)^K`: mutual anticipation of *this* operator
+class deepens into a stronger single anticipator, and DECA2 already measured
+that stronger is worse. The contraction that defines the fixed point is an
+**open-loop** property — licensed by X32c against an exogenous tape — and it
+does not survive **closed-loop** equilibrium: every layer's inventory is a
+function of the same slow public vol state, so the stack's own price impact
+regenerates exactly the forecastable structure the model says it removes.
+Model-space forecastable flow ↓ (1.00 → 0.24) while market-space sign
+leakage ↑ (0.018 → 0.026) — the two curves move in opposite directions,
+which is the cleanest statement the project has of why rational-expectations
+arguments cannot be reached by stacking boundedly-capitalized flow traders.
+The ceiling stands at 5/10 for the third time, now against the strongest
+member of its own critique: the five missing events (E3 E4 E7 E8 E9) cannot
+be bought by *any depth* of mutual anticipation over public state —
+information-free prices are not the fixed point of this operator, because
+the leak lives in the state-riding structure of the flows themselves, not in
+any finite failure to anticipate them.
 
 ## KRONOS-TRADE — the deployable system
 

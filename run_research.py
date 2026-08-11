@@ -1056,6 +1056,115 @@ def exp_decathlon2(force: bool = False) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Experiment 17c (DECATHLON-3): the fixed point of mutual anticipation
+# (DESIGN20: iterate the DESIGN18 anticipation layer K=0/1/5 times)
+# ---------------------------------------------------------------------------
+
+def exp_decathlon3(force: bool = False) -> dict:
+    if not force and (c := load_cached("decathlon3")):
+        print("[decathlon3] cached")
+        return c
+    from kronos.decathlon import CONFIGS3, DEFAULTS, _ant_target_fp, run_decathlon
+
+    t0 = time.time()
+    table = run_decathlon(n_seeds=8, T=6000, configs=CONFIGS3, seed0=100,
+                          per_seed=True)
+
+    # E9 direction-bits trace vs K (per seed + median)
+    bits = {name: {"per_seed": [round(st["dir_bits"], 6)
+                                for st in rec["seed_stats"]],
+                   "median": round(rec["median_stats"]["dir_bits"], 6)}
+            for name, rec in table.items()}
+
+    # forecastable-flow fraction vs K on the deterministic X30c toy world:
+    # beta_K = <f_mech, D_K> / <f_mech, f_mech> (the X32c estimator);
+    # uncapped theory (1-kA)^K
+    p = dict(DEFAULTS)
+
+    def toy_beta(iters: int, T_toy: int = 150) -> float:
+        sig2 = np.array([(3.0 * p["sig_target"]) ** 2])
+        L_prev, I_prev = np.array([1.0]), 0.0
+        flows, f_mech = [], []
+        for _ in range(T_toy):
+            L = np.minimum(p["Lmax"],
+                           p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
+            fm = p["kV"] * float((L - L_prev).sum())
+            L_prev = L
+            D = fm
+            if iters > 0:
+                I_star = _ant_target_fp(sig2, p, iters)
+                D += I_star - I_prev
+                I_prev = I_star
+            r = p["lam"] * D
+            flows.append(D)
+            f_mech.append(fm)
+            sig2 = (1 - p["a_s"]) * sig2 + p["a_s"] * (r ** 2 + p["sig_target"] ** 2)
+        D, fm = np.array(flows), np.array(f_mech)
+        return float(np.sum(fm * D) / np.sum(fm ** 2))
+
+    ff = {f"K{k}": {"toy_beta": round(toy_beta(k), 4),
+                    "theory": round((1 - p["kA"]) ** k, 4)}
+          for k in (0, 1, 5)}
+
+    # The contingent pass FIRED (DESIGN20): the frozen carry-over at K=5
+    # scored 3/10 on the eval seeds — below FCVM's 5/10. The pre-registered
+    # 6-candidate grid on tuning seeds 900-903 (majority of 4) gave
+    #   kA=0.05/capA=0.005: 5, kA=0.05/capA=0.01: 5, kA=0.10/capA=0.005: 5,
+    #   kA=0.10/capA=0.01: 3, kA=0.25/capA=0.005: 4, kA=0.25/capA=0.01: 4
+    # — best 5/10, tied across the three weakest settings; the pre-declared
+    # tie-break (weakest anticipation = lexicographically smallest) picked
+    # kA=0.05, capA=0.005 (effective stack strength 1-0.95^5 = 0.226, WEAKER
+    # than DECA2's single layer). The winner is read once on the eval seeds:
+    tuned_params = {"kA": 0.05, "capA": 0.005, "sA": 0.001}
+    tuned = run_decathlon(
+        n_seeds=8, T=6000, seed0=100, per_seed=True,
+        configs={"K5_TUNED": dict(fundamentalists=True, chartists=True,
+                                  voltargeters=True, marketmakers=True,
+                                  anticipators=True, fixed_point_iters=5,
+                                  params=tuned_params)})
+    tuned_rec = tuned["K5_TUNED"]
+    tuned_rec["params"] = tuned_params
+    tuned_rec["dir_bits_per_seed"] = [round(st["dir_bits"], 6)
+                                      for st in tuned_rec["seed_stats"]]
+
+    out = {"design": "DESIGN20",
+           "frozen_params": {k: DEFAULTS[k] for k in ("kA", "capA", "sA")},
+           "budget": {"K": [0, 1, 5], "seeds": "100-107", "T": 6000,
+                      "note": "K=5 exactly, pre-registered; contingent 6-"
+                              "candidate pass only on a regression below "
+                              "FCVM's 5/10 (DESIGN20)"},
+           "configs": table,
+           "dir_bits_vs_K": bits,
+           "forecastable_flow_fraction_vs_K": ff,
+           "tuning": {"trigger": "frozen K=5 carry-over scored 3/10 < 5/10",
+                      "seeds": "900-903",
+                      "grid": [
+                          {"kA": 0.05, "capA": 0.005, "score": 5},
+                          {"kA": 0.05, "capA": 0.01, "score": 5},
+                          {"kA": 0.10, "capA": 0.005, "score": 5},
+                          {"kA": 0.10, "capA": 0.01, "score": 3},
+                          {"kA": 0.25, "capA": 0.005, "score": 4},
+                          {"kA": 0.25, "capA": 0.01, "score": 4}],
+                      "note": "one pre-registered contingent pass spent; "
+                              "best 5/10 tied across the weakest settings; "
+                              "tie-break picked the weakest (DESIGN20 "
+                              "amendment) — the DECA2 pattern, one level up"},
+           "tuned_eval": tuned_rec}
+    for name, rec in list(table.items()) + [("K5_TUNED", tuned_rec)]:
+        passes = [k for k, v in rec["events"].items() if v]
+        print(f"[decathlon3] {name:13s}: {rec['score']}/10  "
+              f"({', '.join(p_.split('_')[0] for p_ in passes)})")
+    print(f"[decathlon3] dir_bits medians: "
+          + ", ".join(f"{n}={b['median']:.4f}" for n, b in bits.items())
+          + f", K5_TUNED={tuned_rec['median_stats']['dir_bits']:.4f}")
+    print(f"[decathlon3] forecastable-flow fraction (toy): "
+          + ", ".join(f"{k}={v['toy_beta']:.3f}" for k, v in ff.items()))
+    print(f"[decathlon3] done ({time.time()-t0:.0f}s)")
+    save("decathlon3", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Experiment 18 (CRITICAL): are crashes critical transitions or shocks?
 # ---------------------------------------------------------------------------
 
@@ -1769,6 +1878,7 @@ EXPERIMENTS = {
     "arrow": exp_arrow,
     "decathlon": exp_decathlon,
     "decathlon2": exp_decathlon2,
+    "decathlon3": exp_decathlon3,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,
