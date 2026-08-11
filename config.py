@@ -40,6 +40,7 @@ class Config:
 
     # HMM
     n_states: int = 3
+    regime_engine: str = "gaussian"   # "gaussian" | "thmm" (DESIGN16 V2)
     hmm_min_train: int = 750          # obs before first fit
     hmm_refit_every: int = 21         # trading days
     hmm_vol_window: int = 10

@@ -207,15 +207,37 @@ def build_features(market_rets: pd.Series, vol_window: int) -> pd.DataFrame:
     return feats
 
 
-def walkforward_regimes(market_rets: pd.Series, cfg) -> dict:
+def resolve_engine(name: str):
+    """Map a cfg.regime_engine string to a model class.
+
+    "gaussian" -> GaussianHMM; "thmm" -> StudentTHMM (DESIGN16 V2). The
+    t-HMM import is lazy because kronos.thmm subclasses GaussianHMM from
+    this module.
+    """
+    if name == "gaussian":
+        return GaussianHMM
+    if name == "thmm":
+        from kronos.thmm import StudentTHMM
+        return StudentTHMM
+    raise ValueError(f"unknown regime_engine {name!r} (use 'gaussian' or 'thmm')")
+
+
+def walkforward_regimes(market_rets: pd.Series, cfg, model_cls=None) -> dict:
     """Expanding-window walk-forward HMM.
+
+    The emission model comes from cfg.regime_engine ("gaussian" default,
+    "thmm" for the Student-t engine) unless model_cls overrides it.
+    Features, refit cadence, hysteresis and causality are identical for
+    every engine.
 
     Returns dict with:
       filtered  : (T, K) DataFrame of causal probabilities
       smoothed  : (T, K) DataFrame (full final fit; charts only)
       regime    : Series of hysteresis-stabilized regime ids (causal)
-      model     : final fitted GaussianHMM
+      model     : final fitted model (GaussianHMM or subclass)
     """
+    if model_cls is None:
+        model_cls = resolve_engine(getattr(cfg, "regime_engine", "gaussian"))
     feats = build_features(market_rets, cfg.hmm_vol_window)
     X = feats.to_numpy()
     idx = feats.index
@@ -227,8 +249,8 @@ def walkforward_regimes(market_rets: pd.Series, cfg) -> dict:
     refits = 0
     t = cfg.hmm_min_train
     while t < T:
-        m = GaussianHMM(K, cfg.hmm_max_iter if model is None else 25,
-                        cfg.hmm_tol, cfg.seed)
+        m = model_cls(K, cfg.hmm_max_iter if model is None else 25,
+                      cfg.hmm_tol, cfg.seed)
         model = m.fit(X[:t], init_from=model)
         refits += 1
         t_next = min(t + cfg.hmm_refit_every, T)

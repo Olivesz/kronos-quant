@@ -39,8 +39,9 @@ GATES = [
     "test_crypto.py",
     # KRONOS-EDGE gate (risk-overlay direction + leverage + financing)
     "test_risk.py",
-    # KRONOS-EDGE2 gate (HAR forecast-vol lever)
+    # KRONOS-EDGE2 gates (HAR forecast-vol lever; t-HMM engine)
     "test_lever.py",
+    "test_regime_engine.py",
 ]
 
 print("=" * 60)
