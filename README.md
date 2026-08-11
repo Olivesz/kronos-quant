@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-33%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-34%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -29,7 +29,7 @@ KRONOS is two things at once:
    at just over half its drawdown, sized by a forecast of its own volatility
    and gated by a fat-tail-aware Student-t regime engine.
 
-2. **A research program that treats markets like physics.** 24 pre-registered
+2. **A research program that treats markets like physics.** 25 pre-registered
    experiments ask what quant finance genuinely does not know — *is volatility
    rough? how many bits/day does the past leak about the future? are crashes
    critical transitions or shocks? is the market's near-criticality real?* —
@@ -37,7 +37,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 33 such gates run in
+passes a gate on data where the answer is already known.** 34 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -65,11 +65,11 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[data]"          # or: pip install -r requirements.txt
 
 python run_kronos.py              # full pipeline -> output/dashboard.html  (~25s)
-python run_research.py all        # 24 research experiments, cached to research/*.json
+python run_research.py all        # 25 research experiments, cached to research/*.json
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 33 verification gates (~2min)
+python tests/run_all.py           # all 34 verification gates (~2min)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -78,7 +78,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **33 verification gates** — 31 proving an estimator has correct *size*
+- **34 verification gates** — 32 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -143,7 +143,7 @@ rather than hidden.*
 
 ## The research program
 
-24 experiments, each pre-registered in [`docs/design/`](docs/design) and gated
+25 experiments, each pre-registered in [`docs/design/`](docs/design) and gated
 before real data. The one-line answers — **full write-ups, tables, and methods
 in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 
@@ -159,6 +159,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [REFLEX](docs/FINDINGS.md#kronos-reflex--how-endogenous-is-the-market) | Is the market self-exciting? | Mostly an **illusion**: 64% of the famous near-criticality (branching 0.68 → 0.25) is volatility clustering, not reflexivity. |
 | [CONSTANTS](docs/FINDINGS.md#kronos-constants--which-market-laws-are-actually-constant) | Do the laws drift over time? | **Mechanism constants are constant**; only crisis *intensity* moves (peaks 2020, reverts). No Adaptive-Markets secular drift. |
 | [DECATHLON](docs/FINDINGS.md#kronos-decathlon--the-minimal-market) | Smallest market that looks real? | A **vol-targeting spiral** buys the wild facts; the ceiling is 5/10 and the missing organ is **expectation** (anticipatory agents). |
+| [DECATHLON-2](docs/FINDINGS.md#kronos-decathlon-2--is-expectation-the-missing-organ) | Is expectation the missing organ? | **Refuted.** A causal, gate-verified anticipator front-running the vol-targeter flow leaves the ceiling at 5/10 — one layer of expectation moves the sign leak a derivative earlier instead of removing it; information-free prices need the *fixed point* of anticipation. |
 | [TRADE](docs/FINDINGS.md#kronos-trade--the-deployable-system) | What system does the science license? | Forecast-vol targeting + regime-gated risk parity + mechanical crash control — risk control, never direction timing. |
 | [TRANSFER](docs/FINDINGS.md#kronos-transfer--does-market-structure-cross-borders) | Do the laws cross borders? | **Mechanism universal, calibration local** — see below. |
 | [CRYPTO](docs/FINDINGS.md#kronos-crypto--do-the-laws-survive-outside-equities) | Do the laws survive outside equities? | Mostly yes — but the **leverage effect inverts** (crypto +0.03 vs equities −0.04; 8/10 coins flip). Mechanism universal; one law is equity-specific. |
@@ -233,7 +234,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    33 gates (31 synthetic ground truth + 2 real-data calibration)
+tests/                    34 gates (32 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

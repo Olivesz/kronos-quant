@@ -36,6 +36,7 @@ arc, or jump to a finding.
 | 15 | [DESIGN15.md](design/DESIGN15.md) | The engine's structural drag | Diagnosis found an **inverted drawdown throttle** (a sign bug braking at peaks) and an unreachable vol target; both fixed under pre-registered kill criteria — Sharpe 0.94 → 1.02 unlevered. |
 | 16 | [DESIGN16.md](design/DESIGN16.md) | The licensed performance program | The two upgrades the research already licensed: the **HAR forecast-vol lever** (Sharpe 0.95 → 1.03) and the **t-HMM regime engine** (→ 1.05 joint) — each gated, each with a kill criterion, three ledger entries total. |
 | 17 | [DESIGN17.md](design/DESIGN17.md) | FX: the microstructure triangle | FX leverage is **statistically zero** (+0.005, z vs 0 = 0.56) and separable from every equity market (z = 3.89) — the triangle equity −0.04 / FX ~0 / crypto +0.03 is monotone, though the FX–crypto edge stays inside noise (z = 1.44). |
+| 18 | [DESIGN18.md](design/DESIGN18.md) | Is expectation the missing organ? | A causal, gate-verified anticipatory agent front-running the vol-targeters' flow **does not break the 5/10 ceiling — the hypothesis is refuted**: one layer of expectation reproduces the sign leak one derivative earlier instead of removing it. |
 
 ## How the research maps to code
 
@@ -50,6 +51,7 @@ before real data ever touches the estimator:
 | Bits (7) | `kronos/infobudget.py` | `tests/test_infobudget.py` (X17) |
 | Arrow of time (7) | `kronos/entropyprod.py` | `tests/test_entropyprod.py` (X18) |
 | Decathlon (8) | `kronos/decathlon.py` | `tests/test_decathlon.py` (X19) |
+| Decathlon-2 (18) | `kronos/decathlon.py` | `tests/test_decathlon2.py` (X30) |
 | Critical (9) | `kronos/critical.py` | `tests/test_critical.py` (X20) |
 | Reflex (10) | `kronos/hawkes.py` | `tests/test_reflex.py` (X21) |
 | Constants (11) | `kronos/constants.py` | `tests/test_constants.py` (X22) |

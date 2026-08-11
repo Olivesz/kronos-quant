@@ -1022,6 +1022,39 @@ def exp_decathlon(force: bool = False) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Experiment 17b (DECATHLON-2): does EXPECTATION break the 5/10 ceiling?
+# (DESIGN18: anticipatory agents who front-run the vol-targeters' flow)
+# ---------------------------------------------------------------------------
+
+def exp_decathlon2(force: bool = False) -> dict:
+    if not force and (c := load_cached("decathlon2")):
+        print("[decathlon2] cached")
+        return c
+    from kronos.decathlon import CONFIGS2, DEFAULTS, run_decathlon
+
+    t0 = time.time()
+    table = run_decathlon(n_seeds=8, T=6000, configs=CONFIGS2, seed0=100)
+    out = {"design": "DESIGN18",
+           "frozen_params": {k: DEFAULTS[k] for k in ("kA", "capA", "sA")},
+           "tuning": {"seeds": "900-903",
+                      "first_shot": {"kA": 0.5, "capA": 0.02, "sA": 0.002,
+                                     "score": 4},
+                      "grid_best_score": 5,
+                      "note": "one pre-registered grid pass spent; best was "
+                              "5/10, tied across all weak-anticipator "
+                              "settings; pre-declared tie-break picked the "
+                              "weakest (see DESIGN18 amendment)"},
+           "configs": table}
+    for name, rec in table.items():
+        passes = [k for k, v in rec["events"].items() if v]
+        print(f"[decathlon2] {name:7s}: {rec['score']}/10  "
+              f"({', '.join(p.split('_')[0] for p in passes)})")
+    print(f"[decathlon2] done ({time.time()-t0:.0f}s)")
+    save("decathlon2", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Experiment 18 (CRITICAL): are crashes critical transitions or shocks?
 # ---------------------------------------------------------------------------
 
@@ -1700,6 +1733,7 @@ EXPERIMENTS = {
     "bits": exp_bits,
     "arrow": exp_arrow,
     "decathlon": exp_decathlon,
+    "decathlon2": exp_decathlon2,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,

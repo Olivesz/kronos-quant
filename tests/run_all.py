@@ -25,6 +25,8 @@ GATES = [
     "test_infobudget.py", "test_entropyprod.py",
     # KRONOS-DECATHLON gate
     "test_decathlon.py",
+    # KRONOS-DECATHLON-2 gate (anticipatory agent: byte-identity, causality, mechanism)
+    "test_decathlon2.py",
     # KRONOS-CRITICAL gate
     "test_critical.py",
     # KRONOS-REFLEX gate
