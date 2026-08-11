@@ -136,7 +136,8 @@ def main():
                 "cvar", "ensemble", "forensics", "synthesis")
         for name in core + ("tails", "rfsv", "laws", "clock", "surge",
                             "bits", "arrow", "decathlon", "critical", "reflex",
-                            "constants", "trade", "transfer", "crypto", "edge"):
+                            "constants", "trade", "transfer", "crypto", "edge",
+                            "fx", "harvest", "decathlon2"):
             p = os.path.join(res_dir, f"{name}.json")
             if os.path.exists(p):
                 with open(p) as f:
