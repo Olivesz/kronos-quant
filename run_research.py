@@ -1723,6 +1723,40 @@ def exp_edge(force: bool = False) -> dict:
     return out
 
 
+def exp_harvest(force: bool = False) -> dict:
+    """DESIGN19: harvest gap of the h=21 direction channel (measurement arm,
+    orchestrated; zero Sharpe-ledger entries)."""
+    if not force and (c := load_cached("harvest")):
+        print("[harvest] cached")
+        return c
+    from kronos.harvest import drop_one, harvest_gap
+    from kronos.infobudget import causal_features
+    from kronos.regime import walkforward_regimes
+
+    px, ohlc, gk, src = get_data()
+    r = np.log(px[CFG.market] / px[CFG.market].shift(1))
+    t0 = time.time()
+    rg = walkforward_regimes(px[CFG.market].pct_change().dropna(), CFG)  # production t-HMM
+    feats = causal_features(r, gk[CFG.market], rg["regime"])
+    feats = feats[feats["regime"] >= 0]
+    fwd21 = np.sign(r.rolling(21).sum().shift(-21))
+
+    g = harvest_gap(feats, ["regime"], fwd21, n_boot=300, seed=0)
+    attrib = drop_one(feats, ["regime"], fwd21, seed=0)
+    hg1 = g["significant"]
+    print(f"[harvest] I(F;s21)={g['mi_full_net']:.4f} bits, I(regime;s21)="
+          f"{g['mi_harvested_net']:.4f} bits")
+    print(f"[harvest] GAP {g['gap_bits']:.4f} bits, CI [{g['ci'][0]:.4f}, "
+          f"{g['ci'][1]:.4f}], null p95 {g['null_p95']:.4f} -> "
+          f"{'HG1: unharvested bits EXIST' if hg1 else 'KILL: channel formally closed'}")
+    print(f"[harvest] drop-one gap attribution: {attrib}")
+    out = {"gap": g, "drop_one": attrib, "hypothesis_HG1": bool(hg1),
+           "engine": CFG.regime_engine, "horizon": 21, "n": g["n"]}
+    print(f"[harvest] done in {time.time()-t0:.0f}s")
+    save("harvest", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -1741,6 +1775,7 @@ EXPERIMENTS = {
     "crypto": exp_crypto,
     "fx": exp_fx,
     "edge": exp_edge,
+    "harvest": exp_harvest,
     "vollab": exp_vollab,
     "rough": exp_rough,
     "rmt": exp_rmt,
