@@ -21,6 +21,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
 - [KRONOS-EDGE — fixing the engine's structural drag](#kronos-edge--fixing-the-engines-structural-drag)
+- [KRONOS-FX — the third vertex of the microstructure triangle](#kronos-fx--the-third-vertex-of-the-microstructure-triangle)
 - [KRONOS-EDGE2 — the research-licensed performance program](#kronos-edge2--the-research-licensed-performance-program)
 
 ---
@@ -469,6 +470,100 @@ The fix came with the missing gate (X27), the change was pre-registered with
 kill criteria, the trial ledger was charged, and the old numbers remain in the
 table above. That is what "optimizing a backtest" should look like.
 
+## KRONOS-FX — the third vertex of the microstructure triangle
+
+CRYPTO left the leverage-effect story half-told: equities (financial leverage
++ institutional de-risking) sit at **−0.04**, crypto (neither, plus retail
+FOMO) at **+0.03**. FX is the vertex with *neither ingredient and no FOMO
+either* — an institutional dealer market where a currency is not a levered
+claim on anything — so [DESIGN17](design/DESIGN17.md) pre-registered
+**leverage ≈ 0** with numeric criteria, which would make the effect a monotone
+function of microstructure rather than a binary. The same 7-law battery on
+**13 liquid crosses** (12 majors + USDMXN as the declared EM stress case;
+Yahoo daily OHLC **2010–2026 — the same span as the equity universes**),
+placed beside the four equity universes from TRANSFER and crypto from CRYPTO.
+
+**Data quality, screened before design lock-in:** Yahoo FX bars sometimes
+carry fake ranges (high==low, or range pinned to |close−open|), which would
+invalidate Garman-Klass. Measured per pair over ~4,275 days: real-range
+fraction **99.88%–100.00%** — all 13 pass the pre-declared >95% bar, none
+dropped. The same screen now runs inside `load_fx` and raises if fewer than
+8 pairs survive: the study fails loudly rather than silently degrading to a
+different estimator.
+
+| Law | equity cohort | crypto | **FX** | verdict |
+|---|---|---|---|---|
+| fat tails (kurt) | 8.4 – 13.1 | 16.6 | **7.6** | mildest of all six universes |
+| one-clock kurtosis | 3.3 – 3.8 | 4.5 | **2.68** | deepest collapse measured |
+| **leverage effect** | **−0.03 to −0.05** | **+0.031** | **+0.005** | **statistically zero** |
+| roughness H | 0.015 – 0.069 | 0.077 | 0.052 | inside the equity range |
+| branching (raw) | 0.58 – 0.73 | 0.687 | 0.769 | **transfers** (all six) |
+| branching (deformed) | 0.24 – 0.80 | 0.20 | 0.20 | collapses, ties crypto |
+| clock commonality | 0.41 – 0.90 | 0.795 | 0.558 | inside the equity range |
+
+**The leverage triangle** (the point of the study):
+
+| | equity cohort | **FX** | crypto |
+|---|---|---|---|
+| leverage | −0.0405 ± 0.0079 | **+0.005 ± 0.009** | +0.031 ± 0.016 |
+| z vs 0 | ≈ −5 | **0.56** | 1.96 |
+| z vs FX | 3.89 | — | 1.44 |
+| pairs/coins positive | 0/4 markets | **7/13** | 8/10 |
+
+**The pre-registered scorecard:**
+
+- **F1 — the One-Clock law survives. ✓** Raw kurtosis 7.6 collapses to a
+  deformed **2.68** — the deepest gaussianization of any universe measured,
+  below even the equity ~3.5 floor. Six universes in, the collapse has not
+  failed once.
+- **F2 — FX leverage is the zero midpoint. ✗ as pre-registered (2 of 3
+  criteria pass).** The honest split: FX leverage **is** statistically zero
+  (+0.005, z vs 0 = 0.56; 7 of 13 pairs positive — the symmetric scatter the
+  design predicted) and **is** separable from every equity market (one-sided
+  z = 3.89 ≫ 1.645). The failed criterion is separation from *crypto*:
+  z = 1.44 < 1.645 — exactly the test DESIGN17 flagged in advance as barely
+  passable even under a true zero, because crypto's own sampling SD (0.016)
+  dominates the denominator. So the triangle is **monotone in point estimates**
+  (−0.041 < +0.005 < +0.031) and its *equity edge is statistically resolved*
+  (both FX and crypto reject equity-style leverage), but the FX–crypto edge is
+  not — and crypto itself clears zero at only z ≈ 1.96, so "crypto genuinely
+  positive above an FX zero" remains an ordering of point estimates, not a
+  certified separation. Tightening it needs a longer crypto history, not a
+  different test.
+- **F3 — milder tails than equities. ✓** Pooled kurtosis 7.6 sits below the
+  equity cohort minimum 8.4 (pass bar), let alone the median 10.1 (kill bar) —
+  with the SNB CHF event *in* the sample and deliberately preserved by the
+  25% tail-preserving clip.
+
+**What the per-pair spread is made of.** The residual scatter around zero
+lies exactly on the safe-haven/carry axis DESIGN17 declared for
+interpretation: the three most negative pairs are all yen crosses (AUDJPY
+−0.046, GBPJPY −0.024, EURJPY −0.022 — yen strength *is* risk-off, so
+"down → vol up" is flight-to-quality wearing leverage's clothes), and the
+most positive is USDMXN (+0.075 — peso *weakness* is risk-off, same flow,
+opposite quote orientation). The sign tracks each pair's flight-to-quality
+direction, not any balance-sheet channel, and the median across pairs is
+zero. One declared expectation missed in the other direction: clock
+commonality came in at 0.558, *below* the equity median (0.68) despite the
+mechanically shared currency legs — the crosses' vol clocks are more
+independent than arithmetic suggested.
+
+**Verdict.** The leverage effect is now measured at all three vertices:
+**equity −0.04, FX ~0.00, crypto +0.03**, ordered exactly as the
+microstructure story predicts — negative where forced de-risking lives, zero
+in the institutional market without it, positive where retail FOMO dominates.
+What is *certified* is slightly less than what is *suggested*: equity-style
+negative leverage is decisively a property of the equity microstructure
+(rejected at z ≈ 4 from both other vertices), FX is decisively zero, and the
+crypto vertex sits above FX with the right sign but inside one-sided noise
+(z = 1.44). The rest of the battery makes the deeper point: one-clock
+collapse, near-critical branching (raw n 0.769 — the one law that transfers
+across *all six* universes), and its deformation collapse (0.769 → 0.20)
+survive their third microstructure unscathed. No new gate was needed — X24
+licenses the battery, X26's symmetric world licenses reading a zero as a
+zero (spurious-leverage bound |0.04|) — and the one new failure mode, fake
+Yahoo ranges, is guarded at runtime.
+
 ## KRONOS-EDGE2 — the research-licensed performance program
 
 EDGE fixed what was broken; EDGE2 ([DESIGN16](design/DESIGN16.md)) implements
@@ -494,5 +589,26 @@ Every metric moved the right way at once — the forecast lever de-risks
 alongside return. Ledger charged (N=183); **DSR 0.64 → 0.73**; bootstrap
 Sharpe CI [0.54, 1.52]; PBO 0.45 unchanged and the selection caveat stands.
 
-**V2 — the Student-t regime engine:** measured under the same protocol; see
-[DESIGN16](design/DESIGN16.md) for the pre-registration and kill criterion.
+**V2 — the Student-t regime engine (SHIPPED as default).** X² proved Gaussian
+HMMs hallucinate regimes from fat tails; production still ran the Gaussian.
+Now `regime_engine="thmm"` drives the walk-forward with the Student-t HMM —
+identical features, refits, hysteresis, causality (**gate X29**: matches the
+Gaussian engine on a Gaussian world, beats it on held-out log-score on a t
+world, exactly truncation-invariant). Like-for-like on the EWMA lever it
+improves Sharpe 0.951 → 0.972 and MaxDD −21.3% → −20.7%; the mechanism is
+visible in the relabeling: the engines disagree on 43% of days, almost all
+Bear↔Volatile — the t-engine's Volatile state (ν = 4.2) *absorbs* the fat
+tails that the Gaussian engine mislabels as Bear (2020 and 2022 being the
+longest episodes).
+
+**The joint system (V1+V2, the shipped default):**
+
+| Configuration | CAGR | Sharpe | MaxDD | CVaR95 |
+|---|---|---|---|---|
+| EDGE baseline (EWMA lever, Gaussian regimes) | 10.9% | 0.95 | −21.3% | 1.76% |
+| V1 only (HAR lever) | 11.7% | 1.03 | −19.4% | 1.70% |
+| **V1+V2 (HAR lever + t-HMM regimes)** | **12.0%** | **1.05** | **−18.8%** | **1.70%** |
+
+The upgrades stack — they touch different organs (sizing vs labeling). All
+three DESIGN16 ledger entries are spent (N=184); DSR 0.73; PBO 0.45 and the
+selection caveat stands unchanged.
