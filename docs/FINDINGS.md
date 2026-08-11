@@ -411,6 +411,27 @@ DESIGN12 TRADE system, which stays unlevered per its own pre-registration,
 improved to **Sharpe 1.05 at −16.5% MaxDD** from the throttle fix alone — and
 its pre-registered T1 (forecast-vol beats realized-vol targeting) still holds.
 
+**Does the levered overlay behave sensibly in stress?** Verified on the real
+book rather than assumed — exposure is regime-monotone and crisis-responsive:
+
+| Where | mean exposure | detail |
+|---|---|---|
+| Bull regime | 1.48 | levered ~always |
+| Volatile regime | 1.34 | levered 89% of days |
+| Bear regime | 1.09 | levered **63%** of days |
+| COVID crash (Feb–Apr 2020) | **0.53** | min 0.11 — the repaired throttle + vol lever cut hard |
+| 2022 bear | 1.01 | min 0.37 |
+| SPY in >10% drawdown | 0.88 | vs 1.37 otherwise |
+
+The number worth staring at is the honest one: the book stays levered on 63%
+of Bear-*labeled* days. That is by construction — the lever reads the *book's
+own* trailing vol (which runs cool thanks to the defensive HRP tilt), not the
+market's regime label, and the brakes react to the book's own drawdown/CVaR.
+Outcomes stay well inside SPY (MaxDD −21.3% vs −33.7%; CVaR95 1.76% vs 2.55%),
+and when stress actually reaches the book (COVID) the overlay cuts to 0.11.
+A regime-conditional exposure cap is a plausible refinement — but it would be
+a new trial with new selection risk, so it is noted here rather than fitted.
+
 **Trial accounting:** exactly two variants were run and both are reported
 above; the ledger grew 179 → 181 and the deflated Sharpe was recomputed:
 **DSR 0.64** (up from 0.60), PBO unchanged at 0.45. The selection-risk caveat

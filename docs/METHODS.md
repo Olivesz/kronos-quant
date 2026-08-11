@@ -49,7 +49,7 @@ Only after a test convicts the guilty and clears the innocent on synthetic data
 do we point it at the real market. When the same test then reads **≈0** on real
 crashes, we can *trust* that zero — because we proved the test isn't blind.
 That is the difference between "we found nothing" and "there is nothing to
-find." KRONOS runs **30 such gates** on every commit.
+find." KRONOS runs **31 such gates** on every commit.
 
 > **Why this is rare.** Most backtests are a single number computed once on one
 > history. They have no size, no power, no ground truth — there is nothing to
@@ -358,6 +358,35 @@ because every load-bearing step was checked against a world where the answer was
 already known.
 
 ---
+
+## Postscript: the bug the gates missed
+
+Everything above could read as "write enough tests and you're safe." Reality
+check: for its first year of life, this project's flagship book ran with its
+drawdown throttle **inverted** — a one-line sign error that applied maximum
+braking at the equity high-water mark and *released* the brake into crashes.
+Thirty gates, every one green, and none of them caught it, because **no gate
+tested the overlay's direction**. Gates only cover the failure modes you
+thought to imagine.
+
+What found it was the other half of the discipline: **diagnosis before
+optimization**. When the backtest looked mediocre, the temptation was to tune
+signals at the result. Instead we asked *where does the return go?* — and the
+accounting (a throttle binding on 93.6% of days, at its floor at the
+high-water mark) pointed straight at the bug. The fix followed the full
+protocol: pre-registered with expectations and kill criteria
+([DESIGN15](design/DESIGN15.md)), shipped **with the missing gate** (X27, which
+pins the throttle's monotonicity — m = 1 at the high-water mark, declining to
+the floor), charged to the trial ledger, and reported with the old numbers
+kept as the baseline row. The repair raised Sharpe from 0.94 to 1.02 before
+any leverage — the "protection" had been pure drag.
+
+Two lessons worth keeping. First, a green test suite is a claim about the
+questions you asked, not the ones you didn't; when a result looks wrong,
+*audit the accounting, not just the tests*. Second, the honest response to
+finding a bug in your own published numbers is the same as for any other
+finding: pre-register the fix, gate it, count the trials, and leave the old
+numbers visible. ([Full write-up.](FINDINGS.md#kronos-edge--fixing-the-engines-structural-drag))
 
 ## The through-line
 

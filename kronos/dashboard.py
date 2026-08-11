@@ -175,7 +175,7 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
 
   <div class="panel">
     <h2>Risk Engine <span class="legend" id="lg-rk"></span></h2>
-    <div class="sub">Exposure = smoothed min(vol-target, CVaR-target, drawdown throttle), applied T+1, no leverage</div>
+    <div class="sub">Exposure = smoothed vol-target lever × min(CVaR brake, drawdown brake), applied T+1; levered up to 1.5× with financing charged (gate X27)</div>
     <div class="chart" id="ch-rk"></div>
     <div class="row c2e" style="margin-top:14px">
       <div>
@@ -470,7 +470,9 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
   <footer>
     <b>Honest fine print.</b> Backtest, not live trading. Universe is today's liquid mega-caps/ETFs
     (survivorship bias inflates results). Adjusted closes, T+1 execution, costs = 1bp commission +
-    2bp spread + square-root impact (capped 25bp). Risk-free rate ≈ 0 in ratios. HMM probabilities
+    2bp spread + square-root impact (capped 25bp). Exposure may lever up to 1.5× via vol targeting;
+    financing of 3.5%/yr is charged daily on the levered portion (≈1.3%/yr realized drag); the
+    DESIGN12 trade system remains unlevered. Risk-free rate ≈ 0 in ratios. HMM probabilities
     used for decisions are strictly filtered (causal); models are refit walk-forward with no
     look-ahead. Past performance, simulated or otherwise, does not predict future returns.
     Generated <span id="f-gen"></span> · KRONOS v1.0
@@ -927,13 +929,16 @@ new LineChart('ch-dd',[
   c.addEventListener('mouseleave',()=>tip.style.display='none');
 })();
 
-/* risk engine */
+/* risk engine — exposure can lever above 1, so scale the axis to the data
+   and mark the leverage boundary at 1.0 */
+const expoMax=Math.max(1.0,...S.exposure.values.filter(v=>v!=null),
+                       ...S.m_vol.values.filter(v=>v!=null));
 new LineChart('ch-rk',[
   {name:'exposure',dates:S.exposure.dates,values:S.exposure.values,color:COL.cyan,width:2,fill:true},
-  {name:'vol throttle',dates:S.m_vol.dates,values:S.m_vol.values,color:COL.blue,width:1,dash:[3,3]},
-  {name:'CVaR throttle',dates:S.m_cvar.dates,values:S.m_cvar.values,color:COL.amber,width:1,dash:[3,3]},
-  {name:'DD throttle',dates:S.m_dd.dates,values:S.m_dd.values,color:COL.rose,width:1,dash:[3,3]},
-],{height:230,fmt:fmt.pct,legend:'lg-rk',y0:0,yMax:1.05,fillTo:0,regimeBands:true});
+  {name:'vol lever (target/vol)',dates:S.m_vol.dates,values:S.m_vol.values,color:COL.blue,width:1,dash:[3,3]},
+  {name:'CVaR brake',dates:S.m_cvar.dates,values:S.m_cvar.values,color:COL.amber,width:1,dash:[3,3]},
+  {name:'DD brake',dates:S.m_dd.dates,values:S.m_dd.values,color:COL.rose,width:1,dash:[3,3]},
+],{height:230,fmt:fmt.pct,legend:'lg-rk',y0:0,yMax:expoMax*1.06,hline:1.0,fillTo:0,regimeBands:true});
 
 new LineChart('ch-vol',[
   {name:'realized vol (63d)',dates:S.roll_vol.dates,values:S.roll_vol.values,color:COL.cyan,width:1.8,fill:true},
