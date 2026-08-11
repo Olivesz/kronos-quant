@@ -37,6 +37,7 @@ arc, or jump to a finding.
 | 16 | [DESIGN16.md](design/DESIGN16.md) | The licensed performance program | The two upgrades the research already licensed: the **HAR forecast-vol lever** (Sharpe 0.95 → 1.03) and the **t-HMM regime engine** (→ 1.05 joint) — each gated, each with a kill criterion, three ledger entries total. |
 | 17 | [DESIGN17.md](design/DESIGN17.md) | FX: the microstructure triangle | FX leverage is **statistically zero** (+0.005, z vs 0 = 0.56) and separable from every equity market (z = 3.89) — the triangle equity −0.04 / FX ~0 / crypto +0.03 is monotone, though the FX–crypto edge stays inside noise (z = 1.44). |
 | 18 | [DESIGN18.md](design/DESIGN18.md) | Is expectation the missing organ? | A causal, gate-verified anticipatory agent front-running the vol-targeters' flow **does not break the 5/10 ceiling — the hypothesis is refuted**: one layer of expectation reproduces the sign leak one derivative earlier instead of removing it. |
+| 19 | [DESIGN19.md](design/DESIGN19.md) | The harvest gap | The regime label captures only **~18%** of the monthly sign information (gap 0.021 bits, CI excludes 0); the unharvested carrier is 21-day momentum — measured against enumerated ground truth (X31). |
 
 ## How the research maps to code
 
@@ -61,5 +62,6 @@ before real data ever touches the estimator:
 | Edge (15) | `kronos/risk.py`, `kronos/backtest.py` | `tests/test_risk.py` (X27) |
 | Edge2 (16) | `kronos/risk.py` (HAR lever), `kronos/regime.py` (engine flag) | `tests/test_lever.py` (X28), `tests/test_regime_engine.py` (X29) |
 | FX (17) | `kronos/fx.py` | reuses X24 + X26; runtime real-range guard in `load_fx` |
+| Harvest (19) | `kronos/harvest.py` | `tests/test_harvest.py` (X31) |
 
 See the top-level [README](../README.md) for the full results tables.

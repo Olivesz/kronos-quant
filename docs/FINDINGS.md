@@ -24,6 +24,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-EDGE — fixing the engine's structural drag](#kronos-edge--fixing-the-engines-structural-drag)
 - [KRONOS-FX — the third vertex of the microstructure triangle](#kronos-fx--the-third-vertex-of-the-microstructure-triangle)
 - [KRONOS-EDGE2 — the research-licensed performance program](#kronos-edge2--the-research-licensed-performance-program)
+- [KRONOS-HARVEST — is the monthly direction channel fully harvested?](#kronos-harvest--is-the-monthly-direction-channel-fully-harvested)
 
 ---
 
@@ -680,3 +681,38 @@ half** — mechanistically coherent, since a forecast lever earns its keep
 where vol actually moves (2020, 2022), while calm 2013–2019 gives it little
 to forecast — and **V2's increment lives in the first half**. The upgrades
 are complementary in time, which is exactly why they stack.
+
+## KRONOS-HARVEST — is the monthly direction channel fully harvested?
+
+BITS left one direction channel open (h = 21: 0.016 bits/day, significant)
+and the production system's only market-level direction-bearing state is the
+filtered regime label — exposure is direction-blind by design. The orchestrated
+question ([DESIGN19](design/DESIGN19.md), a measurement arm charging **zero**
+Sharpe-ledger entries): does the regime label already capture the monthly sign
+information, or is money left on the table? **Gate X31** proves the harvest-gap
+estimator against *enumerated* ground truth: it recovers a planted gap to
+within 1% (0.0434 vs true 0.0438 bits), exonerates a sufficient state, and
+reads zero on noise.
+
+**Result — HG1 holds: unharvested monthly bits exist.**
+
+| Quantity | bits |
+|---|---|
+| I(full feature set ; 21d-forward sign) | 0.0252 |
+| I(regime label ; 21d-forward sign) | 0.0045 |
+| **Harvest gap** | **0.0208** — CI [0.0171, 0.0659], gap-null p95 0.0027 |
+
+The regime label harvests **~18%** of the monthly sign information. Drop-one
+attribution: the gap survives removing `sign_t` (0.0224 — daily sign carries
+nothing, consistent with BITS's closed daily channel) but collapses to 0.0060
+without `mom21` — **21-day market momentum is the dominant unharvested
+carrier**, with the vol tercile second (0.0106 without it). In plain terms:
+the slow trend information that BITS measured is real, and production uses it
+only cross-sectionally, never to time the book.
+
+Caveats stated: overlapping 21-day targets are serially dependent — the CI
+comes from a 63-day block bootstrap, and both MIs are permutation-debiased per
+draw so composite-code cardinality cannot fake a gap. **What this licenses:**
+proposing (not running) a market-timing tilt arm with its own pre-registration,
+kill criterion, and Sharpe-ledger entry — beside which PBO 0.45 will be
+restated, per the standing rule.

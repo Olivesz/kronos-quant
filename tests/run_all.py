@@ -44,6 +44,8 @@ GATES = [
     # KRONOS-EDGE2 gates (HAR forecast-vol lever; t-HMM engine)
     "test_lever.py",
     "test_regime_engine.py",
+    # KRONOS-HARVEST gate (harvest-gap estimator vs enumerated truth)
+    "test_harvest.py",
 ]
 
 print("=" * 60)
