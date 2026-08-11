@@ -95,6 +95,11 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 - **A cross-market transfer study** on Japan / Europe / Asia-EM: the *mechanism*
   laws are universal, the frozen US-tuned system holds its risk edge abroad,
   but the exact law *values* are local — stated as a clean split verdict.
+- **A self-audit that found its own sign bug**: diagnosing "where does the
+  return go?" exposed an inverted drawdown throttle that 30 green gates had
+  missed (braking at equity highs, releasing into crashes). Fixed under
+  pre-registered kill criteria, shipped *with* the missing gate, old numbers
+  kept as the baseline row.
 - A **1,700-line single-file HTML dashboard** with a hand-written canvas
   charting engine, zero external assets.
 
