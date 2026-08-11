@@ -21,6 +21,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
 - [KRONOS-EDGE — fixing the engine's structural drag](#kronos-edge--fixing-the-engines-structural-drag)
+- [KRONOS-EDGE2 — the research-licensed performance program](#kronos-edge2--the-research-licensed-performance-program)
 
 ---
 
@@ -467,3 +468,31 @@ backtest was not weak alpha but a *sign error the test suite had no gate for*.
 The fix came with the missing gate (X27), the change was pre-registered with
 kill criteria, the trial ledger was charged, and the old numbers remain in the
 table above. That is what "optimizing a backtest" should look like.
+
+## KRONOS-EDGE2 — the research-licensed performance program
+
+EDGE fixed what was broken; EDGE2 ([DESIGN16](design/DESIGN16.md)) implements
+what the research had already licensed but production never received. Two
+pre-registered variants, each with a kill criterion, no scans.
+
+**V1 — the HAR forecast-vol lever (SHIPPED as default).** The lever sized with
+*trailing* EWMA vol while the vol lab's decisive finding (HAR beats EWMA,
+QLIKE 0.417 vs 0.511, DM −7.1) and TRADE's T1 said *forecast* vol should
+drive sizing. Now it does: a causal walk-forward HAR forecast of the book's
+own variance (1/5/22-day features, OLS refit every 21 days, exactly
+future-truncation-invariant). **Gate X28** pins that the lever inherits HAR's
+edge honestly: 11.8% better vol-tracking on a persistent-SV world, a forced
+tie on an iid-vol world (no false edge).
+
+| Lever (real data, levered 1.5×, net incl. financing) | CAGR | Sharpe | MaxDD | CVaR95 |
+|---|---|---|---|---|
+| trailing EWMA (control) | 10.9% | 0.95 | −21.3% | 1.76% |
+| **HAR forecast (new default)** | **11.7%** | **1.03** | **−19.4%** | **1.70%** |
+
+Every metric moved the right way at once — the forecast lever de-risks
+*ahead* of vol spikes rather than after them, which is why drawdown improved
+alongside return. Ledger charged (N=183); **DSR 0.64 → 0.73**; bootstrap
+Sharpe CI [0.54, 1.52]; PBO 0.45 unchanged and the selection caveat stands.
+
+**V2 — the Student-t regime engine:** measured under the same protocol; see
+[DESIGN16](design/DESIGN16.md) for the pre-registration and kill criterion.
