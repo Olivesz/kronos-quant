@@ -29,6 +29,8 @@ GATES = [
     "test_decathlon2.py",
     # KRONOS-DECATHLON-3 gate (fixed-point anticipation: byte-identity, causality, contraction)
     "test_decathlon3.py",
+    # KRONOS-DECATHLON-4 gate (quote-skewing maker: byte-identity, causality, leak absorption)
+    "test_decathlon4.py",
     # KRONOS-CRITICAL gate
     "test_critical.py",
     # KRONOS-REFLEX gate

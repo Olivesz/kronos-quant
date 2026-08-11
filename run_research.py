@@ -1165,6 +1165,115 @@ def exp_decathlon3(force: bool = False) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Experiment 17d (DECATHLON-4): price-setting rationality — the quote-skewing
+# maker (DESIGN22: the third and FINAL attempt on the expectation line; the
+# closure clause is part of the registration)
+# ---------------------------------------------------------------------------
+
+def exp_decathlon4(force: bool = False) -> dict:
+    if not force and (c := load_cached("decathlon4")):
+        print("[decathlon4] cached")
+        return c
+    from kronos.decathlon import CONFIGS4, DEFAULTS, _flow_forecast, run_decathlon
+
+    t0 = time.time()
+    table = run_decathlon(n_seeds=8, T=6000, configs=CONFIGS4, seed0=100,
+                          per_seed=True)
+
+    # E9 direction-bits trace vs lambda (per seed + median)
+    bits = {name: {"per_seed": [round(st["dir_bits"], 6)
+                                for st in rec["seed_stats"]],
+                   "median": round(rec["median_stats"]["dir_bits"], 6)}
+            for name, rec in table.items()}
+
+    # mechanism trace on the X34c toy world (DESIGN22-amended: de-levered
+    # initial L, sn=5e-4 seeded noise): corr(f_mech,t, r_{t+1}) vs lambda
+    p = dict(DEFAULTS)
+
+    def toy_corr(skew: float, T_toy: int = 150, sn: float = 5e-4) -> float:
+        rng_t = np.random.default_rng(4)
+        sig2 = np.array([(3.0 * p["sig_target"]) ** 2])
+        L_prev = np.minimum(p["Lmax"],
+                            p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
+        q_prev = skew * p["lam"] * _flow_forecast(sig2, p)
+        rets, f_mech = [], []
+        for _ in range(T_toy):
+            L = np.minimum(p["Lmax"],
+                           p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
+            fm = p["kV"] * float((L - L_prev).sum())
+            L_prev = L
+            r = p["lam"] * (fm + sn * rng_t.normal())
+            if skew:
+                q = skew * p["lam"] * _flow_forecast(sig2, p)
+                r += q - q_prev
+                q_prev = q
+            rets.append(r)
+            f_mech.append(fm)
+            sig2 = (1 - p["a_s"]) * sig2 + p["a_s"] * (r ** 2 + p["sig_target"] ** 2)
+        f, r = np.array(f_mech), np.array(rets)
+        return float(np.corrcoef(f[:-1], r[1:])[0, 1])
+
+    toy = {f"lam{skew}": round(toy_corr(skew), 4) for skew in (0.0, 0.5, 1.0)}
+
+    # contingent pass (pre-registered in DESIGN22): ONLY if both lambda
+    # values regress below FCVM's score — 6 candidates x 4 tuning seeds
+    # (900-903), weakest-skew-wins tie-break, winner read once on eval seeds
+    base = table["FCVM"]["score"]
+    regressed = (table["FCVM+Q1.0"]["score"] < base
+                 and table["FCVM+Q0.5"]["score"] < base)
+    contingent = {"triggered": bool(regressed)}
+    if regressed:
+        cand = [0.05, 0.10, 0.15, 0.20, 0.30, 0.40]
+        grid = {}
+        for lam_c in cand:
+            g = run_decathlon(
+                n_seeds=4, T=6000, seed0=900,
+                configs={"C": dict(fundamentalists=True, chartists=True,
+                                   voltargeters=True, marketmakers=True,
+                                   quote_skew=lam_c)})
+            grid[f"lam{lam_c}"] = g["C"]["score"]
+            print(f"[decathlon4] contingent lam={lam_c}: {g['C']['score']}/10 "
+                  "(tuning seeds 900-903)")
+        best = max(grid.values())
+        winner = min(lam_c for lam_c in cand if grid[f"lam{lam_c}"] == best)
+        ev = run_decathlon(
+            n_seeds=8, T=6000, seed0=100, per_seed=True,
+            configs={"Q_TUNED": dict(fundamentalists=True, chartists=True,
+                                     voltargeters=True, marketmakers=True,
+                                     quote_skew=winner)})
+        rec = ev["Q_TUNED"]
+        rec["quote_skew"] = winner
+        rec["dir_bits_per_seed"] = [round(st["dir_bits"], 6)
+                                    for st in rec["seed_stats"]]
+        contingent.update({"grid": grid, "winner_lambda": winner,
+                           "tuned_eval": rec})
+        print(f"[decathlon4] contingent winner lam={winner} "
+              f"(weakest-skew tie-break): {rec['score']}/10 on eval seeds")
+
+    out = {"design": "DESIGN22",
+           "budget": {"lambdas": [1.0, 0.5], "seeds": "100-107", "T": 6000,
+                      "note": "3 configs x 8 seeds; contingent 6-candidate "
+                              "x 4-seed pass only if BOTH lambdas regress "
+                              "below FCVM (DESIGN22); this is the final "
+                              "experiment on the DESIGN8 line"},
+           "configs": table,
+           "dir_bits_vs_lambda": bits,
+           "toy_leak_corr_vs_lambda": toy,
+           "contingent_pass": contingent}
+    for name, rec in table.items():
+        passes = [k for k, v in rec["events"].items() if v]
+        print(f"[decathlon4] {name:9s}: {rec['score']}/10  "
+              f"({', '.join(p_.split('_')[0] for p_ in passes)})")
+    print("[decathlon4] dir_bits medians: "
+          + ", ".join(f"{n}={b['median']:.4f}" for n, b in bits.items()))
+    print("[decathlon4] toy leak corr vs lambda: "
+          + ", ".join(f"{k}={v:+.3f}" for k, v in toy.items()))
+    print(f"[decathlon4] done ({time.time()-t0:.0f}s)")
+    save("decathlon4", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Experiment 18 (CRITICAL): are crashes critical transitions or shocks?
 # ---------------------------------------------------------------------------
 
@@ -1879,6 +1988,7 @@ EXPERIMENTS = {
     "decathlon": exp_decathlon,
     "decathlon2": exp_decathlon2,
     "decathlon3": exp_decathlon3,
+    "decathlon4": exp_decathlon4,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,

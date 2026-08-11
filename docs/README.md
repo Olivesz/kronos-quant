@@ -40,6 +40,7 @@ arc, or jump to a finding.
 | 19 | [DESIGN19.md](design/DESIGN19.md) | The harvest gap | The regime label captures only **~18%** of the monthly sign information (gap 0.021 bits, CI excludes 0); the unharvested carrier is 21-day momentum — measured against enumerated ground truth (X31). |
 | 20 | [DESIGN20.md](design/DESIGN20.md) | The fixed point of mutual anticipation | Iterating the anticipation operator (K=5, gate-verified to contract open-loop) **does not close the sign leak — it grows it**: the K-layer stack is equivalent to one stronger anticipator, and the 5/10 ceiling stands against the strongest member of its own critique. |
 | 21 | [DESIGN21.md](design/DESIGN21.md) | The momentum tilt | HARVEST's bits, harvested: a frozen ±15% exposure tilt on 21d momentum — Sharpe 1.05 → **1.07**, both eras improve, cap verified, **DSR 0.73 → 0.75 after charging** (PBO 0.45 restated). |
+| 22 | [DESIGN22.md](design/DESIGN22.md) | Price-setting rationality — the line closes | A maker that QUOTES against the forecastable flow (exact impact absorption, gate-verified to the identity) scores **1/10** — the leak doesn't close, the wildness dies, and per the pre-registered closure clause **the 5/10 ceiling is declared structural and the DESIGN8 line closes**. |
 
 ## How the research maps to code
 
@@ -56,6 +57,7 @@ before real data ever touches the estimator:
 | Decathlon (8) | `kronos/decathlon.py` | `tests/test_decathlon.py` (X19) |
 | Decathlon-2 (18) | `kronos/decathlon.py` | `tests/test_decathlon2.py` (X30) |
 | Decathlon-3 (20) | `kronos/decathlon.py` | `tests/test_decathlon3.py` (X32) |
+| Decathlon-4 (22) | `kronos/decathlon.py` | `tests/test_decathlon4.py` (X34) |
 | Critical (9) | `kronos/critical.py` | `tests/test_critical.py` (X20) |
 | Reflex (10) | `kronos/hawkes.py` | `tests/test_reflex.py` (X21) |
 | Constants (11) | `kronos/constants.py` | `tests/test_constants.py` (X22) |

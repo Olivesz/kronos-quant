@@ -164,18 +164,27 @@ DEFAULTS = dict(
 )
 
 
-def _ant_target(sig2: np.ndarray, p: dict) -> float:
-    """Anticipator's target inventory — a pure function of the CURRENT vol
-    state (causality is gate X30b's contract).
+def _flow_forecast(sig2: np.ndarray, p: dict) -> float:
+    """DESIGN18's public-state forecast of the vol-targeters' INTEGRATED
+    remaining mechanical flow — shared machinery of the DECA2 anticipator
+    and the DECA4 quote-skewing maker (DESIGN22).
 
-    The vol-targeters' mandate is public: L = min(Lmax, sig*/sigma_hat) on a
-    known EWMA of the tape. Under the anticipator's one belief — vol reverts
-    to the targeters' own target — leverage ends at L_eq = min(Lmax, 1), so
-    the INTEGRATED future mechanical flow the current state implies is
-    kV * mean(L_eq - L). Hold kA of it, capped by capital."""
+    The targeters' mandate is public: L = min(Lmax, sig*/sigma_hat) on a
+    known EWMA of the tape. Under the one belief that defines the forecast —
+    vol reverts to the targeters' own target — leverage ends at
+    L_eq = min(Lmax, 1), so the integrated future mechanical flow the
+    current state implies is kV * mean(L_eq - L). A pure function of the
+    CURRENT vol state (causality: gates X30b/X34b)."""
     L = np.minimum(p["Lmax"],
                    p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
-    f_hat = p["kV"] * float((min(p["Lmax"], 1.0) - L).mean())
+    return p["kV"] * float((min(p["Lmax"], 1.0) - L).mean())
+
+
+def _ant_target(sig2: np.ndarray, p: dict) -> float:
+    """Anticipator's target inventory — a pure function of the CURRENT vol
+    state (causality is gate X30b's contract): hold kA of the integrated
+    flow forecast, capped by capital."""
+    f_hat = _flow_forecast(sig2, p)
     return float(np.clip(p["kA"] * f_hat, -p["capA"], p["capA"]))
 
 
@@ -204,9 +213,7 @@ def _ant_target_fp(sig2: np.ndarray, p: dict, iters: int) -> float:
     (causality, gate X32b)."""
     if iters <= 1:
         return _ant_target(sig2, p)
-    L = np.minimum(p["Lmax"],
-                   p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
-    f_hat = p["kV"] * float((min(p["Lmax"], 1.0) - L).mean())
+    f_hat = _flow_forecast(sig2, p)
     resid, I = f_hat, 0.0
     for _ in range(iters):
         J = float(np.clip(p["kA"] * resid, -p["capA"], p["capA"]))
@@ -240,11 +247,32 @@ def anticipator_flows(r: np.ndarray, params: dict | None = None,
     return out
 
 
+def maker_quote_path(r: np.ndarray, params: dict | None = None,
+                     hetero: bool = False,
+                     quote_skew: float = 1.0) -> np.ndarray:
+    """Deterministic quote-adjustment path of the skewing maker (DESIGN22)
+    against an EXOGENOUS return series. q[t] depends on r[:t] only — the
+    time-t quote is set before r[t] exists (same alignment as simulate_abm,
+    where the vol state has absorbed returns through t-1 when the quote is
+    formed). Gate X34b tampers with the future and requires the prefix
+    unchanged."""
+    p = dict(DEFAULTS)
+    if params:
+        p.update(params)
+    s_speeds = np.array([1 / 5, 1 / 20, 1 / 80]) if hetero else np.array([p["a_s"]])
+    sig2 = np.full(len(s_speeds), p["sig_target"] ** 2)
+    out = np.empty(len(r))
+    for t in range(len(r)):
+        out[t] = quote_skew * p["lam"] * _flow_forecast(sig2, p)
+        sig2 = (1 - s_speeds) * sig2 + s_speeds * r[t] ** 2
+    return out
+
+
 def simulate_abm(T: int = 6000, seed: int = 0,
                  fundamentalists: bool = True, chartists: bool = True,
                  voltargeters: bool = True, marketmakers: bool = True,
                  hetero: bool = False, anticipators: bool = False,
-                 fixed_point_iters: int = 0,
+                 fixed_point_iters: int = 0, quote_skew: float = 0.0,
                  params: dict | None = None) -> pd.Series:
     """Returns a pd.Series of daily returns from the minimal market.
 
@@ -253,7 +281,20 @@ def simulate_abm(T: int = 6000, seed: int = 0,
     (0 and 1 are both DECA2's single layer); K=5 is the pre-registered
     fixed-point approximation. Adds no RNG draws, so the noise world is
     identical across K and flag-off output is byte-identical to the
-    pre-DESIGN20 simulator (gates X30a/X32a)."""
+    pre-DESIGN20 simulator (gates X30a/X32a).
+
+    quote_skew (DESIGN22): the quote-skewing maker — a PRICING RULE, not a
+    trader. It computes DESIGN18's public-state forecast of the targeters'
+    remaining mechanical flow, F_hat = kV*mean(L_eq - L), and shifts price
+    formation by the expected impact BEFORE flows execute:
+        q_t = quote_skew * lam * F_hat_t;   r_t = lam*D_t + (q_t - q_{t-1}).
+    Because the maker's forecast state IS the targeters' public state, the
+    quote revision telescopes exactly against the mechanical flow
+    (q_t - q_{t-1} = -quote_skew * lam * f_mech,t): at quote_skew=1 the
+    forecastable flow's impact is absorbed into the price LEVEL and the
+    return keeps only the unforecastable surprise. No inventory, no unwind,
+    no execution noise, no RNG draws — default 0.0 is byte-identical to
+    today's simulator (gate X34a)."""
     p = dict(DEFAULTS)
     if params:
         p.update(params)
@@ -274,6 +315,9 @@ def simulate_abm(T: int = 6000, seed: int = 0,
     out = np.empty(T)
     r_prev = 0.0
     I_ant = 0.0                              # anticipator inventory (DESIGN18)
+    q_prev = 0.0                             # maker quote adjustment (DESIGN22)
+    # (= quote_skew*lam*F_hat(initial state), which is exactly 0: the world
+    #  starts at the vol target, L=1, so the initial flow forecast vanishes)
     for t in range(T):
         V += p["sV"] * rng.normal()
         m = (1 - m_speeds) * m + m_speeds * r_prev
@@ -302,6 +346,14 @@ def simulate_abm(T: int = 6000, seed: int = 0,
             D += (I_star - I_ant) + p["sA"] * rng.normal()
             I_ant = I_star
         r = p["lam"] * D
+        if quote_skew:
+            # DESIGN22: quote-skewed price formation. The shift lands in the
+            # same bar as the forecast revision (efficient absorption into
+            # the LEVEL); no flow is added and no RNG is drawn, so
+            # quote_skew=0 skips this branch and stays byte-identical.
+            q = quote_skew * p["lam"] * _flow_forecast(sig2, p)
+            r += q - q_prev
+            q_prev = q
         r = float(np.clip(r, -0.25, 0.25))      # circuit breaker (data hygiene)
         price += r
         out[t] = r
@@ -353,6 +405,20 @@ CONFIGS3 = {
     "K5_FIXEDPOINT": dict(fundamentalists=True, chartists=True,
                           voltargeters=True, marketmakers=True,
                           anticipators=True, fixed_point_iters=5),
+}
+
+
+# DESIGN22 ablation: PRICE-SETTING rationality — the quote-skewing maker.
+# lambda=1.0 is the theory case (price pre-moves by exactly the expected
+# impact of the forecastable flow), 0.5 is half. lambda is the ONLY thing
+# that varies; the two values are the entire pre-registered budget.
+CONFIGS4 = {
+    "FCVM":      dict(fundamentalists=True, chartists=True,
+                      voltargeters=True, marketmakers=True),
+    "FCVM+Q1.0": dict(fundamentalists=True, chartists=True,
+                      voltargeters=True, marketmakers=True, quote_skew=1.0),
+    "FCVM+Q0.5": dict(fundamentalists=True, chartists=True,
+                      voltargeters=True, marketmakers=True, quote_skew=0.5),
 }
 
 
