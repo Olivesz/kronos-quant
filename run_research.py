@@ -267,10 +267,13 @@ def exp_statarb(force: bool = False) -> dict:
 _SLEEVE_CACHE = os.path.join(RES, "sleeve_returns.csv")
 
 def get_sleeves_and_regime(force: bool = False):
+    from dataclasses import replace
+
     from kronos.regime import walkforward_regimes
     px, ohlc, gk, src = get_data()
     mkt = px[CFG.market].pct_change().dropna()
-    rg = walkforward_regimes(mkt, CFG)
+    # the original KRONOS-X studies predate the engine flag: pin gaussian
+    rg = walkforward_regimes(mkt, replace(CFG, regime_engine="gaussian"))
     regime = rg["regime"]
     if not force and os.path.exists(_SLEEVE_CACHE):
         sleeves = pd.read_csv(_SLEEVE_CACHE, index_col=0, parse_dates=True)
@@ -392,7 +395,7 @@ def exp_forensics(force: bool = False) -> dict:
         "regime_models": 3, "k_sweep": 8, "sjm_lambda_grid": 6,
         "cvar_engines": 4, "ensemble_methods": 5, "vol_forecasters": 3,
         "design15_edge_variants": 2,   # fix-only + fix+lev1.5 (DESIGN15)
-        "design16_variants": 2,        # HAR-vs-EWMA lever + t-HMM engine (DESIGN16)
+        "design16_variants": 3,        # HAR lever + t-HMM engine + joint (DESIGN16)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:
@@ -1516,7 +1519,8 @@ def exp_edge(force: bool = False) -> dict:
     px, _, _, src = get_data()
     mkt = px[CFG.market].pct_change().dropna()
     t0 = time.time()
-    rg = walkforward_regimes(mkt, CFG)
+    # DESIGN15 predates the engine flag (DESIGN16 V2): pin the era's gaussian
+    rg = walkforward_regimes(mkt, replace(CFG, regime_engine="gaussian"))
     pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
 
     def legacy_exposure(port_rets, cfg):
