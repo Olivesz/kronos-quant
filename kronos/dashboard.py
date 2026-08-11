@@ -459,6 +459,18 @@ footer{color:var(--faint);font-size:11.5px;line-height:1.7;margin-top:26px;
       </div>
     </div>
 
+    <div class="panel" id="panel-fx" style="display:none">
+      <h2>FX — The Third Vertex of the Microstructure Triangle</h2>
+      <div class="sub">Equities have financial leverage + institutional de-risking (leverage effect −0.04); crypto has neither plus retail FOMO (+0.03). FX — an institutional dealer market where a currency is not a levered claim — is the vertex with neither ingredient: pre-registered prediction leverage ≈ 0. 13 crosses, all passing a real-range data-quality guard; same 7-law battery.</div>
+      <div class="row c2e">
+        <div><h2 style="margin-bottom:6px">The leverage effect across three microstructures</h2>
+          <div id="ch-fx-tri"></div>
+          <div class="sub" id="sub-fx-tri" style="margin-top:8px"></div></div>
+        <div><h2 style="margin-bottom:6px">Per-pair leverage (the safe-haven axis)</h2>
+          <div class="chart" id="ch-fx-pairs"></div></div>
+      </div>
+    </div>
+
     <div class="panel" id="panel-edge" style="display:none">
       <h2>EDGE — The Sign Bug 30 Green Gates Missed</h2>
       <div class="sub">Diagnosis-before-optimization (DESIGN15): the drawdown throttle was INVERTED — braking hardest at the high-water mark, releasing into crashes — and vol targeting could never reach its target under the exposure cap. Fixed under pre-registered kill criteria; the missing gate (X27) now pins the overlay's direction. Baseline reproduced from the legacy overlay, kept inline and labeled.</div>
@@ -1747,6 +1759,56 @@ function buildResearch(){
     for(const [id,desc,ok] of hyp)
       ht+=`<tr><td>${id}</td><td>${desc}</td><td><span class="${ok?'pos':'neg'}">${ok?'✓ holds':'✗ refuted'}</span></td></tr>`;
     setHTML('tbl-crypto-hyp',ht);
+  }
+
+  /* ---- FX panel ---- */
+  if(R.fx){
+    $('panel-fx').style.display='';
+    const FX=R.fx, lc=FX.leverage_contrast;
+    const tri=[['equities (4 markets)',lc.equity_mean,lc.equity_spread,'var(--rose)'],
+               ['FX (13 crosses)',lc.fx_leverage,lc.fx_sd,'var(--dim)'],
+               ['crypto (10 majors)',lc.crypto_leverage,lc.crypto_sd,'var(--green)']];
+    const span=0.09;
+    let h='<div style="font-size:11px">';
+    for(const [name,v,sd,col] of tri){
+      const x=(v+span/2)/span*100, w=sd/span*100;
+      h+=`<div style="display:flex;align-items:center;gap:8px;margin:8px 0">`+
+        `<span style="width:120px;color:var(--faint);text-align:right">${name}</span>`+
+        `<div style="flex:1;position:relative;height:16px;background:var(--panel2);border-radius:4px">`+
+        `<div style="position:absolute;left:50%;top:0;width:1px;height:16px;background:var(--line)"></div>`+
+        `<div style="position:absolute;left:${x-w}%;top:6px;height:4px;width:${2*w}%;background:${col};opacity:.35;border-radius:2px"></div>`+
+        `<div style="position:absolute;left:${x}%;top:1px;width:3px;height:14px;background:${col};border-radius:1px"></div>`+
+        `</div><span style="width:56px;color:${col}">${v>=0?'+':''}${v.toFixed(3)}</span></div>`;}
+    h+='</div>';
+    setHTML('ch-fx-tri',h);
+    setHTML('sub-fx-tri',`<b style="color:var(--green)">The ordering is monotone in microstructure</b>: equity −0.041 &lt; FX ${lc.fx_leverage>=0?'+':''}${lc.fx_leverage} &lt; crypto +${lc.crypto_leverage}. FX is statistically ZERO (z vs 0 = ${lc.z_fx_vs_zero}) and separated from every equity market (z = ${lc.z_fx_vs_equities}); the FX–crypto edge stays inside noise (z = ${lc.z_crypto_vs_fx}) — reported as the pre-registered partial it is. One-clock collapse: the deepest measured (kurt 7.6 → 2.68).`);
+
+    const pp=Object.entries(FX.per_pair_leverage).sort((a,b)=>a[1]-b[1]);
+    const mx=Math.max(...pp.map(([,v])=>Math.abs(v)),0.03);
+    let hb='<div style="font-size:11px">';
+    for(const [pair,v] of pp){
+      const w=Math.abs(v)/mx*48, pos=v>0;
+      hb+=`<div style="display:flex;align-items:center;gap:8px;margin:2px 0">`+
+        `<span style="width:64px;color:var(--faint);text-align:right">${pair.replace('=X','')}</span>`+
+        `<div style="flex:1;position:relative;height:10px;background:var(--panel2);border-radius:3px">`+
+        `<div style="position:absolute;left:50%;top:0;width:1px;height:10px;background:var(--line)"></div>`+
+        `<div style="position:absolute;${pos?'left:50%':'right:50%'};top:1px;height:8px;width:${w}%;background:${pos?'var(--green)':'var(--rose)'};border-radius:2px"></div>`+
+        `</div><span style="width:52px;color:${pos?'var(--green)':'var(--rose)'}">${v>=0?'+':''}${v.toFixed(3)}</span></div>`;}
+    hb+=`</div><div class="sub" style="margin-top:6px">The three most negative pairs are all <b>yen crosses</b> — carry-unwind dynamics acting like equity leverage; the most positive is USDMXN. The residual spread lies on the safe-haven axis.</div>`;
+    setHTML('ch-fx-pairs',hb);
+  }
+
+  /* ---- HARVEST note on the BITS panel ---- */
+  if(R.bits&&R.harvest&&$('sub-bits')){
+    const g=R.harvest.gap;
+    $('sub-bits').insertAdjacentHTML('beforeend',
+      ` <b style="color:var(--amber)">HARVEST (DESIGN19):</b> the production regime label captures only ${(R.harvest.gap.mi_harvested_net/R.harvest.gap.mi_full_net*100).toFixed(0)}% of the monthly sign information — gap ${g.gap_bits.toFixed(4)} bits, CI [${g.ci[0].toFixed(4)}, ${g.ci[1].toFixed(4)}]; the unharvested carrier is 21-day momentum, now shipped as the MOMTILT exposure tilt (DESIGN21).`);
+  }
+
+  /* ---- DECATHLON-2 note on the DECATHLON panel ---- */
+  if(R.decathlon&&R.decathlon2&&$('sub-deca')){
+    $('sub-deca').insertAdjacentHTML('beforeend',
+      ` <b style="color:var(--rose)">DECATHLON-2:</b> the "missing organ is expectation" conjecture was put to the test — a causal, gate-verified anticipatory agent front-running the vol-targeters' flow leaves the score at 5/10 with an identical fail set. <b>Refuted</b>: one layer of expectation reproduces the sign leak one derivative earlier; information-free prices need the fixed point of mutual anticipation.`);
   }
 
   /* ---- EDGE panel ---- */
