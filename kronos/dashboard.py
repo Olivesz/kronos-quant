@@ -1809,6 +1809,8 @@ function buildResearch(){
   if(R.decathlon&&R.decathlon2&&$('sub-deca')){
     $('sub-deca').insertAdjacentHTML('beforeend',
       ` <b style="color:var(--rose)">DECATHLON-2:</b> the "missing organ is expectation" conjecture was put to the test — a causal, gate-verified anticipatory agent front-running the vol-targeters' flow leaves the score at 5/10 with an identical fail set. <b>Refuted</b>: one layer of expectation reproduces the sign leak one derivative earlier; information-free prices need the fixed point of mutual anticipation.`);
+    if(R.decathlon3) $('sub-deca').insertAdjacentHTML('beforeend',
+      ` <b style="color:var(--rose)">DECATHLON-3:</b> iterating that fixed point (K=5, gate-verified to contract open-loop) makes the leak GROW (E9 bits 0.018 → 0.026) — the K-stack is algebraically one stronger anticipator. The ceiling stands against the strongest member of its own critique.`);
   }
 
   /* ---- EDGE panel ---- */
