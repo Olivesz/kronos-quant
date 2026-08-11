@@ -21,6 +21,7 @@ studies extend the battery to Japan, Europe, Asia-EM, crypto (2017–2026), and
 - [KRONOS-DECATHLON — the minimal market](#kronos-decathlon--the-minimal-market)
 - [KRONOS-DECATHLON-2 — is expectation the missing organ?](#kronos-decathlon-2--is-expectation-the-missing-organ)
 - [KRONOS-DECATHLON-3 — the fixed point of mutual anticipation](#kronos-decathlon-3--the-fixed-point-of-mutual-anticipation)
+- [KRONOS-DECATHLON-4 — the ceiling is structural; the line closes](#kronos-decathlon-4--the-ceiling-is-structural-the-line-closes)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
@@ -365,6 +366,80 @@ be bought by *any depth* of mutual anticipation over public state —
 information-free prices are not the fixed point of this operator, because
 the leak lives in the state-riding structure of the flows themselves, not in
 any finite failure to anticipate them.
+
+## KRONOS-DECATHLON-4 — the ceiling is structural; the line closes
+
+DECA2 and DECA3 killed every agent that TRADES against the forecastable flow
+— an anticipator's inventory rides the same slow public state, so its trades
+re-leak what they absorb. One hypothesis survived that diagnosis:
+**price-setting rationality**. A market maker who does not trade but QUOTES —
+pre-adjusting the price by the expected impact of the forecastable flow so
+the information is absorbed into the price *level* instead of the return
+([DESIGN22](design/DESIGN22.md), pre-registered as the third and **final**
+attempt on the expectation line, closure clause included). The maker reuses
+DECA2's causal public-state forecast, holds no inventory, adds no flow, and
+draws no noise: `q_t = λ·lam·F̂_t`, `r_t = lam·D_t + (q_t − q_{t−1})`.
+Because its forecast state IS the targeters' public state, the quote
+revision telescopes *exactly* against the mechanical flow — at full skew the
+forecastable component's price impact vanishes from returns by algebraic
+identity, not by tuning. Gate **X34** licenses all of it before any score is
+read: flag-off is byte-identical (X30/X32 pins reproduced), the quote path
+is causal under future-tampering, and on the deterministic toy world the
+leak estimator corr(f_mech,t, r_{t+1}) collapses **+0.66 → −0.06** while
+the flow series itself is untouched (max deviation 4.5% of peak, total
+re-leveraging identical) — absorption into the level, not suppression of
+the flow. The mechanism is perfect. The market still refuses it:
+
+| Config | Score | Event pattern | E9 bits (median) |
+|---|---|---|---|
+| FCVM (control) | 5/10 | fails E3 E4 E7 E8 E9 | 0.0184 |
+| **FCVM+Q(1.0)** (the theory case) | **1/10** | fails **everything but E6** | **0.0237** |
+| FCVM+Q(0.5) | 3/10 | fails E1 E2 E3 E4 E7 E8 E9 | 0.0180 |
+| Q(0.05) tuned (contingent pass) | 5/10 | fails E3 E4 E7 E8 E9 | 0.0176 |
+
+**D4-1 REFUTED — and the refutation is the sharpest of the three.** The
+full-skew maker removes the vol-targeters' forecastable impact *exactly*,
+and the sign leak does not close: bits stay flat at half skew (0.0180 vs
+0.0184) and **grow** at full skew (0.0237, higher on 7 of 8 seeds). The leak
+was never the vol-targeters' drift alone — DESIGN18's original attribution
+is overturned. It lives distributed across ALL the state-riding flows
+(chartist momentum, fundamentalist reversion, the one-lag maker's partial
+absorption), and deleting the spiral's impact just strips away the wildness
+that was masking them: E1 breaks (ac1 +0.04 → −0.26; with the spiral gone,
+the liquidity provider's reversion dominates), and the newly-Gaussian
+returns make the remaining structure *easier* to detect. **D4-2 REFUTED at
+the theory case**: the maker does not neutralize only the forecastable mean
+— in this market the forecastable flow IS the wildness generator, so full
+absorption kills fat tails (kurt 8.8 → 3.0), the leverage effect (−0.125 →
+−0.008), crash asymmetry (tail ratio 40 → 1.1), and vol clustering
+(ac1|r| 0.38 → 0.06) in one stroke. Half skew regresses too (3/10), so the
+pre-registered contingent pass fired: the 6-candidate ladder came back flat
+at 5/10 for every λ ≤ 0.30, and the pre-declared weakest-skew tie-break
+picked λ=0.05 — the DECA2/DECA3 selection pattern a third time, now for a
+pricing rule. Read once on the eval seeds: 5/10, failing exactly FCVM's
+five events (D4-3: the residual failure set is unmoved). The battery pays
+for the least rationality at every opportunity, in every agent class.
+
+**THE CLOSURE CLAUSE FIRES.** Per the pre-registration: the 5/10 ceiling is
+declared **STRUCTURAL** for flow-based minimal markets with
+boundedly-rational agents of every class here considered, and the DESIGN8
+line **CLOSES** — no DECATHLON-5. The three refutations compose into one
+theorem-shaped statement. In this model class the forecastable flow
+component and the wild one-sided facts are *the same object*: (1) an agent
+who trades against the flow re-leaks it one derivative earlier (DECA2);
+(2) stacking such agents to the fixed point of mutual anticipation is
+algebraically one stronger such agent and re-leaks harder (DECA3); (3) a
+price-setter who absorbs the flow's impact exactly — the rational-
+expectations limit for this channel, verified to the identity — can only
+close the leak by deleting the de-leveraging dynamics that generate the
+tails, the leverage effect, and the crash asymmetry, scoring 1/10 (DECA4).
+Efficiency-in-signs and wildness are not separate dials: in a market moved
+by state-riding flows they are jointly produced, and no bolt-on layer of
+rationality — trading, iterated, or price-setting — can buy the five
+missing events (E3 E4 E7 E8 E9). What the minimal market lacks is not a
+smarter agent but a different *kind* of memory: the long-memory clock and
+the coupling arrow live upstream of the flows, in whatever generates them —
+which is where any successor program would have to begin.
 
 ## KRONOS-TRADE — the deployable system
 
