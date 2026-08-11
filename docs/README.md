@@ -34,6 +34,7 @@ arc, or jump to a finding.
 | 13 | [DESIGN13.md](design/DESIGN13.md) | Cross-market transfer | The mechanism laws (fat tails, leverage, near-critical branching) reappear abroad; the frozen US-tuned system holds its risk edge in Japan/Europe/Asia-EM. |
 | 14 | [DESIGN14.md](design/DESIGN14.md) | Crypto: laws outside equities | The mechanism transfers to crypto (one-clock collapse, branching), but the **leverage effect inverts** — it's a property of the equity microstructure, not a market universal. |
 | 15 | [DESIGN15.md](design/DESIGN15.md) | The engine's structural drag | Diagnosis found an **inverted drawdown throttle** (a sign bug braking at peaks) and an unreachable vol target; both fixed under pre-registered kill criteria — Sharpe 0.94 → 1.02 unlevered. |
+| 16 | [DESIGN16.md](design/DESIGN16.md) | The licensed performance program | The two upgrades the research already licensed: the **HAR forecast-vol lever** (Sharpe 0.95 → 1.03) and the **t-HMM regime engine** (→ 1.05 joint) — each gated, each with a kill criterion, three ledger entries total. |
 | 17 | [DESIGN17.md](design/DESIGN17.md) | FX: the microstructure triangle | FX leverage is **statistically zero** (+0.005, z vs 0 = 0.56) and separable from every equity market (z = 3.89) — the triangle equity −0.04 / FX ~0 / crypto +0.03 is monotone, though the FX–crypto edge stays inside noise (z = 1.44). |
 
 ## How the research maps to code
@@ -56,6 +57,7 @@ before real data ever touches the estimator:
 | Transfer (13) | `kronos/transfer.py` | `tests/test_transfer.py` (X24) |
 | Crypto (14) | `kronos/crypto.py` | `tests/test_crypto.py` (X26) |
 | Edge (15) | `kronos/risk.py`, `kronos/backtest.py` | `tests/test_risk.py` (X27) |
+| Edge2 (16) | `kronos/risk.py` (HAR lever), `kronos/regime.py` (engine flag) | `tests/test_lever.py` (X28), `tests/test_regime_engine.py` (X29) |
 | FX (17) | `kronos/fx.py` | reuses X24 + X26; runtime real-range guard in `load_fx` |
 
 See the top-level [README](../README.md) for the full results tables.
