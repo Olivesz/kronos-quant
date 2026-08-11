@@ -1501,6 +1501,98 @@ def exp_crypto(force: bool = False) -> dict:
     return out
 
 
+def exp_fx(force: bool = False) -> dict:
+    if not force and (c := load_cached("fx")):
+        print("[fx] cached")
+        return c
+    from kronos.fx import fx_contrast, load_fx, per_pair_leverage
+    from kronos.hawkes import recovery_curve
+    from kronos.transfer import battery, transfer_tests
+
+    # Equity cohort: the EXACT batteries TRANSFER reported; crypto: the EXACT
+    # battery CRYPTO reported — all six universes share one baseline.
+    tj = load_cached("transfer")
+    if tj is None:
+        exp_transfer(force=False)
+        tj = load_cached("transfer")
+    cj = load_cached("crypto")
+    if cj is None:
+        exp_crypto(force=False)
+        cj = load_cached("crypto")
+    eq_markets = list(tj["sources"].keys())          # US + 3 equity regions
+    laws = tj["laws"]
+    batteries = {m: {q: (laws[q]["values"][m], laws[q]["sds"][m])
+                     for q in laws if m in laws[q]["values"]}
+                 for m in eq_markets}
+    batteries["crypto"] = {q: (cj["laws"][q]["values"]["crypto"],
+                               cj["laws"][q]["sds"]["crypto"])
+                           for q in cj["laws"] if "crypto" in cj["laws"][q]["values"]}
+
+    t0 = time.time()
+    fu = load_fx()   # raises loudly if the real-range guard fails (DESIGN17)
+    audit = fu["range_audit"]
+    print(f"[fx] {fu['close'].shape[1]} pairs x {len(fu['close'])} days "
+          f"({fu['source']}, {fu['close'].index[0].date()} -> "
+          f"{fu['close'].index[-1].date()})")
+    print(f"[fx] real-range audit: min {min(audit.values()):.2%} "
+          f"across {len(audit)} pairs; dropped: {fu['dropped'] or 'none'}")
+    curve = recovery_curve(n_rep=8, T=float(len(fu["close"])), seed=0)
+    batteries["fx"] = battery(fu["close"], fu["gk"], curve)
+
+    rep = transfer_tests(batteries, ref="US")
+    lev = fx_contrast(batteries, eq_markets)
+    per_pair = per_pair_leverage(fu["close"], fu["gk"])
+    n_pos = sum(1 for v in per_pair.values() if v > 0)
+    # F2's sign test (two-sided binomial 5%): 3..10 of 13 positive = symmetric
+    sign_ok = 3 <= n_pos <= len(per_pair) - 3
+
+    def eqmed(q):
+        return float(np.median([laws[q]["values"][m] for m in eq_markets]))
+
+    F = batteries["fx"]
+    eq_kurts = [batteries[m]["kurt"][0] for m in eq_markets]
+    f1 = F["kurt_def"][0] < 5.0
+    f2 = lev["verdict"] == "ZERO-MIDPOINT" and sign_ok
+    # F3 pass: below the equity cohort MINIMUM; kill: at/above the MEDIAN
+    if F["kurt"][0] < min(eq_kurts):
+        f3_class, f3 = "PASS", True
+    elif F["kurt"][0] >= float(np.median(eq_kurts)):
+        f3_class, f3 = "KILLED", False
+    else:
+        f3_class, f3 = "MARGINAL", False
+
+    for q in rep:
+        fv = rep[q]["values"].get("fx")
+        print(f"[fx] {q:12s} fx={fv} vs equity-median={round(eqmed(q),3)} "
+              f"crypto={rep[q]['values'].get('crypto')} "
+              f"| {rep[q]['class']}  z={rep[q]['z_vs_ref'].get('fx')}")
+    print(f"[fx] LEVERAGE: equity {lev['equity_mean']:+.3f} | fx "
+          f"{lev['fx_leverage']:+.3f} (sd {lev['fx_sd']:.3f}) | crypto "
+          f"{lev['crypto_leverage']:+.3f} -> {lev['verdict']}")
+    print(f"[fx] z(fx vs 0)={lev['z_fx_vs_zero']} z(fx vs eq)="
+          f"{lev['z_fx_vs_equities']} z(crypto vs fx)={lev['z_crypto_vs_fx']} "
+          f"monotone={lev['monotone_eq_fx_crypto']}; {n_pos}/{len(per_pair)} "
+          f"pairs positive (sign test {'ok' if sign_ok else 'LOPSIDED'})")
+    print(f"[fx] F1 one-clock survives: {f1} (kurt_def={F['kurt_def'][0]:.2f}) | "
+          f"F2 leverage is the zero midpoint: {f2} ({lev['verdict']}) | "
+          f"F3 milder tails: {f3_class} (kurt {F['kurt'][0]:.1f} vs equity "
+          f"min {min(eq_kurts):.1f} / median {float(np.median(eq_kurts)):.1f})")
+
+    out = {"source": fu["source"], "pairs": list(fu["close"].columns),
+           "span": [str(fu["close"].index[0].date()),
+                    str(fu["close"].index[-1].date())],
+           "range_audit": audit, "dropped_pairs": fu["dropped"],
+           "equity_markets": eq_markets, "laws": rep,
+           "leverage_contrast": lev, "per_pair_leverage": per_pair,
+           "n_pairs_positive": n_pos, "sign_test_symmetric": bool(sign_ok),
+           "branching_still_collapses": bool(F["n_def"][0] < F["n_raw"][0]),
+           "F3_class": f3_class,
+           "hypotheses": {"F1": bool(f1), "F2": bool(f2), "F3": bool(f3)}}
+    print(f"[fx] done in {time.time()-t0:.0f}s")
+    save("fx", out)
+    return out
+
+
 def exp_edge(force: bool = False) -> dict:
     """DESIGN15 before/after, reproducible: reconstructs the LEGACY (inverted-
     throttle) overlay inline for the baseline row, then measures fix-only and
@@ -1613,6 +1705,7 @@ EXPERIMENTS = {
     "constants": exp_constants,
     "transfer": exp_transfer,
     "crypto": exp_crypto,
+    "fx": exp_fx,
     "edge": exp_edge,
     "vollab": exp_vollab,
     "rough": exp_rough,

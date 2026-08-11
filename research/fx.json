@@ -1,0 +1,285 @@
+{
+ "source": "yahoo",
+ "pairs": [
+  "AUDJPY=X",
+  "AUDUSD=X",
+  "CAD=X",
+  "CHF=X",
+  "EURCHF=X",
+  "EURGBP=X",
+  "EURJPY=X",
+  "EURUSD=X",
+  "GBPJPY=X",
+  "GBPUSD=X",
+  "JPY=X",
+  "MXN=X",
+  "NZDUSD=X"
+ ],
+ "span": [
+  "2010-01-01",
+  "2026-06-04"
+ ],
+ "range_audit": {
+  "AUDJPY=X": 1.0,
+  "AUDUSD=X": 0.9998,
+  "CAD=X": 0.9998,
+  "CHF=X": 0.9998,
+  "EURCHF=X": 0.9988,
+  "EURGBP=X": 0.9988,
+  "EURJPY=X": 0.9998,
+  "EURUSD=X": 0.9995,
+  "GBPJPY=X": 0.9995,
+  "GBPUSD=X": 0.9988,
+  "JPY=X": 0.9995,
+  "MXN=X": 0.9995,
+  "NZDUSD=X": 0.9993
+ },
+ "dropped_pairs": {},
+ "equity_markets": [
+  "US",
+  "japan",
+  "europe",
+  "asia_em"
+ ],
+ "laws": {
+  "kurt": {
+   "values": {
+    "US": 13.143,
+    "japan": 8.878,
+    "europe": 11.319,
+    "asia_em": 8.418,
+    "crypto": 16.574,
+    "fx": 7.58
+   },
+   "sds": {
+    "US": 2.86,
+    "japan": 0.858,
+    "europe": 1.929,
+    "asia_em": 0.687,
+    "crypto": 3.173,
+    "fx": 0.97
+   },
+   "VR": 2.92,
+   "p": 0.036,
+   "z_vs_ref": {
+    "japan": -1.43,
+    "europe": -0.53,
+    "asia_em": -1.61,
+    "crypto": 0.8,
+    "fx": -1.84
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "kurt_def": {
+   "values": {
+    "US": 3.439,
+    "japan": 3.346,
+    "europe": 3.553,
+    "asia_em": 3.765,
+    "crypto": 4.498,
+    "fx": 2.679
+   },
+   "sds": {
+    "US": 0.046,
+    "japan": 0.042,
+    "europe": 0.038,
+    "asia_em": 0.054,
+    "crypto": 0.199,
+    "fx": 0.066
+   },
+   "VR": 40.43,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": -1.49,
+    "europe": 1.91,
+    "asia_em": 4.6,
+    "crypto": 5.18,
+    "fx": -9.47
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "leverage": {
+   "values": {
+    "US": -0.047,
+    "japan": -0.039,
+    "europe": -0.046,
+    "asia_em": -0.03,
+    "crypto": 0.031,
+    "fx": 0.005
+   },
+   "sds": {
+    "US": 0.015,
+    "japan": 0.008,
+    "europe": 0.017,
+    "asia_em": 0.01,
+    "crypto": 0.016,
+    "fx": 0.009
+   },
+   "VR": 6.04,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": 0.47,
+    "europe": 0.04,
+    "asia_em": 0.94,
+    "crypto": 3.56,
+    "fx": 3.0
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "H": {
+   "values": {
+    "US": 0.069,
+    "japan": 0.015,
+    "europe": 0.055,
+    "asia_em": 0.048,
+    "crypto": 0.077,
+    "fx": 0.052
+   },
+   "sds": {
+    "US": 0.008,
+    "japan": 0.007,
+    "europe": 0.007,
+    "asia_em": 0.004,
+    "crypto": 0.009,
+    "fx": 0.005
+   },
+   "VR": 9.88,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": -5.08,
+    "europe": -1.32,
+    "asia_em": -2.35,
+    "crypto": 0.66,
+    "fx": -1.84
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "n_raw": {
+   "values": {
+    "US": 0.693,
+    "japan": 0.58,
+    "europe": 0.727,
+    "asia_em": 0.626,
+    "crypto": 0.687,
+    "fx": 0.769
+   },
+   "sds": {
+    "US": 0.068,
+    "japan": 0.062,
+    "europe": 0.069,
+    "asia_em": 0.078,
+    "crypto": 0.036,
+    "fx": 0.037
+   },
+   "VR": 1.27,
+   "p": 0.267,
+   "z_vs_ref": {
+    "japan": -1.23,
+    "europe": 0.35,
+    "asia_em": -0.65,
+    "crypto": -0.08,
+    "fx": 0.98
+   },
+   "class": "TRANSFERS"
+  },
+  "n_def": {
+   "values": {
+    "US": 0.241,
+    "japan": 0.455,
+    "europe": 0.8,
+    "asia_em": 0.32,
+    "crypto": 0.2,
+    "fx": 0.2
+   },
+   "sds": {
+    "US": 0.147,
+    "japan": 0.133,
+    "europe": 0.145,
+    "asia_em": 0.151,
+    "crypto": 0.027,
+    "fx": 0.092
+   },
+   "VR": 3.5,
+   "p": 0.008,
+   "z_vs_ref": {
+    "japan": 1.08,
+    "europe": 2.71,
+    "asia_em": 0.37,
+    "crypto": -0.27,
+    "fx": -0.24
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  },
+  "commonality": {
+   "values": {
+    "US": 0.693,
+    "japan": 0.903,
+    "europe": 0.667,
+    "asia_em": 0.413,
+    "crypto": 0.795,
+    "fx": 0.558
+   },
+   "sds": {
+    "US": 0.038,
+    "japan": 0.034,
+    "europe": 0.037,
+    "asia_em": 0.034,
+    "crypto": 0.029,
+    "fx": 0.03
+   },
+   "VR": 26.02,
+   "p": 0.0,
+   "z_vs_ref": {
+    "japan": 4.12,
+    "europe": -0.49,
+    "asia_em": -5.49,
+    "crypto": 2.13,
+    "fx": -2.78
+   },
+   "class": "UNIVERSE-SPECIFIC"
+  }
+ },
+ "leverage_contrast": {
+  "fx_leverage": 0.0049,
+  "fx_sd": 0.0086,
+  "equity_mean": -0.0405,
+  "equity_spread": 0.0079,
+  "equity_values": {
+   "US": -0.047,
+   "japan": -0.039,
+   "europe": -0.046,
+   "asia_em": -0.03
+  },
+  "crypto_leverage": 0.031,
+  "crypto_sd": 0.016,
+  "z_fx_vs_zero": 0.56,
+  "z_fx_vs_equities": 3.89,
+  "z_crypto_vs_fx": 1.44,
+  "monotone_eq_fx_crypto": true,
+  "verdict": "SAME-AS-CRYPTO"
+ },
+ "per_pair_leverage": {
+  "AUDJPY=X": -0.04619010506018897,
+  "AUDUSD=X": -0.02160879713211312,
+  "CAD=X": 0.025461599341628054,
+  "CHF=X": 0.004862228623305902,
+  "EURCHF=X": -0.009829502654889063,
+  "EURGBP=X": 0.029921075930764224,
+  "EURJPY=X": -0.022256515894426482,
+  "EURUSD=X": 0.008273123306705085,
+  "GBPJPY=X": -0.023837057994662146,
+  "GBPUSD=X": 0.005398510161169642,
+  "JPY=X": -0.01671449432112216,
+  "MXN=X": 0.07475058865270287,
+  "NZDUSD=X": 0.01038143739253783
+ },
+ "n_pairs_positive": 7,
+ "sign_test_symmetric": true,
+ "branching_still_collapses": true,
+ "F3_class": "PASS",
+ "hypotheses": {
+  "F1": true,
+  "F2": false,
+  "F3": true
+ }
+}
