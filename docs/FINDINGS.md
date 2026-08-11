@@ -17,6 +17,7 @@ liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC.
 - [KRONOS-REFLEX — how endogenous is the market?](#kronos-reflex--how-endogenous-is-the-market)
 - [KRONOS-CONSTANTS — which market laws are actually constant?](#kronos-constants--which-market-laws-are-actually-constant)
 - [KRONOS-DECATHLON — the minimal market](#kronos-decathlon--the-minimal-market)
+- [KRONOS-DECATHLON-2 — is expectation the missing organ?](#kronos-decathlon-2--is-expectation-the-missing-organ)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
@@ -240,6 +241,58 @@ configuration buys long memory, the arrow-in-the-coupling, or information-free
 signs. **The minimal market's missing organ is expectation** — anticipatory
 agents who trade against predictable flows. The sharpest mechanism statement
 the project produced about what makes real markets real.
+
+## KRONOS-DECATHLON-2 — is expectation the missing organ?
+
+DECATHLON's conclusion was a testable hypothesis, so we tested it
+([DESIGN18](design/DESIGN18.md), pre-registered with a one-pass tuning budget
+and a kill criterion before any battery run). One new agent type: an
+**anticipator** who front-runs the vol-targeters' mechanical flow using only
+public information — it reconstructs their EWMA vol estimate from the tape,
+forecasts the integrated future de/re-leveraging under vol reversion to the
+targeters' own target, and holds capped inventory against it
+(`I* = clip(kA·kV·(L_eq − L̄), ±capA)`, three parameters). Gate **X30**
+licenses the mechanism before any score is read: the flag off is
+byte-identical to the old simulator (pinned hashes — X19's SPY-10/GBM-3
+calibration untouched), the forecast is causal (tampering with future returns
+leaves the trade prefix unchanged), and on a deterministic toy flow the
+anticipator profits and damps the flow's price impact (impact per unit of
+arriving mechanical flow 1.00 → 0.75). The agent *works*.
+The hypothesis doesn't:
+
+| Config | Score | Event pattern |
+|---|---|---|
+| FCVM (best-old, control) | 5/10 | fails E3 E4 E7 E8 E9 |
+| **FCVM+A** (the hypothesis) | **5/10** | fails E3 E4 E7 E8 E9 — **identical** |
+| FV+A | 5/10 | fails E1 E3 E4 E8 E9 — identical to FV |
+| F+A (no vol-targeters) | 3/10 | = F exactly |
+
+**D2-1 REFUTED.** The pre-registered kill criterion fires: after the single
+tuning pass (first shot 4/10; 18-point grid, best 5/10) the score never
+exceeds the flow-only ceiling. **D2-2 REFUTED** — the events anticipation was
+supposed to buy did not move: direction bits went *up*, not away (0.018 →
+0.020 at the frozen setting, 0.039 at full strength kA=1), and the long-memory
+events stayed flat (8-week clock AC ~0.02 vs the 0.12 bar). **D2-3 HELD**:
+without vol-targeters the anticipator buys nothing (F+A = F = 3/10) —
+expectation indeed needs a predictable flow to trade against; it just doesn't
+fix anything when it has one.
+
+**Why it fails is the finding.** The tuning grid is monotone: the harder the
+anticipator trades, the *worse* the market scores — E1 breaks (its unwind adds
+reversal, ac1 −0.09 → −0.35 as kA rises), E2 erodes (it damps the very spiral
+that generates the tails, kurt 8.8 → 4.6), and the sign leak *grows* (bits up
+to 0.039), because the anticipator's inventory is driven by the same slow
+public vol state as the flow it front-runs — its own trades are exactly as
+forecastable as what it absorbs. One layer of expectation doesn't remove the
+predictable flow; **it reproduces the leak one derivative earlier**, while
+eating the wildness. The battery's preferred anticipator is the weakest one on
+the grid — the market scores best when the anticipator barely trades. So the
+missing organ is not *an* anticipator: information-free prices are a **fixed
+point of mutual anticipation** (anticipators of anticipators, all the way to
+rational expectations), not a fifth flow you can bolt on. A refutation with a
+working gate — DECATHLON's ceiling stands, and it now says something sharper:
+the five missing events cannot be bought by any single boundedly-capitalized
+agent trading against public state.
 
 ## KRONOS-TRADE — the deployable system
 

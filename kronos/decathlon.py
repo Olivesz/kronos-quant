@@ -152,13 +152,59 @@ DEFAULTS = dict(
     sV=0.006,           # fundamental innovation vol
     a_m=1 / 10,         # chartist EWMA speed (single-scale)
     a_s=1 / 8,          # vol-estimate EWMA speed (single-scale)
+    # --- anticipatory agent (DESIGN18) --- FROZEN after the one
+    # pre-registered tuning pass (grid on seeds 900-903, disjoint from
+    # evaluation seeds; first shot kA=0.5/capA=0.02/sA=0.002 scored 4/10;
+    # the grid tied at 5/10 across all weak settings and the pre-declared
+    # tie-break picked the weakest — itself part of the finding: the
+    # battery scores best when the anticipator trades LEAST).
+    kA=0.25,            # fraction of the integrated forecast flow front-run
+    capA=0.01,          # inventory cap (limited capital)
+    sA=0.001,           # execution/forecast noise
 )
+
+
+def _ant_target(sig2: np.ndarray, p: dict) -> float:
+    """Anticipator's target inventory — a pure function of the CURRENT vol
+    state (causality is gate X30b's contract).
+
+    The vol-targeters' mandate is public: L = min(Lmax, sig*/sigma_hat) on a
+    known EWMA of the tape. Under the anticipator's one belief — vol reverts
+    to the targeters' own target — leverage ends at L_eq = min(Lmax, 1), so
+    the INTEGRATED future mechanical flow the current state implies is
+    kV * mean(L_eq - L). Hold kA of it, capped by capital."""
+    L = np.minimum(p["Lmax"],
+                   p["sig_target"] / np.maximum(np.sqrt(sig2), 1e-5))
+    f_hat = p["kV"] * float((min(p["Lmax"], 1.0) - L).mean())
+    return float(np.clip(p["kA"] * f_hat, -p["capA"], p["capA"]))
+
+
+def anticipator_flows(r: np.ndarray, params: dict | None = None,
+                      hetero: bool = False) -> np.ndarray:
+    """Deterministic trade path of the anticipatory agent against an
+    EXOGENOUS return series. flow[t] depends on r[:t] only — the time-t trade
+    is decided before r[t] exists (same alignment as simulate_abm, where the
+    vol state has absorbed returns through t-1 when flows are formed).
+    Gate X30b tampers with the future and requires the prefix unchanged."""
+    p = dict(DEFAULTS)
+    if params:
+        p.update(params)
+    s_speeds = np.array([1 / 5, 1 / 20, 1 / 80]) if hetero else np.array([p["a_s"]])
+    sig2 = np.full(len(s_speeds), p["sig_target"] ** 2)
+    I_prev = 0.0
+    out = np.empty(len(r))
+    for t in range(len(r)):
+        I_star = _ant_target(sig2, p)
+        out[t] = I_star - I_prev
+        I_prev = I_star
+        sig2 = (1 - s_speeds) * sig2 + s_speeds * r[t] ** 2
+    return out
 
 
 def simulate_abm(T: int = 6000, seed: int = 0,
                  fundamentalists: bool = True, chartists: bool = True,
                  voltargeters: bool = True, marketmakers: bool = True,
-                 hetero: bool = False,
+                 hetero: bool = False, anticipators: bool = False,
                  params: dict | None = None) -> pd.Series:
     """Returns a pd.Series of daily returns from the minimal market."""
     p = dict(DEFAULTS)
@@ -180,6 +226,7 @@ def simulate_abm(T: int = 6000, seed: int = 0,
     price, V = 0.0, 0.0
     out = np.empty(T)
     r_prev = 0.0
+    I_ant = 0.0                              # anticipator inventory (DESIGN18)
     for t in range(T):
         V += p["sV"] * rng.normal()
         m = (1 - m_speeds) * m + m_speeds * r_prev
@@ -197,6 +244,16 @@ def simulate_abm(T: int = 6000, seed: int = 0,
             L_prev = L
         if marketmakers:
             D += -p["kM"] * r_prev           # liquidity provision (reversion)
+        if anticipators:
+            # trade toward the target inventory implied by the forecast of
+            # the vol-targeters' remaining mechanical flow (current state
+            # only — no look-ahead), plus execution noise. The extra RNG
+            # draw happens ONLY behind this flag: with anticipators=False
+            # the draw sequence, and hence the output, is byte-identical
+            # to the pre-DESIGN18 simulator (gate X30a).
+            I_star = _ant_target(sig2, p)
+            D += (I_star - I_ant) + p["sA"] * rng.normal()
+            I_ant = I_star
         r = p["lam"] * D
         r = float(np.clip(r, -0.25, 0.25))      # circuit breaker (data hygiene)
         price += r
@@ -223,15 +280,28 @@ CONFIGS = {
                   marketmakers=True, hetero=True),
 }
 
+# DESIGN18 ablation: does EXPECTATION break the 5/10 ceiling?
+CONFIGS2 = {
+    "FCVM":   dict(fundamentalists=True, chartists=True, voltargeters=True,
+                   marketmakers=True),
+    "FCVM+A": dict(fundamentalists=True, chartists=True, voltargeters=True,
+                   marketmakers=True, anticipators=True),
+    "FV+A":   dict(fundamentalists=True, chartists=False, voltargeters=True,
+                   marketmakers=False, anticipators=True),
+    "F+A":    dict(fundamentalists=True, chartists=False, voltargeters=False,
+                   marketmakers=False, anticipators=True),
+}
 
-def run_decathlon(n_seeds: int = 8, T: int = 6000) -> dict:
+
+def run_decathlon(n_seeds: int = 8, T: int = 6000,
+                  configs: dict | None = None, seed0: int = 100) -> dict:
     """Ablation table: per config, the majority-vote event passes."""
     results = {}
-    for name, cfg in CONFIGS.items():
+    for name, cfg in (configs or CONFIGS).items():
         votes = None
         stats_acc = []
         for s in range(n_seeds):
-            r = simulate_abm(T=T, seed=100 + s, **cfg)
+            r = simulate_abm(T=T, seed=seed0 + s, **cfg)
             b = battery(r, seed=s)
             v = {k: int(bool(x)) for k, x in b["events"].items()}
             votes = v if votes is None else {k: votes[k] + v[k] for k in v}
