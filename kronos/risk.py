@@ -1,7 +1,9 @@
 """Risk engine: CVaR / vol-target / drawdown throttles and portfolio Greeks.
 
-Exposure multiplier = EWMA( min(m_vol, m_cvar, m_dd) ), capped at 1 (no
-leverage). All inputs are trailing — strictly causal.
+Exposure multiplier = EWMA( min(m_vol, m_cvar, m_dd) ), capped at
+cfg.max_exposure (DESIGN15: modest leverage so vol-targeting can actually
+reach the vol target; financing on the levered portion is charged by the
+backtester). All inputs are trailing — strictly causal.
 """
 from __future__ import annotations
 
@@ -26,9 +28,10 @@ def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
     """
     r = port_rets.fillna(0.0)
     ann = np.sqrt(252)
+    max_exp = getattr(cfg, "max_exposure", 1.0)
 
     ewma_vol = r.ewm(halflife=21).std() * ann
-    m_vol = (cfg.vol_target / ewma_vol.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
+    m_vol = (cfg.vol_target / ewma_vol.replace(0, np.nan)).clip(upper=max_exp).fillna(1.0)
 
     cvar = r.rolling(252).apply(lambda x: historical_cvar(x.to_numpy(), cfg.cvar_alpha),
                                 raw=False)
@@ -36,13 +39,18 @@ def exposure_series(port_rets: pd.Series, cfg) -> pd.DataFrame:
 
     nav = (1 + r).cumprod()
     dd = nav / nav.cummax() - 1.0
-    # linear de-risk from dd_start to dd_floor_at
-    span = cfg.dd_floor_at - cfg.dd_start
-    m_dd = 1.0 + (dd - cfg.dd_start) * (1 - cfg.dd_min_exposure) / span
-    m_dd = m_dd.clip(lower=cfg.dd_min_exposure, upper=1.0)
+    # linear de-risk: full risk while dd >= dd_start, then down to the floor
+    # at dd_floor_at. (DESIGN15 fixed an inverted sign here that braked at the
+    # high-water mark and released into crashes; gate X27 pins the direction.)
+    frac = ((cfg.dd_start - dd) / (cfg.dd_start - cfg.dd_floor_at)).clip(0.0, 1.0)
+    m_dd = 1.0 - frac * (1.0 - cfg.dd_min_exposure)
 
-    raw = pd.concat([m_vol, m_cvar, m_dd], axis=1).min(axis=1)
-    exposure = raw.ewm(span=cfg.risk_smooth_days).mean().clip(0.0, 1.0)
+    # m_vol is the LEVER (can exceed 1 up to max_exposure when the book runs
+    # cool); m_cvar and m_dd are BRAKES in [floor, 1]. lever x min(brakes):
+    # the old min() of all three could never exceed 1 (gate X27).
+    brakes = pd.concat([m_cvar, m_dd], axis=1).min(axis=1)
+    raw = m_vol * brakes
+    exposure = raw.ewm(span=cfg.risk_smooth_days).mean().clip(0.0, max_exp)
     return pd.DataFrame({"m_vol": m_vol, "m_cvar": m_cvar, "m_dd": m_dd,
                          "exposure": exposure})
 

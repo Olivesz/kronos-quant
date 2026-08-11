@@ -391,6 +391,7 @@ def exp_forensics(force: bool = False) -> dict:
         "v1_manual_sweeps": 10,        # pairs(4) voltarget(2) hysteresis(2) kappa(2)
         "regime_models": 3, "k_sweep": 8, "sjm_lambda_grid": 6,
         "cvar_engines": 4, "ensemble_methods": 5, "vol_forecasters": 3,
+        "design15_edge_variants": 2,   # fix-only + fix+lev1.5 (DESIGN15)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:

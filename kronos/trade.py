@@ -165,8 +165,10 @@ class TradingSystem:
         m_cvar = (c.cvar_target / cvar.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
         nav_g = (1 + gross).cumprod()
         dd = nav_g / nav_g.cummax() - 1.0
-        span = c.dd_floor_at - c.dd_start
-        m_dd = (1.0 + (dd - c.dd_start) * (1 - c.dd_min_exp) / span).clip(c.dd_min_exp, 1.0)
+        # full risk while dd >= dd_start, linear to the floor at dd_floor_at
+        # (DESIGN15 fixed an inverted sign here; direction pinned by gate X27)
+        frac = ((c.dd_start - dd) / (c.dd_start - c.dd_floor_at)).clip(0.0, 1.0)
+        m_dd = 1.0 - frac * (1.0 - c.dd_min_exp)
 
         exposure = pd.concat([m_vol, m_cvar, m_dd], axis=1).min(axis=1)
         exposure = exposure.ewm(span=c.exp_smooth).mean().clip(0.0, 1.0)

@@ -93,10 +93,13 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
     gross_rets = (weights * rets).sum(axis=1)  # weights are start-of-day, t+1-aligned
     gross_rets.iloc[:warmup + 1] = 0.0
 
-    # risk overlay: exposure from trailing gross book, applied T+1
+    # risk overlay: exposure from trailing gross book, applied T+1.
+    # Leverage above 1 pays financing daily on the levered portion (DESIGN15).
     expo = exposure_series(gross_rets, cfg)
     exposure_lag = expo["exposure"].shift(1).fillna(1.0)
-    net_rets = gross_rets * exposure_lag - costs
+    fin_rate = getattr(cfg, "financing_rate_ann", 0.0)
+    financing = (exposure_lag - 1.0).clip(lower=0.0) * (fin_rate / 252.0)
+    net_rets = gross_rets * exposure_lag - costs - financing
 
     return {
         "dates": dates,
