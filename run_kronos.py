@@ -112,8 +112,9 @@ def main():
     }
     years = len(net) / 252
     ann_cost = bt["costs"].loc[start:].sum() / years
+    ann_fin = bt["financing"].loc[start:].sum() / years
     ann_turn = bt["turnover"].loc[start:].sum() / years
-    greeks = portfolio_greeks(net, mkt, ann_cost)
+    greeks = portfolio_greeks(net, mkt, ann_cost + ann_fin)
 
     print("\n=== KRONOS net of costs ===")
     s = stats["KRONOS (net)"]
@@ -125,7 +126,7 @@ def main():
     # 7. payload --------------------------------------------------------------
     payload = build_payload(px, source, regime, rg, bt, pares, pairs_ret,
                             sleeves, net, gross, spy, ew, stats, greeks,
-                            ann_cost, ann_turn)
+                            ann_cost, ann_fin, ann_turn)
 
     # attach KRONOS-X research results if cached (run_research.py)
     if "--research" in sys.argv:
@@ -157,7 +158,7 @@ def main():
 
 
 def build_payload(px, source, regime, rg, bt, pares, pairs_ret, sleeves,
-                  net, gross, spy, ew, stats, greeks, ann_cost, ann_turn):
+                  net, gross, spy, ew, stats, greeks, ann_cost, ann_fin, ann_turn):
     idx = net.index
     nav = lambda r: (1 + r).cumprod()
 
@@ -260,6 +261,7 @@ def build_payload(px, source, regime, rg, bt, pares, pairs_ret, sleeves,
             "rebalance_days": CFG.rebalance_every,
             "vol_target": CFG.vol_target,
             "ann_cost": float(ann_cost),
+            "ann_financing": float(ann_fin),
             "ann_turnover": float(ann_turn),
         },
         "stats": stats,

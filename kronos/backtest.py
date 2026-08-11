@@ -106,6 +106,7 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
         "gross": gross_rets,
         "net": pd.Series(net_rets, index=dates),
         "costs": pd.Series(costs, index=dates),
+        "financing": pd.Series(financing, index=dates),
         "turnover": pd.Series(turnover, index=dates),
         "weights": weights,
         "exposure": expo,
