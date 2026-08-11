@@ -88,6 +88,8 @@ class Config:
     dd_floor_at: float = -0.20
     dd_min_exposure: float = 0.25
     risk_smooth_days: int = 5
+    max_exposure: float = 1.5         # DESIGN15: let vol-targeting reach target
+    financing_rate_ann: float = 0.035 # charged daily on the levered portion
 
     # backtest
     rebalance_every: int = 21
