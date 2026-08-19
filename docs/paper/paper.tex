@@ -69,6 +69,9 @@ effect's sign ordered by market microstructure across equities ($-0.04$), FX
 results are pre-registered, gate-verified against synthetic ground truth, and
 regenerable from the public repository.
 % src: abstract v1, docs/paper/OUTLINE.md; leverage values research/fx.json leverage_contrast
+\medskip
+\noindent\textit{Keywords:} stylized facts; agent-based markets; market
+efficiency; price impact; leverage effect; pre-registered negative results.
 \end{abstract}
 
 \section{Introduction}
@@ -806,6 +809,74 @@ market without it, and (in point estimate) positive where an opposite retail
 dynamic dominates --- but it is not proof of it. No claim is made that the
 minimal market's specific mechanism generates the real effect.
 
+\section{Related work}
+\label{sec:related}
+
+\citet{cont2001} fixed the stylized-facts target list this battery
+operationalizes; our contribution to that program is calibration at both ends
+(real data 10/10, GBM exactly 3/10) so that partial scores are interpretable.
+The agent-based literature descending from \citet{lux1999} and surveyed by
+\citet{lebaron2006} established that fundamentalist--chartist interaction
+buys fat tails and clustering; our ablation reproduces that result (and its
+fragility: chartists without market makers destroy efficiency, scoring 1/10)
+but differs in asking the complement --- which facts a flow-based market
+\emph{cannot} buy at any rationality depth, established by pre-registered
+refutation rather than by exhibition.
+% src: research/decathlon.json configs.FC.score
+
+Two adjacent traditions ask closely related questions with different
+instruments. In the heterogeneous-beliefs models of \citet{brock1998},
+the sophistication of agents' expectations is a bifurcation parameter of a
+deterministic pricing map: making agents more forward-looking changes the
+dynamics qualitatively rather than monotonically improving them. Our
+$K$-ladder is a stochastic, capital-bounded cousin of that exercise, and it
+finds the same non-monotonicity in a measured quantity --- the sign leak
+grows as anticipation deepens. The minority-game literature
+\citep{challet1997} and the intermittent agent-based markets of
+\citet{giardina2003} derive stylized facts from the statistical mechanics of
+adaptive agents competing over a scarce resource, with realistic regimes
+appearing near phase boundaries; our battery differs in scoring a fixed list
+of calibrated events rather than exhibiting a regime, but the joint-production
+finding rhymes with that literature's lesson that efficiency and excess
+volatility are properties of one collective state, not separate features.
+
+The paper's E9 event operationalizes the oldest target in the field.
+\citet{samuelson1965} proved that properly anticipated prices fluctuate
+randomly; \citet{fama1970} organized the empirical program around
+informational efficiency; and \citet{grossman1980} showed that full
+informational efficiency is impossible when information is costly --- an
+equilibrium amount of inefficiency must survive to pay the agents who remove
+it. The joint-production result is a mechanical relative of that
+impossibility with the cost relocated: in this model class the residual sign
+information is not a fee paid to arbitrageurs but a by-product of the same
+state-riding flows that generate the volatility structure, and the three
+experiments show it cannot be traded, iterated, or quoted away without taking
+the wildness with it.
+
+The price-impact literature of Bouchaud and coauthors
+\citep{bouchaud2009, bouchaud2018} underlies the paper's central object: the
+idea that order flow is the proximate mover of prices and that liquidity
+provision digests predictable flow. Our quote-skewing maker is a minimal
+formalization of perfect digestion --- and Experiment~III's finding that exact
+absorption deletes the volatility dynamics along with the leak is, in that
+vocabulary, a statement that the market's wildness \emph{is} its undigested
+flow. \citet{filimonov2012} measured near-critical reflexivity in markets via
+the Hawkes branching ratio; the measurement program behind this paper found
+that result replicates raw (branching ratio $0.68$ across 48 US assets) but
+collapses to $0.25$ --- a no-self-excitation null --- once events are deformed
+by the volatility clock, so most apparent reflexivity at the daily horizon is
+volatility clustering; the same deformation-first discipline shapes the
+battery's E8 event.
+% src: research/reflex.json median_n_raw=0.6827, median_n_def=0.2459, per_asset (48 assets); docs/FINDINGS.md KRONOS-REFLEX
+Rough volatility \citep{gatheral2018} motivates the battery's long-memory
+clock event E4: the measurement program replicated $H \approx 0.10$ on 16
+years of SPY range-based volatility, and E4 is calibrated so that
+exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
+event no flow configuration and no rationality layer ever bought, consistent
+with rough volatility's message that the clock's memory is structural, not
+flow-generated.
+% src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
+
 \section{Methods}
 \label{sec:methods}
 
@@ -888,75 +959,7 @@ makes mechanism claims, not performance claims, but the same accounting
 culture --- count the shots, publish the misses --- produced it.
 % src: research/forensics.json pbo.pbo=0.4455; docs/METHODS.md sections 5 and 8; docs/FINDINGS.md (PBO 0.45 standing rule)
 
-\section{Related work}
-\label{sec:related}
-
-\citet{cont2001} fixed the stylized-facts target list this battery
-operationalizes; our contribution to that program is calibration at both ends
-(real data 10/10, GBM exactly 3/10) so that partial scores are interpretable.
-The agent-based literature descending from \citet{lux1999} and surveyed by
-\citet{lebaron2006} established that fundamentalist--chartist interaction
-buys fat tails and clustering; our ablation reproduces that result (and its
-fragility: chartists without market makers destroy efficiency, scoring 1/10)
-but differs in asking the complement --- which facts a flow-based market
-\emph{cannot} buy at any rationality depth, established by pre-registered
-refutation rather than by exhibition.
-% src: research/decathlon.json configs.FC.score
-
-Two adjacent traditions ask closely related questions with different
-instruments. In the heterogeneous-beliefs models of \citet{brock1998},
-the sophistication of agents' expectations is a bifurcation parameter of a
-deterministic pricing map: making agents more forward-looking changes the
-dynamics qualitatively rather than monotonically improving them. Our
-$K$-ladder is a stochastic, capital-bounded cousin of that exercise, and it
-finds the same non-monotonicity in a measured quantity --- the sign leak
-grows as anticipation deepens. The minority-game literature
-\citep{challet1997} and the intermittent agent-based markets of
-\citet{giardina2003} derive stylized facts from the statistical mechanics of
-adaptive agents competing over a scarce resource, with realistic regimes
-appearing near phase boundaries; our battery differs in scoring a fixed list
-of calibrated events rather than exhibiting a regime, but the joint-production
-finding rhymes with that literature's lesson that efficiency and excess
-volatility are properties of one collective state, not separate features.
-
-The paper's E9 event operationalizes the oldest target in the field.
-\citet{samuelson1965} proved that properly anticipated prices fluctuate
-randomly; \citet{fama1970} organized the empirical program around
-informational efficiency; and \citet{grossman1980} showed that full
-informational efficiency is impossible when information is costly --- an
-equilibrium amount of inefficiency must survive to pay the agents who remove
-it. The joint-production result is a mechanical relative of that
-impossibility with the cost relocated: in this model class the residual sign
-information is not a fee paid to arbitrageurs but a by-product of the same
-state-riding flows that generate the volatility structure, and the three
-experiments show it cannot be traded, iterated, or quoted away without taking
-the wildness with it.
-
-The price-impact literature of Bouchaud and coauthors
-\citep{bouchaud2009, bouchaud2018} underlies the paper's central object: the
-idea that order flow is the proximate mover of prices and that liquidity
-provision digests predictable flow. Our quote-skewing maker is a minimal
-formalization of perfect digestion --- and Experiment~III's finding that exact
-absorption deletes the volatility dynamics along with the leak is, in that
-vocabulary, a statement that the market's wildness \emph{is} its undigested
-flow. \citet{filimonov2012} measured near-critical reflexivity in markets via
-the Hawkes branching ratio; the measurement program behind this paper found
-that result replicates raw (branching ratio $0.68$ across 48 US assets) but
-collapses to $0.25$ --- a no-self-excitation null --- once events are deformed
-by the volatility clock, so most apparent reflexivity at the daily horizon is
-volatility clustering; the same deformation-first discipline shapes the
-battery's E8 event.
-% src: research/reflex.json median_n_raw=0.6827, median_n_def=0.2459, per_asset (48 assets); docs/FINDINGS.md KRONOS-REFLEX
-Rough volatility \citep{gatheral2018} motivates the battery's long-memory
-clock event E4: the measurement program replicated $H \approx 0.10$ on 16
-years of SPY range-based volatility, and E4 is calibrated so that
-exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
-event no flow configuration and no rationality layer ever bought, consistent
-with rough volatility's message that the clock's memory is structural, not
-flow-generated.
-% src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
-
-\section{Reproducibility statement}
+\subsection{Code and data availability}
 \label{sec:repro}
 
 Every number in this paper is regenerable from the public repository. The
