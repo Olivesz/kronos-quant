@@ -459,6 +459,21 @@ reproduces (all six kA=0.25 settings at 5/10, plus (0.5, 0.01, 0.001);
 first shot 4/10). The paper's number checker now asserts all of it;
 narrative skips 4 → 1 (the last closes with A1).
 
+**A1 — the 10/10 anchor audited on six more indices; the prediction FAILED
+and the failure is the finding.** Registered list (no swaps): QQQ, DIA, IWM
++ the transfer study's local index ETFs. Prediction ≥9/10 each. Result:
+**DIA 10/10**, QQQ 8/10 (E7 E8), IWM 8/10 (E8 E10), **1306.T 6/10, EXW1.DE
+7/10, 2800.HK 5/10** — non-US single indices miss the clock-structure and
+sign events (E7/E8/E9 recur). A post-run hygiene probe (recorded in
+DESIGN24) rules out union-calendar padding: native-calendar re-runs score
+the same or lower. Verdict: the battery's absolute anchor extends across
+the large-cap US complex but NOT across venues — the thresholds are
+US-calibrated. This lands in the paper as a measured scope boundary
+(appendix table), consistent with TRANSFER's mechanism-universal /
+calibration-local split. Bonus: the GJR-GARCH clock reference is now
+executable (`battery_audit.json gjr_clock`: median AC8 0.034, max 0.086,
+every seed below the 0.12 bar) — checker narrative skips 1 → 0.
+
 ## KRONOS-TRADE — the deployable system
 
 `run_trade.py` turns the findings into trading software. The design is dictated
