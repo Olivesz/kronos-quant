@@ -18,6 +18,14 @@ data/cache/
 output/dashboard.html
 output/positions_*.json
 
+# LaTeX build artifacts (paper.pdf and figures ARE committed)
+docs/paper/*.aux
+docs/paper/*.log
+docs/paper/*.out
+docs/paper/*.toc
+docs/paper/*.bbl
+docs/paper/*.blg
+
 # OS / editor
 .DS_Store
 
