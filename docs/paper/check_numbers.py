@@ -451,6 +451,44 @@ check("appendix SPY skew cited",
       re.search(r"\(SPY \$-0\.221\$\)", TEX) is not None
       and abs(spy["clock_skew_u"] - (-0.221)) <= 0.0005)
 
+# ------------------------------------- 8b. calibration audit (DESIGN24 A1)
+print("== multi-index calibration audit (battery_audit.json)")
+BA = load("battery_audit")
+gjr = BA["gjr_clock"]
+cite("appendix GJR clock AC8",
+     r"clock\s*\$\\mathrm{AC}_8\$ median \$([\d.]+)\$, maximum \$([\d.]+)\$",
+     gjr["median"], gjr["max"])
+check("GJR below the E4 bar on every seed",
+      gjr["all_below_bar"] and gjr["e4_bar"] == 0.12
+      and max(gjr["per_seed"]) < 0.12)
+check("audit anchor unchanged", BA["anchor"] == {"SPY": 10, "GBM": 3})
+check("audit prediction failed and the paper says so",
+      BA["prediction_ge9_all"] is False
+      and re.search(r"\$\\ge 9/10\$ --- \\emph{failed}", TEX) is not None)
+_venue = {"QQQ": "US", "DIA": "US", "IWM": "US", "1306.T": "Japan",
+          "EXW1.DE": "Europe", "2800.HK": "Hong Kong"}
+for name, venue in _venue.items():
+    rec = BA["indices"][name]
+    check_row(f"tab:audit {name}",
+              rf"{re.escape(name)} +& {venue}.*?\\\\",
+              rec["score"], failed_set(rec["events"]), None,
+              score_cell=2, events_cell=3)
+check_row("tab:audit SPY", r"SPY \(anchor\) & US.*?\\\\",
+          D1["spy"]["score"], failed_set(D1["spy"]["events"]), None,
+          score_cell=2, events_cell=3)
+_us = [BA["indices"][k]["score"] for k in ("QQQ", "DIA", "IWM")]
+_foreign = [BA["indices"][k]["score"] for k in ("1306.T", "EXW1.DE", "2800.HK")]
+check("§2 audit summary (DIA 10, QQQ/IWM 8, foreign 5-7)",
+      BA["indices"]["DIA"]["score"] == 10
+      and BA["indices"]["QQQ"]["score"] == BA["indices"]["IWM"]["score"] == 8
+      and min(_foreign) == 5 and max(_foreign) == 7
+      and re.search(r"DIA also scores 10/10, QQQ and IWM\s*8/10", TEX)
+      and re.search(r"score only 5--7/10", TEX) is not None)
+check("appendix recurring misses E7/E8/E9 in all foreign failure sets",
+      all({7, 9} <= failed_set(BA["indices"][k]["events"])
+          or {7, 8} <= failed_set(BA["indices"][k]["events"])
+          for k in ("1306.T", "EXW1.DE", "2800.HK")))
+
 # --------------------------------------------------------- 9. protocol facts
 print("== protocol facts")
 check("T=6000 in budgets", D3["budget"]["T"] == 6000 and D4["budget"]["T"] == 6000
@@ -479,13 +517,8 @@ check("§7 spurious-leverage bound == gate X26's constant",
       _m26 is not None and float(_m26.group(1)) == 0.04
       and "$|0.04|$" in TEX)
 
-SKIPS = [
-    ("appendix GJR-GARCH clock AC8 ≈ 0.06",
-     "calibration-phase measurement recorded in DESIGN8/code comments only"),
-]
-print()
-for s, why in SKIPS:
-    print(f"  SKIP  {s}\n        ({why})")
+# (no remaining narrative skips: the GJR clock reference is asserted against
+# battery_audit.json gjr_clock in section 8b)
 # --- anti-drift: gate counts stated in the paper must equal len(GATES) -------
 _runner = (ROOT / "tests" / "run_all.py").read_text()
 _n_true = len(re.findall(r'"(test_\w+\.py)"', _runner))

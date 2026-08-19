@@ -227,14 +227,17 @@ Calibration pins both ends of the scale: real SPY (close-only) scores 10/10;
 a pure GBM scores exactly 3/10, passing only E1, E6 and E9 --- Gaussian worlds
 are efficient, trivially one-clock, and carry no sign information. Everything
 between 3 and 10 is what a mechanism must buy. Two scoping remarks. The
-thresholds are ranges from the multi-asset program, but the joint-10/10
-anchor is a single index; the battery's job in this paper is comparative ---
+thresholds are empirical ranges from a US program, and a registered audit on
+six further indices (Table~\ref{tab:audit} in Appendix~\ref{app:battery})
+measures how far the joint anchor extends: DIA also scores 10/10, QQQ and IWM
+8/10, while three non-US index ETFs score only 5--7/10 --- the battery is a
+US-calibrated instrument, and its job in this paper is comparative ---
 every configuration is scored on the same events with the same seeds --- not
-to certify any absolute realism. And a battery score carries no formal
+to certify absolute realism for any venue. And a battery score carries no formal
 standard error; what protects the comparisons is that they are paired (all
 configurations share seeds 100--107) and that every conclusion below rests on
 a pre-registered kill criterion, not on a one-event margin.
-% src: research/decathlon.json spy.score, configs.G
+% src: research/decathlon.json spy.score, configs.G; research/battery_audit.json indices (DIA 10, QQQ/IWM 8, foreign 5-7)
 
 \subsection{The minimal market}
 
@@ -1098,11 +1101,56 @@ Two calibration facts anchor the thresholds. GBM's weekly-clock innovation
 skew ($-0.651$) is the log-$\chi^2$ noise floor E7 is calibrated against;
 real volatility's up-jumps cancel most of it (SPY $-0.221$). And the E4
 level-autocorrelation criterion is what a GJR-GARCH process fails (clock
-$\mathrm{AC}_8 \approx 0.06$ against the $0.12$ bar): exponential memory
+$\mathrm{AC}_8$ median $0.03$, maximum $0.09$, over the battery's eight
+evaluation seeds of the gate suite's GJR world --- every seed below the
+$0.12$ bar): exponential memory
 decays too fast at eight weeks, which is why E4 is the battery's long-memory
 event rather than any Hurst point estimate (the close-only Hurst proxy is
 biased and is recorded as informational only).
-% src: docs/design/DESIGN8.md amendment 1; kronos/decathlon.py comments (E4, E7)
+% src: research/battery_audit.json gjr_clock (median 0.034, max 0.086, all_below_bar); kronos/decathlon.py comments (E4, E7)
+
+\paragraph{How far does the 10/10 anchor extend?}
+The joint calibration anchor above is one index. A registered audit
+(fixed list, declared before any score was read) ran the identical
+close-only battery on six further real indices: QQQ, DIA, IWM
+(2010--2026), and the three locally-listed index ETFs used by the research
+program's transfer study --- 1306.T (TOPIX), EXW1.DE (EURO STOXX 50),
+2800.HK (Hang Seng tracker). The registered prediction --- every index
+$\ge 9/10$ --- \emph{failed}, and the failure is itself a measurement
+(Table~\ref{tab:audit}): the anchor extends across the large-cap US complex
+(DIA joins SPY at 10/10; QQQ and IWM drop single events), but non-US single
+indices score 5--7/10, missing the clock-structure and sign events (E7, E8,
+E9 recur) --- consistent with the transfer study's finding that mechanism
+transfers across venues while calibration values are local. A hygiene probe
+recorded in the registration rules out the union-calendar padding of the
+foreign panels as the cause (native-calendar re-runs score the same or
+lower). The battery's absolute anchor is therefore a US-equity statement;
+all conclusions in this paper are comparative and unaffected.
+% src: docs/design/DESIGN24.md A1 (registration, result, hygiene probe); research/battery_audit.json
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{llll}
+\toprule
+Index & Venue & Score & Failed events \\
+\midrule
+SPY (anchor) & US & 10/10 & --- \\
+DIA          & US & 10/10 & --- \\
+QQQ          & US & 8/10  & E7 E8 \\
+IWM          & US & 8/10  & E8 E10 \\
+1306.T       & Japan & 6/10 & E4 E7 E8 E9 \\
+EXW1.DE      & Europe & 7/10 & E7 E8 E9 \\
+2800.HK      & Hong Kong & 5/10 & E3 E4 E7 E9 E10 \\
+\bottomrule
+\end{tabular}
+\caption{The multi-index calibration audit (registered list, no
+post-hoc swaps; misses reported by name). US large-cap indices reproduce
+the anchor; non-US single indices do not --- the battery's thresholds are
+US-calibrated, so its absolute scores certify realism only against US
+equity data, which is how the paper uses them.}
+% src: research/battery_audit.json indices.*.score, indices.*.failed
+\label{tab:audit}
+\end{table}
 
 \begin{thebibliography}{17}
 
