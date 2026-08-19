@@ -486,6 +486,16 @@ and the paper now says so with the test attached
 per-seed bits exactly — asserted at run time). F3's per-seed scatter now
 shows all 32 seeds at K∈{0,1}.
 
+**A3 — every battery score now carries a formal SE, and all are < 0.5
+events.** Seed-level bootstrap (resample the 8 evaluation seeds 2000×,
+recompute the majority-vote score, SD over resamples;
+`research/score_se.json`). Every published configuration's per-seed event
+matrix reproduces its published score exactly (asserted at run time). SE
+range **0.00–0.49**; largest: F 0.49, K5-frozen 0.49, FCVMH 0.48 — the
+knife-edge configs; the paper's headline rows are tight (FCVM 0.18, FCVM+A
+0.03, Q1.0 0.34). The paper's tables now print ± beside every simulated
+score and §2's "no formal SE" caveat is replaced by the measurement.
+
 ## KRONOS-TRADE — the deployable system
 
 `run_trade.py` turns the findings into trading software. The design is dictated
