@@ -249,7 +249,8 @@ D^{\mathrm{vol}}_t + D^{\mathrm{mm}}_t + D^{\mathrm{noise}}_t\,\bigr],
 %
 with price-impact coefficient $\lambda$;
 $D^{\mathrm{fund}} = k_F\,(V_t - p_t)$ for a random-walk log fundamental $V$;
-$D^{\mathrm{chart}} = k_C \tanh(m_t/s)$ for an EWMA trend signal $m$;
+$D^{\mathrm{chart}} = k_C \tanh(m_t/s)$ for an EWMA trend signal $m$ with
+saturation scale $s$;
 $D^{\mathrm{vol}} = k_V\,(L_t - L_{t-1})$ for volatility-targeters (hereafter
 vol-targeters) running the
 leverage rule $L = \min(L_{\max}, \sigma^{*}/\hat\sigma)$ against an EWMA
@@ -398,7 +399,9 @@ Table~\ref{tab:deca2} shows the outcome. The kill criterion fires:
 events expectation was supposed to buy did not move --- the direction bits
 did not move toward zero (medians $0.0184 \to 0.0200$; the paired per-seed
 comparison splits 4--4, so the licensed reading at one layer is
-``unchanged,'' not ``reduced''), and the long-memory events stayed flat. The interaction hypothesis held: without vol-targeters the anticipator
+``unchanged,'' not ``reduced''), and the long-memory events stayed flat.
+The interaction hypothesis --- that the anticipator can act only through the
+flow it fronts --- held: without vol-targeters the anticipator
 buys nothing (\cfg{F+A} $=$ \cfg{F} $=$ 3/10) --- expectation needs a
 predictable flow to trade against; it simply does not fix anything when it has
 one.
@@ -542,7 +545,7 @@ equilibrium, because every layer's inventory is a function of the same slow
 public volatility state, so the stack's own price impact regenerates exactly
 the forecastable structure the model says it removes. Model-space forecastable
 flow down, market-space sign leak up: this is the cleanest statement we
-know of why rational-expectations arguments cannot be reached by stacking
+know of why the rational-expectations limit cannot be reached by stacking
 boundedly-capitalized flow traders.
 % src: docs/FINDINGS.md DECATHLON-3 (mechanism paragraph)
 
@@ -594,6 +597,7 @@ ceiling is declared structural for this model class and the line closes.
 
 \begin{table}[t]
 \centering\small
+\setlength{\tabcolsep}{5pt}%
 \begin{tabular}{llll}
 \toprule
 Config & Score & Failed events & E9 bits (median) \\
@@ -601,7 +605,7 @@ Config & Score & Failed events & E9 bits (median) \\
 \cfg{FCVM} (control)              & 5/10 & E3 E4 E7 E8 E9 & 0.0184 \\
 \cfg{FCVM+Q}($\lambda_Q{=}1.0$) (theory case) & 1/10 & all but E6 & 0.0237 \\
 \cfg{FCVM+Q}($\lambda_Q{=}0.5$)   & 3/10 & E1 E2 E3 E4 E7 E8 E9 & 0.0180 \\
-\cfg{Q}($\lambda_Q{=}0.05$) (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0176 \\
+\cfg{FCVM+Q}($\lambda_Q{=}0.05$) (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0176 \\
 \bottomrule
 \end{tabular}
 \caption{Experiment III. Full skew removes the vol-targeters' forecastable

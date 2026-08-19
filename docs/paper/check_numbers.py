@@ -303,7 +303,7 @@ check_row("tab:deca4 Q0.5", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.5\$\).*?\\\\",
           c4["FCVM+Q0.5"]["score"], failed_set(c4["FCVM+Q0.5"]["events"]),
           bits4["FCVM+Q0.5"])
 cp = D4["contingent_pass"]
-check_row("tab:deca4 tuned", r"\\cfg{Q}\(\$\\lambda_Q{=}0\.05\$\).*?\\\\",
+check_row("tab:deca4 tuned", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.05\$\).*?\\\\",
           cp["tuned_eval"]["score"], failed_set(cp["tuned_eval"]["events"]),
           cp["tuned_eval"]["median_stats"]["dir_bits"])
 check("tuned winner lambda 0.05", cp["winner_lambda"] == 0.05)
