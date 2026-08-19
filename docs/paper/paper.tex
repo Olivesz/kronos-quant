@@ -409,11 +409,14 @@ one.
 
 Why it fails is the finding. The tuning grid is monotone: the harder the
 anticipator trades, the worse the market scores. Efficiency breaks (its unwind
-adds reversal: AC$_1$ falls from $-0.09$ toward $-0.35$ as $k_A$ rises), the
+adds reversal: AC$_1$ falls from $-0.09$ at the frozen setting toward $-0.35$
+at $k_A = 1$), the
 tails erode (it damps the very spiral that generates them, kurtosis
-$8.8 \to 4.6$), and the sign leak \emph{grows} (up to 0.039 bits at full
-strength $k_A = 1$).
-% src: docs/FINDINGS.md DECATHLON-2 (tuning-grid mechanism paragraph)
+$8.8 \to 4.6$ from the control to the grid's most capitalized settings), and
+the sign leak \emph{grows} (up to 0.039 bits at full
+strength $k_A = 1$). The full grid --- per-setting scores and statistics ---
+is exported with the archived results.
+% src: research/decathlon2.json tuning_grid_stats (per_setting: ac1_r -0.090 at kA=0.25/capA=0.01/sA=0.001, -0.349 at kA=1.0/capA=0.05/sA=0.001; kurt 4.57 at kA=0.5/capA=0.05/sA=0.001; max dir_bits 0.0390 at kA=1); configs.FCVM.median_stats.kurt=8.79
 The mechanism is structural, not parametric: the anticipator's inventory is a
 function of the same slow public volatility state as the flow it front-runs,
 so its own future unwind is exactly as forecastable as what it absorbs. One

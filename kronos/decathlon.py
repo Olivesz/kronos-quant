@@ -427,17 +427,21 @@ def run_decathlon(n_seeds: int = 8, T: int = 6000,
                   per_seed: bool = False) -> dict:
     """Ablation table: per config, the majority-vote event passes.
     per_seed=True additionally records each seed's raw statistics
-    (DESIGN20 needs the E9 direction-bits trace, not just the median)."""
+    (DESIGN20 needs the E9 direction-bits trace, not just the median)
+    and each seed's per-event outcomes (DESIGN24 A3 bootstraps the
+    majority-vote score over seeds, which needs the seed-level events)."""
     results = {}
     for name, cfg in (configs or CONFIGS).items():
         votes = None
         stats_acc = []
+        events_acc = []
         for s in range(n_seeds):
             r = simulate_abm(T=T, seed=seed0 + s, **cfg)
             b = battery(r, seed=s)
             v = {k: int(bool(x)) for k, x in b["events"].items()}
             votes = v if votes is None else {k: votes[k] + v[k] for k in v}
             stats_acc.append(b["stats"])
+            events_acc.append(v)
         passed = {k: votes[k] > n_seeds / 2 for k in votes}
         med = {k: float(np.median([st[k] for st in stats_acc]))
                for k in stats_acc[0] if isinstance(stats_acc[0][k], (int, float))}
@@ -448,4 +452,5 @@ def run_decathlon(n_seeds: int = 8, T: int = 6000,
                 {k: float(v) for k, v in st.items()
                  if isinstance(v, (int, float, np.floating, np.bool_))}
                 for st in stats_acc]
+            results[name]["seed_events"] = events_acc
     return results

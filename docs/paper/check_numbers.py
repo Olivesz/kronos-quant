@@ -226,8 +226,34 @@ check_row("tab:deca2 F+A", r"\\cfg{F\+A} \(no targeters\).*?\\\\",
           c2["F+A"]["score"], None, None)
 check("F+A failure set == F's (the '= F exactly' claim)",
       failed_set(c2["F+A"]["events"]) == failed_set(D1["configs"]["F"]["events"]))
+
+# --- the tuning-grid mechanism numbers (DESIGN24 A0: exported per-setting) --
+g = D2["tuning_grid_stats"]
+cells = {(c["kA"], c["capA"], c["sA"]): c for c in g["per_setting"]}
+check("grid: 18 settings on tuning seeds", len(cells) == 18
+      and g["seeds"] == "900-903")
+check("grid tie structure reproduces the DESIGN18 amendment",
+      {k for k, c in cells.items() if c["score"] == 5}
+      == ({(0.25, a, s) for a in (0.01, 0.02, 0.05) for s in (0.001, 0.002)}
+          | {(0.5, 0.01, 0.001)}))
+check("grid first shot scored 4/10", cells[(0.5, 0.02, 0.002)]["score"] == 4)
+cite("§3 grid AC1 endpoints",
+     r"AC\$_1\$ falls from \$(-0\.09)\$ at the frozen setting toward "
+     r"\$(-0\.35)\$\s*at \$k_A = 1\$",
+     cells[(0.25, 0.01, 0.001)]["ac1_r"], cells[(1.0, 0.05, 0.001)]["ac1_r"])
+cite("§3 grid kurt erosion",
+     r"kurtosis\s*\$([\d.]+) \\to ([\d.]+)\$ from the control to the grid's "
+     r"most capitalized",
+     D2["configs"]["FCVM"]["median_stats"]["kurt"],
+     cells[(0.5, 0.05, 0.001)]["kurt"])
+cite("§3 grid max bits",
+     r"up to ([\d.]+) bits at full\s*strength \$k_A = 1\$",
+     max(c["dir_bits"] for c in g["per_setting"]))
+check("grid max bits occurs at kA=1",
+      max(g["per_setting"], key=lambda c: c["dir_bits"])["kA"] == 1.0)
+
 cite("§3 one-layer medians",
-     r"medians \$([\d.]+) \\to ([\d.]+)\$; the paired per-seed",
+     r"medians \$([\d.]+) \\to ([\d.]+)\$; the paired",
      c2["FCVM"]["median_stats"]["dir_bits"], c2["FCVM+A"]["median_stats"]["dir_bits"])
 
 # --------------------------------------------------------- 4. experiment II
@@ -442,21 +468,21 @@ check("DECA3 K=1 reproduces DECA2's layer (byte-identity claim)",
       abs(D3["dir_bits_vs_K"]["K1_DECA2"]["median"]
           - D2["configs"]["FCVM+A"]["median_stats"]["dir_bits"]) < 1e-6)
 
-# ------------------------------------------------------------------ SKIPS
-SKIPS = [
-    ("§3 tuning-grid mechanism numbers (AC1 -0.09→-0.35, kurt 8.8→4.6, "
-     "bits 0.039 at kA=1)", "decathlon2.json stores only grid scores; "
-     "narrative source docs/FINDINGS.md DECATHLON-2 (logged in REVIEW-NOTES)"),
-    ("§7 spurious-leverage bound |0.04| (gate X26)",
-     "gate constant lives in tests/, narrative in FINDINGS KRONOS-CRYPTO/FX"),
-    ("appendix GJR-GARCH clock AC8 ≈ 0.06",
-     "calibration-phase measurement recorded in DESIGN8/code comments only"),
-    ("§9 toy corr exact values in src comment (0.6575 → -0.0583)",
-     "checked above at cited 2-dp precision; exact values asserted here:"),
-]
+# ------------------------------------------------------- former narrative SKIPS
+# (converted to executable checks: the DECA2 grid stats via DESIGN24 A0
+# above, the X26 bound and the toy-corr src comment here)
 check("src-comment exact toy corr", abs(toy["lam0.0"] - 0.6575) < 5e-5
       and abs(toy["lam1.0"] - (-0.0583)) < 5e-5)
+_x26 = (ROOT / "tests" / "test_crypto.py").read_text()
+_m26 = re.search(r"abs\(sym\.mean\(\)\) < ([\d.]+)", _x26)
+check("§7 spurious-leverage bound == gate X26's constant",
+      _m26 is not None and float(_m26.group(1)) == 0.04
+      and "$|0.04|$" in TEX)
 
+SKIPS = [
+    ("appendix GJR-GARCH clock AC8 ≈ 0.06",
+     "calibration-phase measurement recorded in DESIGN8/code comments only"),
+]
 print()
 for s, why in SKIPS:
     print(f"  SKIP  {s}\n        ({why})")
