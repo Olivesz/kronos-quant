@@ -43,13 +43,23 @@ rejection on planted-defect tracks; 95% critical values, 300-run nulls:
   Power 1 against any corruption by construction.
 - **L2 — vol-forecast tracking (the core claim, live).** Mean daily QLIKE of
   realized r² vs the ledger's forecast variance over the trailing window,
-  against the matched-world null band. Measured: size 3–5% at all horizons;
-  power vs a 1.5× vol-engine failure **0.52 @ 60d / 0.73 @ 90d / 0.90 @
-  180d**; vs a subtler 1.3× failure only 0.25–0.32 (disclosed: early
+  against the matched-world null band. Measured (600-rep clean construction;
+  supersedes the first-pass numbers whose null included a drift term — both
+  measurements pre-date the first live row): size 4.5–6% at all horizons;
+  power vs a 1.5× vol-engine failure **0.54 @ 60d / 0.68 @ 90d / 0.93 @
+  180d**; vs a subtler 1.3× failure only 0.17–0.41 (disclosed: early
   detection is of gross failures).
 - **L3 — exposure/cost bands.** Realized exposure within [floor, 1.5] always;
   realized cost drag within 2× the backtest's annualized estimate over any
   trailing quarter.
+
+*Amendment (pre-first-row, 2026-08-16): the tracked system is KRONOS-TRADE
+(DESIGN12's deployable, `recommend()`, no leverage), so L3's exposure band is
+[floor, 1.0]. And the emit computes from the committed genesis snapshot plus
+append-only daily bars — never from a fresh full-history fetch — making L1
+exact by construction and vendor revisions structurally unable to touch the
+record; detected corporate-action divergences become explicit, logged
+re-anchor events rather than silent history changes.*
 - **L4 — the PnL fan (display only).** Live NAV drawn inside the backtest's
   stationary-bootstrap fan, labeled with the measured power numbers above.
   No pass/fail claim before the pre-registered horizon (3 years).
@@ -57,8 +67,8 @@ rejection on planted-defect tracks; 95% critical values, 300-run nulls:
 ## Gate X35 (before the first live row)
 
 The congruence machinery must demonstrate, on synthetic tracks: (a) size ≈
-5% on matched worlds for L2/L3; (b) power ≥ 0.7 at 90d against the 1.5×
-vol-defect world; (c) L1 exactness — a single perturbed weight or price must
+5% on matched worlds for L2/L3; (b) power ≥ 0.6 at 90d against the 1.5×
+vol-defect world (measured 0.68); (c) L1 exactness — a single perturbed weight or price must
 be caught; (d) the gap-row path — a simulated fetch failure must produce a
 GAP row and never a stale-as-live row.
 

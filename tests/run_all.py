@@ -50,6 +50,8 @@ GATES = [
     "test_regime_engine.py",
     # KRONOS-HARVEST gate (harvest-gap estimator vs enumerated truth)
     "test_harvest.py",
+    # KRONOS-LIVE gate (forward-ledger congruence machinery)
+    "test_live.py",
     # KRONOS-MOMTILT gate (momentum tilt: mechanism-disappears + cap safety)
     "test_momtilt.py",
 ]
