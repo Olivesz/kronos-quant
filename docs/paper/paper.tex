@@ -51,7 +51,7 @@ Agent-based models reproduce financial stylized facts piecemeal; whether a
 single minimal mechanism can buy them all is open. We score minimal flow-based
 markets against a ten-event battery calibrated so that real equity data passes
 all ten events and geometric Brownian motion exactly three. A market of
-fundamentalists, chartists, volatility-targeters and market-makers reaches five
+fundamentalists, chartists, volatility-targeters and market makers reaches five
 of ten, and its failures are informative: the missing events concern long
 memory, time-irreversibility, and information-free price signs. We then test,
 in three pre-registered experiments with kill criteria, whether rationality can
@@ -60,7 +60,7 @@ close the gap: (i) an anticipatory agent that front-runs the forecastable flow;
 price-setting maker that provably absorbs the forecastable component into the
 price level. All three fail, and they fail informatively: deeper anticipation
 \emph{grows} the sign leak while contracting the flow it targets, and exact
-absorption kills the fat tails, leverage asymmetry and volatility clustering
+absorption kills the fat tails, the leverage effect and volatility clustering
 along with the leak. We conclude that in this model class, sign-efficiency and
 the wild stylized facts are jointly produced by the same state-riding flows and
 are not separately purchasable. An empirical counterpart --- the leverage
@@ -138,9 +138,9 @@ The paper's headline mechanism result is easy to state. Adding one layer of
 anticipation to the minimal market leaves its score unchanged and moves the
 sign leak one derivative earlier; iterating anticipation five deep contracts
 the model-space forecastable flow by a factor of four while the leaked sign
-information in the realized prices moves the wrong way --- median direction
-bits 0.0184 $\to$ 0.0200 $\to$ 0.0257, the depth-five rise holding on 7 of 8
-paired seeds; and a maker that removes the
+information in the realized prices moves the wrong way (median direction
+bits 0.0184 $\to$ 0.0200 $\to$ 0.0257; the depth-five rise holds on 7 of 8
+paired seeds); and a maker that removes the
 forecastable component's price impact exactly --- verified to the identity on a
 toy world --- does not close the leak either, but instead deletes the fat
 tails (kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$), and
@@ -223,7 +223,8 @@ D^{\mathrm{vol}}_t + D^{\mathrm{mm}}_t + D^{\mathrm{noise}}_t\,\bigr],
 with
 $D^{\mathrm{fund}} = k_F\,(V_t - p_t)$ for a random-walk log fundamental $V$;
 $D^{\mathrm{chart}} = k_C \tanh(m_t/s)$ for an EWMA trend signal $m$;
-$D^{\mathrm{vol}} = k_V\,(L_t - L_{t-1})$ for volatility-targeters running the
+$D^{\mathrm{vol}} = k_V\,(L_t - L_{t-1})$ for volatility-targeters (hereafter
+vol-targeters) running the
 leverage rule $L = \min(L_{\max}, \sigma^{*}/\hat\sigma)$ against an EWMA
 variance estimate $\hat\sigma^2$;
 a one-lag market-maker flow $D^{\mathrm{mm}} = -k_M\, r_{t-1}$; and i.i.d.\
@@ -258,7 +259,7 @@ configuration (\cfg{FCVM}) are E3, E4, E7, E8, E9.}
 Figure~\ref{fig:scorecard} shows the ladder. Noise alone (G) and
 fundamentalists alone (F) score the Gaussian 3/10. Chartists without
 discipline are toxic: \cfg{FC} scores 1/10, because the momentum leak destroys
-even efficiency. The volatility-targeters are the star ingredient:
+even efficiency. The vol-targeters are the star ingredient:
 \cfg{FV} jumps to 5/10, buying the wild one-sided facts --- fat tails (E2),
 the leverage effect (E5), clock jumps (E7), crash asymmetry (E10) --- because
 the de-leveraging spiral is the only flow that reacts to volatility and reacts
@@ -289,11 +290,15 @@ SPY's 0.0029) or generate long memory and the coupling arrow.}
 
 The ceiling is 5/10 and the five missing events are a diagnosis
 (Table~\ref{tab:fcvm}). \cfg{FCVM} fails E3 (slow volatility clustering), E4
-(long-memory clock), E7 (clock up-jumps, marginally), E8 (the arrow in the
-coupling), and E9 (information-free signs: 0.0184 significant direction bits).
-The E9 leak has a known source: the vol-targeters' de-/re-leveraging drift is
-serially correlated and forecastable from the tape, and a one-lag market maker
-cannot absorb a multi-day drift. The natural hypothesis --- the one this
+(long-memory clock), E7 (clock jumps, marginally), E8 (the arrow in the
+coupling), and E9 (information-free signs). The E9 failure is the paper's
+through-line, so we give it a name used throughout: the \emph{sign leak} ---
+a significant excess of E9's statistic, the \emph{direction bits}
+$I(\text{tape features};\, \mathrm{sign}\, r_{t+1})$, over its shuffle null.
+\cfg{FCVM} leaks 0.0184 bits where real SPY shows 0.0029. The leak has a
+known source: the vol-targeters' de-/re-leveraging drift is serially
+correlated and forecastable from the tape, and a one-lag market maker cannot
+absorb a multi-day drift. The natural hypothesis --- the one this
 paper's arc tests to destruction --- is that the missing organ is
 \emph{expectation}: rational agents who anticipate the predictable flow should
 arbitrage the sign leak away and perhaps stretch the volatility episodes into
@@ -366,7 +371,7 @@ Config & Score & Failed events & E9 bits (median) \\
 \end{tabular}
 \caption{Experiment I ablation (8 evaluation seeds, majority vote). Adding the
 anticipator changes nothing that was supposed to change: the failure set is
-identical and the direction bits go \emph{up}.}
+identical and the direction bits do not fall.}
 % src: research/decathlon2.json configs (scores, events, median_stats.dir_bits)
 \label{tab:deca2}
 \end{table}
@@ -518,7 +523,7 @@ the gate against an exogenous tape; it does not survive closed-loop
 equilibrium, because every layer's inventory is a function of the same slow
 public volatility state, so the stack's own price impact regenerates exactly
 the forecastable structure the model says it removes. Model-space forecastable
-flow down, market-space sign leakage up: this is the cleanest statement we
+flow down, market-space sign leak up: this is the cleanest statement we
 know of why rational-expectations arguments cannot be reached by stacking
 boundedly-capitalized flow traders.
 % src: docs/FINDINGS.md DECATHLON-3 (mechanism paragraph)
@@ -531,9 +536,9 @@ boundedly-capitalized flow traders.
 Experiments I and II killed every agent that \emph{trades} against the
 forecastable flow: an anticipator's inventory rides the same slow public
 state, so its trades re-leak what they absorb. One hypothesis survives that
-diagnosis: price-\emph{setting} rationality. A market maker who does not trade
-but quotes --- pre-adjusting the price by the expected impact of the
-forecastable flow, so that the information is absorbed into the price
+diagnosis: price-\emph{setting} rationality --- a market maker who does not
+trade but quotes, pre-adjusting the price by the expected impact of the
+forecastable flow so that the information is absorbed into the price
 \emph{level} rather than left in the return. The maker reuses the same causal
 public-state forecast $\hat F_t$ of Eq.~\eqref{eq:forecast}, holds no
 inventory, posts no flow, and draws no noise:
@@ -766,8 +771,8 @@ claim and carries no equity premium, so whatever asymmetry survives outside
 equities must come from the venue's flow structure. Equity markets
 --- where financial leverage and institutional de-risking cascades live ---
 show the textbook negative effect in all four universes ($-0.030$ to
-$-0.047$). FX --- an institutional dealer market where a currency is not a
-levered claim on anything and no retail-momentum dynamic dominates --- is
+$-0.047$). FX --- an institutional dealer market hosting neither de-risking
+cascades nor a dominant retail-momentum dynamic --- is
 statistically zero ($+0.005$, $z$ vs.\ zero $= 0.56$; 7 of 13 pairs positive,
 the symmetric scatter a true zero predicts). Crypto --- no financial leverage,
 no institutional de-risking, a retail dynamic in which rallies rather than
@@ -892,7 +897,7 @@ operationalizes; our contribution to that program is calibration at both ends
 The agent-based literature descending from \citet{lux1999} and surveyed by
 \citet{lebaron2006} established that fundamentalist--chartist interaction
 buys fat tails and clustering; our ablation reproduces that result (and its
-fragility: chartists without market-makers destroy efficiency, scoring 1/10)
+fragility: chartists without market makers destroy efficiency, scoring 1/10)
 but differs in asking the complement --- which facts a flow-based market
 \emph{cannot} buy at any rationality depth, established by pre-registered
 refutation rather than by exhibition.
@@ -1010,7 +1015,7 @@ against the log-$\chi^2$ noise skew of the weekly clock (GBM innovations skew
 $\approx -0.65$; real SPY $-0.22$). E8's entropy production symbolizes the
 series into 3 bins, measures 3-gram irreversibility, and tests against 120
 block-reversal surrogates (random block offsets, blocks reversed with
-probability $1/2$). E9's features are the cartesian product of three tape
+probability $1/2$). E9's features are the Cartesian product of three tape
 observables --- $\mathrm{sign}(r_t)$, the sign of 21-day momentum, and the
 volatility tercile --- scored by discrete plug-in mutual information with
 Miller--Madow bias correction against a 120-permutation null; the program's
