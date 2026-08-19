@@ -129,8 +129,9 @@ The paper's headline mechanism result is easy to state. Adding one layer of
 anticipation to the minimal market leaves its score unchanged and moves the
 sign leak one derivative earlier; iterating anticipation five deep contracts
 the model-space forecastable flow by a factor of four while the leaked sign
-information in the realized prices \emph{rises} monotonically
-(0.0184 $\to$ 0.0200 $\to$ 0.0257 bits); and a maker that removes the
+information in the realized prices moves the wrong way --- median direction
+bits 0.0184 $\to$ 0.0200 $\to$ 0.0257, the depth-five rise holding on 7 of 8
+paired seeds; and a maker that removes the
 forecastable component's price impact exactly --- verified to the identity on a
 toy world --- does not close the leak either, but instead deletes the fat
 tails (kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$), and
@@ -190,12 +191,19 @@ permutation null.}
 Calibration pins both ends of the scale: real SPY (close-only) scores 10/10;
 a pure GBM scores exactly 3/10, passing only E1, E6 and E9 --- Gaussian worlds
 are efficient, trivially one-clock, and carry no sign information. Everything
-between 3 and 10 is what a mechanism must buy.
+between 3 and 10 is what a mechanism must buy. Two scoping remarks. The
+thresholds are ranges from the multi-asset program, but the joint-10/10
+anchor is a single index; the battery's job in this paper is comparative ---
+every configuration is scored on the same events with the same seeds --- not
+to certify any absolute realism. And a battery score carries no formal
+standard error; what protects the comparisons is that they are paired (all
+configurations share seeds 100--107) and that every conclusion below rests on
+a pre-registered kill criterion, not on a one-event margin.
 % src: research/decathlon.json spy.score, configs.G
 
 \subsection{The minimal market}
 
-The base market is deliberately small: aggregated flows, roughly eight
+The base market is deliberately small: aggregated flows, about a dozen
 parameters, linear impact. Log price $p_t$ moves by
 %
 \begin{equation}
@@ -357,8 +365,9 @@ identical and the direction bits go \emph{up}.}
 Table~\ref{tab:deca2} shows the outcome. The kill criterion fires:
 \cfg{FCVM+A} scores 5/10 with a failure set identical to the control's. The
 events expectation was supposed to buy did not move --- the direction bits
-went up, not away ($0.0184 \to 0.0200$), and the long-memory events stayed
-flat. The interaction hypothesis held: without vol-targeters the anticipator
+did not move toward zero (medians $0.0184 \to 0.0200$; the paired per-seed
+comparison splits 4--4, so the licensed reading at one layer is
+``unchanged,'' not ``reduced''), and the long-memory events stayed flat. The interaction hypothesis held: without vol-targeters the anticipator
 buys nothing (\cfg{F+A} $=$ \cfg{F} $=$ 3/10) --- expectation needs a
 predictable flow to trade against; it simply does not fix anything when it has
 one.
@@ -441,10 +450,11 @@ $K{=}5$ (frozen carry-over)     & 3/10 & E1 E3 E4 E5 E7 E8 E9 & 0.0257 \\
 $K{=}5$ (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0168 \\
 \bottomrule
 \end{tabular}
-\caption{Experiment II: the $K$-ladder. The sign leak grows monotonically in
-$K$ while the model-space forecastable flow contracts toward zero; the frozen
-$K{=}5$ stack is a two-event regression (it breaks efficiency and kills the
-leverage effect).}
+\caption{Experiment II: the $K$-ladder. The median sign leak grows in $K$
+--- the depth-five rise holds on 7 of 8 paired seeds --- while the
+model-space forecastable flow contracts toward zero; the frozen $K{=}5$ stack
+is a two-event regression (it breaks efficiency and kills the leverage
+effect).}
 % src: research/decathlon3.json configs, dir_bits_vs_K, tuned_eval
 \label{tab:deca3}
 \end{table}
@@ -456,8 +466,9 @@ leverage effect).}
 forecastable-flow fraction $\beta_K$ measured on the deterministic toy world,
 falling exactly as $(1-k_A)^K$ --- $1.000 \to 0.750 \to 0.237$. Dashed line and
 open squares (right axis): the E9 direction bits measured in the simulated
-market at the same $K$ (open circles: the eight evaluation seeds), rising
-monotonically $0.0184 \to 0.0200 \to 0.0257$. The operator removes forecastable
+market at the same $K$ (open circles: the eight evaluation seeds), medians
+rising $0.0184 \to 0.0200 \to 0.0257$; the $K{=}5$ rise holds on 7 of 8
+paired seeds. The operator removes forecastable
 flow in model space; the market re-creates sign information in price space.
 Open-loop contraction does not survive closed-loop equilibrium.}
 % src: research/decathlon3.json forecastable_flow_fraction_vs_K, dir_bits_vs_K
@@ -468,7 +479,8 @@ Table~\ref{tab:deca3} and Figure~\ref{fig:inversion} give the result, which is
 the paper's centerpiece. The kill criterion fires again, and this time the two
 diagnostics move in \emph{opposite directions}: as $K$ goes $0 \to 1 \to 5$,
 the model-space forecastable flow falls $1.000 \to 0.750 \to 0.237$ while the
-market-space sign leak rises $0.0184 \to 0.0200 \to 0.0257$ bits. The frozen
+market-space sign leak rises $0.0184 \to 0.0200 \to 0.0257$ bits in the
+medians, with $K{=}5$ above the control on 7 of 8 paired seeds. The frozen
 $K{=}5$ stack is moreover a two-event regression: its aggregate unwind adds
 reversal (AC$_1$: $-0.075 \to -0.247$, breaking E1) and it absorbs the very
 spiral that generates the leverage effect (E5 dies, $-0.095 \to -0.030$),
@@ -725,17 +737,24 @@ instruments positive & 0 of 4 markets & 7 of 13 pairs & 8 of 10 coins \\
 \end{tabular}
 \caption{The leverage triangle. Equity cohort: four universes (US, Japan,
 Europe, Asia-EM), 2010--2026. FX: 13 liquid crosses, 2010--2026. Crypto: 10
-major coins, 2017--2026. The ordering $-0.041 < +0.005 < +0.031$ is monotone
-in point estimates; the equity edge is statistically certified, the FX--crypto
-edge is inside one-sided noise.}
+major coins, 2017--2026. Each $z$ vs.\ zero is the cohort mean divided by its
+cross-sectional dispersion (the $\pm$ values in the first row). The ordering
+$-0.041 < +0.005 < +0.031$ is monotone in point estimates; the equity edge is
+statistically certified, the FX--crypto edge is inside one-sided noise.}
 % src: research/fx.json leverage_contrast (equity_mean, equity_spread, fx_leverage, fx_sd, z_fx_vs_zero, z_fx_vs_equities, z_crypto_vs_fx), n_pairs_positive; research/crypto.json leverage_contrast, per_coin_leverage
 % src: z-vs-zero equity and crypto DERIVED as mean/sd from the stored fields: equity_mean/equity_spread = -0.0405/0.0079 = -5.13; crypto_leverage/crypto_sd = 0.0312/0.0158 = 1.97 (crypto.json); checked by docs/paper/check_numbers.py
 \label{tab:triangle}
 \end{table}
 
 Table~\ref{tab:triangle} and Figure~\ref{fig:triangle} give the measurement,
-using the identical estimator battery at all three vertices (realized variance
-from daily OHLC ranges via Garman--Klass \citep{garman1980}). Equity markets
+using an estimator battery identical across the three vertices (realized
+variance from daily OHLC ranges via Garman--Klass \citep{garman1980}). The
+classical readings of the equity effect --- firm capital structure
+\citep{black1976} and volatility feedback through the equity risk premium
+\citep{bekaert2000} --- are equity-specific mechanisms, which is exactly what
+makes the cross-venue comparison informative: a currency is not a levered
+claim and carries no equity premium, so whatever asymmetry survives outside
+equities must come from the venue's flow structure. Equity markets
 --- where financial leverage and institutional de-risking cascades live ---
 show the textbook negative effect in all four universes ($-0.030$ to
 $-0.047$). FX --- an institutional dealer market where a currency is not a
@@ -803,16 +822,19 @@ quote-skewing maker to absorb impact while leaving the flow untouched
 (Section~\ref{sec:deca4}). This is what makes the refutations evidential:
 when a licensed mechanism fails to move the battery, the failure is a property
 of the market, not of a broken implementation. At the time of writing the
-continuous-integration suite runs 37 numbered gates on every commit.
-% src: docs/METHODS.md sections 0 and 8
+continuous-integration suite runs the numbered gates X1--X35 on every commit.
+% src: tests/*.py (gate identifiers X1..X35, verified by grep); docs/METHODS.md sections 0 and 8
 
 \subsection{Pre-registration, budgets, and tie-breaks}
 
-Each experiment fixed, before any evaluation run: hypotheses (with one starred
-primary), the full parameter set, the evaluation protocol (8 seeds, IDs
-100--107, $T = 6000$, majority vote per event, identical across all three
-experiments so ablations are comparable), a kill criterion, and a bounded
-tuning budget --- one grid pass on disjoint tuning seeds (900--903), permitted
+``Pre-registered'' here means: the design document --- hypotheses, budgets,
+kill criteria --- is committed to the repository before any evaluation run,
+and the version-control history is the timestamp; there is no external
+registry. Each experiment fixed, before any evaluation run: hypotheses (with
+one starred primary), the full parameter set, the evaluation protocol (8
+seeds, IDs 100--107, $T = 6000$, majority vote per event, identical across
+all three experiments so ablations are paired seed-for-seed), a kill
+criterion, and a bounded tuning budget --- one grid pass on disjoint tuning seeds (900--903), permitted
 only under a pre-declared trigger, with a deterministic pre-declared tie-break
 (``weakest intervention wins''). Amendments were permitted only before
 evaluation data was read, and each is recorded in the registration documents
@@ -984,7 +1006,9 @@ observables --- $\mathrm{sign}(r_t)$, the sign of 21-day momentum, and the
 volatility tercile --- scored by discrete plug-in mutual information with
 Miller--Madow bias correction against a 120-permutation null; the program's
 continuous information channel uses the KSG estimator \citep{kraskov2004},
-but E9's features are discrete by construction.}
+but E9's features are discrete by construction. The volatility tercile is cut
+on full-sample quantiles: E9 is a measurement of information content,
+computed identically on real and simulated series, not a trading rule.}
 % src: kronos/decathlon.py battery(); kronos/entropyprod.py ep_with_null(); kronos/infobudget.py direction_bits()
 \label{tab:thresholds}
 \end{table}
@@ -1046,6 +1070,17 @@ overfitting, and non-normality.
 Bailey, D.~H., J.~Borwein, M.~L{\'o}pez de Prado, and Q.~J. Zhu (2017).
 The probability of backtest overfitting.
 \emph{Journal of Computational Finance}, 20(4), 39--69.
+
+\bibitem[Bekaert and Wu(2000)]{bekaert2000}
+Bekaert, G., and G.~Wu (2000).
+Asymmetric volatility and risk in equity markets.
+\emph{Review of Financial Studies}, 13(1), 1--42.
+
+\bibitem[Black(1976)]{black1976}
+Black, F. (1976).
+Studies of stock price volatility changes.
+In \emph{Proceedings of the 1976 Meetings of the American Statistical
+Association, Business and Economic Statistics Section}, 177--181.
 
 \bibitem[Bouchaud et~al.(2009)]{bouchaud2009}
 Bouchaud, J.-P., J.~D. Farmer, and F.~Lillo (2009).
