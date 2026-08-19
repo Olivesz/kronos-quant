@@ -372,6 +372,59 @@ cite("§5 clustering", r"AC\$_1\(\|r\|\)\$\s*\$([\d.]+) \\to ([\d.]+)\$",
 cite("§5 efficiency break", r"AC\$_1\$: \$\+([\d.]+) \\to (-[\d.]+)\$",
      mF["ac1_r"], mQ1["ac1_r"])
 
+# ---------------------------------------------- 5b. score SEs (DESIGN24 A3)
+print("== battery-score SEs (score_se.json)")
+SEJ = load("score_se")
+check("SE method", SEJ["method"]["n_boot"] == 2000
+      and SEJ["method"]["rng_seed"] == 0 and SEJ["method"]["seeds"] == "100-107")
+_pub = {"G": D1["configs"]["G"]["score"], "F": D1["configs"]["F"]["score"],
+        "FC": D1["configs"]["FC"]["score"], "FV": D1["configs"]["FV"]["score"],
+        "FCV": D1["configs"]["FCV"]["score"],
+        "FCVM": D1["configs"]["FCVM"]["score"],
+        "FCVMH": D1["configs"]["FCVMH"]["score"],
+        "FCVM+A": c2["FCVM+A"]["score"], "FV+A": c2["FV+A"]["score"],
+        "F+A": c2["F+A"]["score"],
+        "K5_FIXEDPOINT": c3["K5_FIXEDPOINT"]["score"],
+        "K5_TUNED": D3["tuned_eval"]["score"],
+        "FCVM+Q1.0": c4["FCVM+Q1.0"]["score"],
+        "FCVM+Q0.5": c4["FCVM+Q0.5"]["score"],
+        "Q_TUNED": cp["tuned_eval"]["score"]}
+for _cfg, _sc in _pub.items():
+    check(f"SE reproduction {_cfg}", SEJ["scores"][_cfg] == _sc,
+          f"score_se {SEJ['scores'][_cfg]} vs published {_sc}")
+check("§2 SE ceiling 0.5 claim", max(SEJ["se"].values()) <= 0.5
+      and re.search(r"SE\s*is at most 0\.5 events", TEX) is not None)
+
+
+def check_pm(label, line_regex, se_key, score_cell=1):
+    cells = row_cells(line_regex)
+    if cells is None:
+        check(label, False, f"row not found: {line_regex!r}")
+        return
+    m = re.search(r"\\pm\$ ([\d.]+)", cells[score_cell])
+    check(label, m is not None
+          and abs(float(m.group(1)) - SEJ["se"][se_key]) <= tol_of(m.group(1))
+          if m else False,
+          f"cell {cells[score_cell]!r} vs SE {SEJ['se'][se_key]}")
+
+
+check_pm("tab:deca2 FCVM ±", r"\\cfg{FCVM} \(control\).*?\\\\", "FCVM")
+check_pm("tab:deca2 FCVM+A ±", r"\\cfg{FCVM\+A} \(hypothesis\).*?\\\\", "FCVM+A")
+check_pm("tab:deca2 FV+A ±", r"\\cfg{FV\+A} .*?\\\\", "FV+A")
+check_pm("tab:deca2 F+A ±", r"\\cfg{F\+A} \(no targeters\).*?\\\\", "F+A")
+check_pm("tab:deca3 K0 ±", r"\$K{=}0\$ \(\\cfg{FCVM}, control\).*?\\\\", "FCVM")
+check_pm("tab:deca3 K1 ±", r"\$K{=}1\$ \(Exp\..*?\\\\", "FCVM+A")
+check_pm("tab:deca3 K5 ±", r"\$K{=}5\$ \(frozen carry-over\).*?\\\\",
+         "K5_FIXEDPOINT")
+check_pm("tab:deca3 K5 tuned ±", r"\$K{=}5\$ \(tuned, contingent pass\).*?\\\\",
+         "K5_TUNED")
+check_pm("tab:deca4 Q1.0 ±", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}1\.0\$\).*?\\\\",
+         "FCVM+Q1.0")
+check_pm("tab:deca4 Q0.5 ±", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.5\$\).*?\\\\",
+         "FCVM+Q0.5")
+check_pm("tab:deca4 tuned ±", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.05\$\).*?\\\\",
+         "Q_TUNED")
+
 # ------------------------------------------------------------- 6. triangle
 print("== the triangle (fx.json / crypto.json)")
 lc, cc = FX["leverage_contrast"], CR["leverage_contrast"]

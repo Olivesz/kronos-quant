@@ -233,11 +233,16 @@ measures how far the joint anchor extends: DIA also scores 10/10, QQQ and IWM
 8/10, while three non-US index ETFs score only 5--7/10 --- the battery is a
 US-calibrated instrument, and its job in this paper is comparative ---
 every configuration is scored on the same events with the same seeds --- not
-to certify absolute realism for any venue. And a battery score carries no formal
-standard error; what protects the comparisons is that they are paired (all
+to certify absolute realism for any venue. Simulated scores carry a
+seed-bootstrap standard error --- the eight evaluation seeds are resampled
+with replacement 2000 times and the majority-vote score recomputed per
+resample; the SD of the resampled scores is reported as $\pm$ in the
+experiment tables --- and across every configuration in this paper that SE
+is at most 0.5 events. What protects the comparisons beyond the SEs is that
+they are paired (all
 configurations share seeds 100--107) and that every conclusion below rests on
 a pre-registered kill criterion, not on a one-event margin.
-% src: research/decathlon.json spy.score, configs.G; research/battery_audit.json indices (DIA 10, QQQ/IWM 8, foreign 5-7)
+% src: research/decathlon.json spy.score, configs.G; research/battery_audit.json indices (DIA 10, QQQ/IWM 8, foreign 5-7); research/score_se.json (se_max 0.49)
 
 \subsection{The minimal market}
 
@@ -384,13 +389,14 @@ already being evidence about the hypothesis.
 \toprule
 Config & Score & Failed events & E9 bits (median) \\
 \midrule
-\cfg{FCVM} (control)      & 5/10 & E3 E4 E7 E8 E9 & 0.0184 \\
-\cfg{FCVM+A} (hypothesis) & 5/10 & E3 E4 E7 E8 E9 & 0.0200 \\
-\cfg{FV+A}                & 5/10 & E1 E3 E4 E8 E9 & 0.0158 \\
-\cfg{F+A} (no targeters)  & 3/10 & $=$ \cfg{F} exactly & 0.0002 \\
+\cfg{FCVM} (control)      & 5/10 $\pm$ 0.18 & E3 E4 E7 E8 E9 & 0.0184 \\
+\cfg{FCVM+A} (hypothesis) & 5/10 $\pm$ 0.03 & E3 E4 E7 E8 E9 & 0.0200 \\
+\cfg{FV+A}                & 5/10 $\pm$ 0.10 & E1 E3 E4 E8 E9 & 0.0158 \\
+\cfg{F+A} (no targeters)  & 3/10 $\pm$ 0.16 & $=$ \cfg{F} exactly & 0.0002 \\
 \bottomrule
 \end{tabular}
-\caption{Experiment I ablation (8 evaluation seeds, majority vote). Adding the
+\caption{Experiment I ablation (8 evaluation seeds, majority vote; $\pm$ is
+the seed-bootstrap SE of the score, Section~\ref{sec:battery}). Adding the
 anticipator changes nothing that was supposed to change: the failure set is
 identical and the direction bits do not fall.}
 % src: research/decathlon2.json configs (scores, events, median_stats.dir_bits)
@@ -487,10 +493,10 @@ market obeys the argument.
 \toprule
 Config & Score & Failed events & E9 bits (median) \\
 \midrule
-$K{=}0$ (\cfg{FCVM}, control)   & 5/10 & E3 E4 E7 E8 E9 & 0.0184 \\
-$K{=}1$ (Exp.~I layer, byte-identical) & 5/10 & E3 E4 E7 E8 E9 & 0.0200 \\
-$K{=}5$ (frozen carry-over)     & 3/10 & E1 E3 E4 E5 E7 E8 E9 & 0.0257 \\
-$K{=}5$ (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0168 \\
+$K{=}0$ (\cfg{FCVM}, control)   & 5/10 $\pm$ 0.18 & E3 E4 E7 E8 E9 & 0.0184 \\
+$K{=}1$ (Exp.~I layer, byte-identical) & 5/10 $\pm$ 0.03 & E3 E4 E7 E8 E9 & 0.0200 \\
+$K{=}5$ (frozen carry-over)     & 3/10 $\pm$ 0.49 & E1 E3 E4 E5 E7 E8 E9 & 0.0257 \\
+$K{=}5$ (tuned, contingent pass) & 5/10 $\pm$ 0.00 & E3 E4 E7 E8 E9 & 0.0168 \\
 \bottomrule
 \end{tabular}
 \caption{Experiment II: the $K$-ladder. The median sign leak grows in $K$
@@ -621,10 +627,10 @@ ceiling is declared structural for this model class and the line closes.
 \toprule
 Config & Score & Failed events & E9 bits (median) \\
 \midrule
-\cfg{FCVM} (control)              & 5/10 & E3 E4 E7 E8 E9 & 0.0184 \\
-\cfg{FCVM+Q}($\lambda_Q{=}1.0$) (theory case) & 1/10 & all but E6 & 0.0237 \\
-\cfg{FCVM+Q}($\lambda_Q{=}0.5$)   & 3/10 & E1 E2 E3 E4 E7 E8 E9 & 0.0180 \\
-\cfg{FCVM+Q}($\lambda_Q{=}0.05$) (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0176 \\
+\cfg{FCVM} (control)              & 5/10 $\pm$ 0.18 & E3 E4 E7 E8 E9 & 0.0184 \\
+\cfg{FCVM+Q}($\lambda_Q{=}1.0$) (theory case) & 1/10 $\pm$ 0.34 & all but E6 & 0.0237 \\
+\cfg{FCVM+Q}($\lambda_Q{=}0.5$)   & 3/10 $\pm$ 0.03 & E1 E2 E3 E4 E7 E8 E9 & 0.0180 \\
+\cfg{FCVM+Q}($\lambda_Q{=}0.05$) (tuned, contingent) & 5/10 $\pm$ 0.00 & E3 E4 E7 E8 E9 & 0.0176 \\
 \bottomrule
 \end{tabular}
 \caption{Experiment III. Full skew removes the vol-targeters' forecastable
