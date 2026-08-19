@@ -52,7 +52,7 @@ single minimal mechanism can buy them all is open. We score minimal flow-based
 markets against a ten-event battery calibrated so that real equity data passes
 all ten events and geometric Brownian motion exactly three. A market of
 fundamentalists, chartists, volatility-targeters and market makers reaches five
-of ten, and its failures are informative: the missing events concern long
+of ten, and its failures are diagnostic: the missing events concern long
 memory, time-irreversibility, and information-free price signs. We then test,
 in three pre-registered experiments with kill criteria, whether rationality can
 close the gap: (i) an anticipatory agent that front-runs the forecastable flow;
@@ -69,7 +69,7 @@ effect's sign ordered by market microstructure across equities ($-0.04$), FX
 results are pre-registered, gate-verified against synthetic ground truth, and
 regenerable from the public repository.
 % src: abstract v1, docs/paper/OUTLINE.md; leverage values research/fx.json leverage_contrast
-\medskip
+\par\medskip
 \noindent\textit{Keywords:} stylized facts; agent-based markets; market
 efficiency; price impact; leverage effect; pre-registered negative results.
 \end{abstract}
@@ -77,26 +77,47 @@ efficiency; price impact; leverage effect; pre-registered negative results.
 \section{Introduction}
 \label{sec:intro}
 
-A quarter century ago the stylized-facts program gave empirical finance a
-shared target: a short list of statistical regularities --- heavy tails,
-volatility clustering, the leverage effect, near-absence of linear return
-autocorrelation --- that any candidate mechanism for price formation should
-reproduce \citep{cont2001}. Agent-based modeling took up the challenge early.
-Heterogeneous-agent markets with fundamentalists and chartists were shown to
-generate fat tails and clustered volatility from agent interaction rather than
-from exogenous news \citep{lux1999}, and a substantial literature has since
-mapped which ingredients produce which facts \citep{lebaron2006}.
+Real price series manage two things at once: their return signs are nearly
+unforecastable, and their amplitudes are wild --- heavy tails, clustered
+volatility, crash asymmetry. This paper asks whether a minimal market
+mechanism can buy both properties together, and answers by refutation: in
+flow-based minimal markets, sign-efficiency and wildness are jointly produced
+by the same flows, and three pre-registered attempts to purchase them
+separately --- rationality added as a trading agent, as the fixed point of
+mutual anticipation, and as a price-setting rule --- all fail against kill
+criteria declared in advance. The refutations are the result: they compose
+into a structural claim about what this model class cannot do, measured on a
+fixed instrument (Figure~\ref{fig:scorecard}).
 
-Two gaps in that literature motivate this paper. First, scoring is usually
-piecemeal: a model is exhibited that matches two or three facts, with the
-remaining facts unexamined, so the literature accumulates existence proofs
-rather than a ledger of what a given mechanism class can and cannot buy.
-Second, negative results are structurally underproduced: when an added
-ingredient fails to improve a model, the failure is rarely reported, almost
-never pre-registered, and so carries no evidential weight.
+The question sits in a literature with a shared target list: the stylized
+facts --- heavy tails, volatility clustering, the leverage effect,
+near-absence of linear return autocorrelation --- that any candidate mechanism
+for price formation should reproduce \citep{cont2001}. Agent-based modeling
+took up the challenge early: heterogeneous-agent markets with fundamentalists
+and chartists generate fat tails and clustered volatility from agent
+interaction rather than from exogenous news \citep{lux1999}, and a substantial
+literature has since mapped which ingredients produce which facts
+\citep{lebaron2006}. Two gaps in that literature motivate the design here.
+First, scoring is usually piecemeal: a model is exhibited that matches two or
+three facts, with the remaining facts unexamined, so the literature
+accumulates existence proofs rather than a ledger of what a given mechanism
+class can and cannot buy. Second, negative results are structurally
+underproduced: when an added ingredient fails to improve a model, the failure
+is rarely reported, almost never pre-registered, and so carries no evidential
+weight. We address both gaps with a fixed measurement instrument and a
+pre-registered refutation chain.
 
-We address both gaps with a fixed measurement instrument and a pre-registered
-refutation chain.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\linewidth]{battery_scorecard}
+\caption{Battery scorecard: real SPY against the ablation ladder (filled =
+pass). G = noise only (GBM); F adds fundamentalists; C chartists; V
+volatility-targeters; M market makers; H multi-horizon heterogeneity. No flow
+configuration exceeds 5/10, and the five events missing from the best
+configuration (\cfg{FCVM}) are E3, E4, E7, E8, E9.}
+% src: research/decathlon.json spy.events, configs.*.events
+\label{fig:scorecard}
+\end{figure}
 
 \paragraph{Contribution (i): a battery, calibrated at both ends.}
 We distill ten events (E1--E10) from a prior measurement program on real
@@ -137,7 +158,7 @@ experiment additionally pre-declared a closure clause naming itself the final
 attempt on the line. Under this regime a refutation is not an absence of
 result; it is a measurement.
 
-The paper's headline mechanism result is easy to state. Adding one layer of
+The headline mechanism result is easy to state. Adding one layer of
 anticipation to the minimal market leaves its score unchanged and moves the
 sign leak one derivative earlier; iterating anticipation five deep contracts
 the model-space forecastable flow by a factor of four while the leaked sign
@@ -246,18 +267,6 @@ per configuration, $T = 6000$; an event passes if a majority of seeds pass.
 % src: docs/design/DESIGN8.md honesty constraints
 
 \subsection{The ablation ladder and the 5/10 ceiling}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.72\linewidth]{battery_scorecard}
-\caption{Battery scorecard: real SPY against the ablation ladder (filled =
-pass). G = noise only (GBM); F adds fundamentalists; C chartists; V
-volatility-targeters; M market makers; H multi-horizon heterogeneity. No flow
-configuration exceeds 5/10, and the five events missing from the best
-configuration (\cfg{FCVM}) are E3, E4, E7, E8, E9.}
-% src: research/decathlon.json spy.events, configs.*.events
-\label{fig:scorecard}
-\end{figure}
 
 Figure~\ref{fig:scorecard} shows the ladder. Noise alone (G) and
 fundamentalists alone (F) score the Gaussian 3/10. Chartists without
