@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-38%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-39%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -38,7 +38,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 38 such gates run in
+passes a gate on data where the answer is already known.** 39 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -70,7 +70,7 @@ python run_research.py all        # 28 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 38 verification gates (~3min)
+python tests/run_all.py           # all 39 verification gates (~3min)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -79,7 +79,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **38 verification gates** — 36 proving an estimator has correct *size*
+- **39 verification gates** — 37 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -236,7 +236,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    38 gates (36 synthetic ground truth + 2 real-data calibration)
+tests/                    39 gates (37 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 
