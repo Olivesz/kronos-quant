@@ -460,6 +460,16 @@ check("src-comment exact toy corr", abs(toy["lam0.0"] - 0.6575) < 5e-5
 print()
 for s, why in SKIPS:
     print(f"  SKIP  {s}\n        ({why})")
+# --- anti-drift: gate counts stated in the paper must equal len(GATES) -------
+_runner = (ROOT / "tests" / "run_all.py").read_text()
+_n_true = len(re.findall(r'"(test_\w+\.py)"', _runner))
+_stated = [int(x) for x in re.findall(r"runs all (\d+) verification gates", TEX)]
+check("gate count stated in paper", len(_stated) >= 1,
+      "paper must state the gate count explicitly")
+for _s in _stated:
+    check(f"paper gate count {_s} == len(GATES)", _s == _n_true,
+          f"run_all.py defines {_n_true} gates")
+
 print()
 if failures:
     print(f"FAILED: {len(failures)} of {n_checks} checks")
