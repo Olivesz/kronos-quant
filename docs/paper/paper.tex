@@ -872,7 +872,7 @@ probability of backtest overfitting \citep{bailey2017}; the program's standing
 rule is that its PBO of 0.45 is restated beside any Sharpe claim. This paper
 makes mechanism claims, not performance claims, but the same accounting
 culture --- count the shots, publish the misses --- produced it.
-% src: docs/METHODS.md sections 5 and 8; docs/FINDINGS.md (PBO 0.45 standing rule)
+% src: research/forensics.json pbo.pbo=0.4455; docs/METHODS.md sections 5 and 8; docs/FINDINGS.md (PBO 0.45 standing rule)
 
 \section{Related work}
 \label{sec:related}
@@ -932,7 +932,7 @@ collapses to $0.25$ --- a no-self-excitation null --- once events are deformed
 by the volatility clock, so most apparent reflexivity at the daily horizon is
 volatility clustering; the same deformation-first discipline shapes the
 battery's E8 event.
-% src: docs/FINDINGS.md KRONOS-REFLEX (0.68 -> 0.25)
+% src: research/reflex.json median_n_raw=0.6827, median_n_def=0.2459, per_asset (48 assets); docs/FINDINGS.md KRONOS-REFLEX
 Rough volatility \citep{gatheral2018} motivates the battery's long-memory
 clock event E4: the measurement program replicated $H \approx 0.10$ on 16
 years of SPY range-based volatility, and E4 is calibrated so that
@@ -940,7 +940,7 @@ exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
 event no flow configuration and no rationality layer ever bought, consistent
 with rough volatility's message that the clock's memory is structural, not
 flow-generated.
-% src: docs/FINDINGS.md KRONOS-X Q3b (H ~= 0.10); docs/design/DESIGN8.md amendment 1 (GJR fails E4)
+% src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
 
 \section{Reproducibility statement}
 \label{sec:repro}
