@@ -9,9 +9,14 @@ FIGS = figures/battery_scorecard.pdf figures/e9_bits_configs.pdf \
        figures/deca3_inversion.pdf figures/deca4_wildfacts.pdf \
        figures/leverage_triangle.pdf figures/gate_schematic.pdf
 
-.PHONY: all figures clean
+.PHONY: all figures check clean
 
 all: paper.pdf
+
+# Verify every derivable number in paper.tex against research/*.json and the
+# battery code's thresholds. Exits nonzero on any mismatch.
+check:
+	$(PYTHON) check_numbers.py
 
 paper.pdf: paper.tex $(FIGS)
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex
