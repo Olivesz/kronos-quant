@@ -400,9 +400,12 @@ identical and the direction bits do not fall.}
 Table~\ref{tab:deca2} shows the outcome. The kill criterion fires:
 \cfg{FCVM+A} scores 5/10 with a failure set identical to the control's. The
 events expectation was supposed to buy did not move --- the direction bits
-did not move toward zero (medians $0.0184 \to 0.0200$; the paired per-seed
-comparison splits 4--4, so the licensed reading at one layer is
+did not move toward zero (medians $0.0184 \to 0.0200$; the paired comparison,
+extended to 32 seeds under a registered fixed budget, is statistically flat
+--- the anticipator above control on 19 of 32 seeds, two-sided Wilcoxon
+$p = 0.57$ --- so the licensed reading at one layer is
 ``unchanged,'' not ``reduced''), and the long-memory events stayed flat.
+% src: research/decathlon3.json k01_extension (n_pos 19/32, wilcoxon_p 0.5733; K1 is byte-identical to FCVM+A)
 The interaction hypothesis --- that the anticipator can act only through the
 flow it fronts --- held: without vol-targeters the anticipator
 buys nothing (\cfg{F+A} $=$ \cfg{F} $=$ 3/10) --- expectation needs a
@@ -491,7 +494,10 @@ $K{=}5$ (tuned, contingent pass) & 5/10 & E3 E4 E7 E8 E9 & 0.0168 \\
 \bottomrule
 \end{tabular}
 \caption{Experiment II: the $K$-ladder. The median sign leak grows in $K$
---- the depth-five rise holds on 7 of 8 paired seeds --- while the
+--- the depth-five rise holds on 7 of 8 paired seeds, while the one-layer
+step ($K{=}0 \to 1$) is statistically flat in a registered 32-seed extension
+(Wilcoxon $p = 0.57$): the licensed reading is the depth trend, not the
+single-layer increment --- and the
 model-space forecastable flow contracts toward zero; the frozen $K{=}5$ stack
 is a two-event regression (it breaks efficiency and kills the leverage
 effect).}
@@ -506,9 +512,12 @@ effect).}
 forecastable-flow fraction $\beta_K$ measured on the deterministic toy world,
 falling exactly as $(1-k_A)^K$ --- $1.000 \to 0.750 \to 0.237$. Dashed line and
 open squares (right axis): the E9 direction bits measured in the simulated
-market at the same $K$ (open circles: the 8 evaluation seeds), medians
+market at the same $K$ (open circles: per-seed values --- 32 seeds at
+$K \in \{0, 1\}$ from the registered extension, the 8 evaluation seeds at
+$K{=}5$), medians
 rising $0.0184 \to 0.0200 \to 0.0257$; the $K{=}5$ rise holds on 7 of 8
-paired seeds. The operator removes forecastable
+paired seeds, while the one-layer step is flat at 32 seeds.
+The operator removes forecastable
 flow in model space; the market re-creates sign information in price space.
 Open-loop contraction does not survive closed-loop equilibrium.}
 % src: research/decathlon3.json forecastable_flow_fraction_vs_K, dir_bits_vs_K
@@ -520,7 +529,11 @@ the paper's centerpiece. The kill criterion fires again, and this time the two
 diagnostics move in \emph{opposite directions}: as $K$ goes $0 \to 1 \to 5$,
 the model-space forecastable flow falls $1.000 \to 0.750 \to 0.237$ while the
 market-space sign leak rises $0.0184 \to 0.0200 \to 0.0257$ bits in the
-medians, with $K{=}5$ above the control on 7 of 8 paired seeds. The frozen
+medians, with $K{=}5$ above the control on 7 of 8 paired seeds. (The
+one-layer step inside that rise is a point estimate within seed noise ---
+the registered 32-seed extension comes back flat, medians $0.0195$ versus
+$0.0194$, Wilcoxon $p = 0.57$ --- so the ladder licenses the depth trend,
+not the single-layer increment.) The frozen
 $K{=}5$ stack is moreover a two-event regression: its aggregate unwind adds
 reversal (AC$_1$: $-0.075 \to -0.247$, breaking E1) and it absorbs the very
 spiral that generates the leverage effect (E5 dies, $-0.095 \to -0.030$),

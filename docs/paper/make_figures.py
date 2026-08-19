@@ -148,7 +148,11 @@ def f3_inversion():
     kA = D3["frozen_params"]["kA"]
     bit_keys = ["K0_FCVM", "K1_DECA2", "K5_FIXEDPOINT"]
     med = [D3["dir_bits_vs_K"][k]["median"] for k in bit_keys]
-    seeds = [D3["dir_bits_vs_K"][k]["per_seed"] for k in bit_keys]
+    # per-seed scatter: the DESIGN24 A2 32-seed extension at K=0/1, the 8
+    # evaluation seeds at K=5 (medians stay the published 8-seed protocol
+    # values; the caption states both seed counts)
+    ext = D3["k01_extension"]["per_seed"]
+    seeds = [ext.get(k, D3["dir_bits_vs_K"][k]["per_seed"]) for k in bit_keys]
 
     fig, ax = plt.subplots(figsize=(3.4, 2.55))
     axr = ax.twinx()
@@ -171,7 +175,8 @@ def f3_inversion():
 
     # Right axis: E9 direction bits, per-seed + median.
     for x, s in zip(ks, seeds):
-        xs = [x + (k - (len(s) - 1) / 2) * 0.045 for k in range(len(s))]
+        sp = 0.045 if len(s) <= 8 else 0.016
+        xs = [x + (k - (len(s) - 1) / 2) * sp for k in range(len(s))]
         axr.plot(xs, s, "o", ms=2.2, mfc="none", mec="0.55", mew=0.6, zorder=2)
     axr.plot(ks, med, "s--", color="0.25", ms=4.5, mfc="white", lw=1.1,
              zorder=3)
