@@ -870,12 +870,30 @@ estimator recovers each with wide separation and its spurious-leverage bound
 is $|0.04|$, so a zero is read as a zero and an inversion as an inversion.
 % src: docs/FINDINGS.md KRONOS-CRYPTO (gate X26), KRONOS-FX (spurious bound)
 
-The positioning is deliberate: this triangle is \emph{consistent with} the
-thesis --- the wildness channel follows the flow structure of the venue, being
+Finally, the triangle's epistemic status is a stated boundary of the paper's
+claims, and it is worth being precise about what would move it. The triangle
+is \emph{consistent with} the
+thesis --- the wildness channel follows the flow structure of the venue,
 negative exactly where forced de-risking lives, zero in the institutional
 market without it, and (in point estimate) positive where an opposite retail
-dynamic dominates --- but it is not proof of it. No claim is made that the
+dynamic dominates --- but consistency with three ordered points is weak
+evidence by construction: any monotone story over the same venue ordering
+fits them. What would count as proof is a \emph{discriminating} cross-venue
+prediction, and the mechanism makes one: a venue whose flow structure
+changes should see its leverage sign migrate. Crypto's institutionalization
+is the live case --- the mechanism predicts its leverage effect drifts
+toward the equity sign as leveraged institutional flow displaces retail
+momentum, and BTC ($-0.043$) and ETH ($-0.019$), the two most
+institutionally held coins, already carry the equity-style sign in the
+registered universe (joined by XMR in the widened one) --- an in-sample
+observation that is consistent but proves nothing. Delivering that
+prediction as a certified test needs either the history the power bound
+above shows does not yet exist, or flow decompositions (who is trading, not
+just what the price did) that public daily data does not carry. So the
+claim stays scoped: the triangle is an empirical counterpart, not an
+empirical test, and no claim is made that the
 minimal market's specific mechanism generates the real effect.
+% src: research/crypto.json per_coin_leverage (BTC -0.0427, ETH -0.0187); research/crypto_wide.json per_coin_leverage (XMR -0.0251 also negative); positioning per docs/paper/OUTLINE.md NOT-claimed list
 
 \section{Related work}
 \label{sec:related}
