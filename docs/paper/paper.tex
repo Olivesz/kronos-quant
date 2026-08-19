@@ -834,13 +834,35 @@ Honesty about what is certified: the equity edge is resolved (one-sided
 $z = 3.89$ against FX, $z = 4.06$ against crypto), and FX is decisively zero;
 but the FX--crypto edge is $z = 1.44$, inside noise, and crypto itself clears
 zero at only $z \approx 2$ --- so ``crypto genuinely positive above an FX
-zero'' is an ordering of point estimates, not a certified separation. The
+zero'' is an ordering of point estimates, not a certified separation.
+% src: research/crypto.json leverage_contrast.z_vs_equities; research/fx.json leverage_contrast
+
+That edge is not under-analyzed; it is underpowered, and the bound is
+arithmetic. Certifying $z \ge 2$ at the current point separation requires
+the crypto sampling SD to fall from $0.0158$ below $0.0099$, a $1.6\times$
+reduction; the SDs are time-block bootstrap SDs scaling as $1/\sqrt{T}$, so
+history alone would need $\approx 22$ years of daily crypto data against
+the 8.6 that exist (major-coin daily history begins in late 2017). Nor can
+the cross-section substitute for $T$: a registered widening of the universe
+from 10 to 17 majors --- every liquid 2017-era coin passing the
+pre-declared real-range and history gates --- left the sampling SD
+essentially unchanged ($0.0158 \to 0.0161$) while the pooled estimate moved
+to $+0.026$ (14 of 17 coins positive) and the $z$ against FX to 1.16;
+coins share their volatility events, so widening adds instruments but
+almost no independent information. (The equity--crypto separation, by
+contrast, survives the widening at $z = 3.71$.) At these point estimates
+the FX--crypto edge becomes certifiable only by the accrual of history ---
+not by more coins, more crosses, or a different test --- and we report it
+as what it is: an ordering the data cannot yet promote to a separation.
+% src: research/crypto_wide.json arithmetic (csd_now, csd_needed_for_z2, reduction_factor_needed 1.59, history_years_needed_if_T_only 21.7, history_years_now 8.6), leverage_wide, sd_wide, n_pos/n_coins, z_vs_fx_wide, z_vs_equities_wide; docs/design/DESIGN24.md A4
+
+The
 residual per-pair scatter in FX lies on the flight-to-quality axis: the three
 most negative crosses are all yen pairs (AUDJPY $-0.046$, GBPJPY $-0.024$,
 EURJPY $-0.022$ --- yen strength is risk-off, so ``down $\to$ vol up'' is
 flight-to-quality wearing leverage's clothes), and the most positive is USDMXN
 ($+0.075$, the same flow with the opposite quote orientation).
-% src: research/crypto.json leverage_contrast.z_vs_equities; research/fx.json leverage_contrast, per_pair_leverage
+% src: research/fx.json per_pair_leverage
 
 The reading is licensed by a sign-recovery gate: on synthetic worlds with a
 known leverage sign (equity-negative, inverted-positive, symmetric-zero), the

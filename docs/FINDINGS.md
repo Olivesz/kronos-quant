@@ -496,6 +496,21 @@ knife-edge configs; the paper's headline rows are tight (FCVM 0.18, FCVM+A
 0.03, Q1.0 0.34). The paper's tables now print ± beside every simulated
 score and §2's "no formal SE" caveat is replaced by the measurement.
 
+**A4 — the FX–crypto edge is T-bound: widening the universe cannot certify
+it, and the paper now argues why.** Certification arithmetic from the
+stored vertices: z ≥ 2 needs the crypto sampling SD down from 0.0158 to
+0.0099 (1.59×); block-bootstrap SDs scale ~1/√T, so history alone needs
+~21.7 years vs the 8.6 that exist. The registered widening (10 → 17 majors:
++TRX, XMR, EOS, NEO, DASH, ZEC, BAT; ATOM excluded by the pre-declared
+history rule; range audit min 99.81%, panel start preserved) measured the
+cross-section's contribution: SD 0.0158 → **0.0161** (no reduction — coins
+share vol events), pooled leverage +0.026 (14/17 positive), z vs FX 1.44 →
+**1.16**, z vs equities 3.71 (equity edge survives). Verdict: the
+FX–crypto edge is certifiable only by accrual of history (~2039 at these
+point estimates); §7 now argues this as a bound in the body
+(`research/crypto_wide.json`; crypto.json's registered 10-coin vertex
+untouched).
+
 ## KRONOS-TRADE — the deployable system
 
 `run_trade.py` turns the findings into trading software. The design is dictated

@@ -469,6 +469,44 @@ cite("§7 z fx-crypto", r"FX--crypto edge is \$z = ([\d.]+)\$", lc["z_crypto_vs_
 cite("abstract equities", r"equities \(\$(-0\.04)\$\)", lc["equity_mean"])
 cite("abstract crypto", r"crypto \(\$\+(0\.03)\$\)", cc["crypto_leverage"])
 
+# ------------------------------- 6b. widened crypto universe (DESIGN24 A4)
+print("== widened crypto universe (crypto_wide.json)")
+CW = load("crypto_wide")
+ar = CW["arithmetic"]
+cite("§7 power arithmetic SDs",
+     r"fall from \$([\d.]+)\$ below \$([\d.]+)\$, a \$([\d.]+)\\times\$",
+     ar["csd_now"], ar["csd_needed_for_z2"], ar["reduction_factor_needed"])
+cite("§7 history bound",
+     r"\\approx (\d+)\$ years of daily crypto data against\s*the ([\d.]+) "
+     r"that exist",
+     ar["history_years_needed_if_T_only"], ar["history_years_now"])
+cite("§7 widening counts", r"from (\d+) to (\d+) majors",
+     10, CW["n_coins"])
+cite("§7 widened SD unchanged",
+     r"essentially unchanged \(\$([\d.]+) \\to ([\d.]+)\$\)",
+     ar["csd_now"], CW["sd_wide"])
+cite("§7 widened estimate and z",
+     r"pooled estimate moved\s*to \$\+([\d.]+)\$ \((\d+) of (\d+) coins "
+     r"positive\) and the \$z\$\s*against FX to ([\d.]+)",
+     CW["leverage_wide"], CW["n_pos"], CW["n_coins"], CW["z_vs_fx_wide"])
+cite("§7 widened equity edge survives",
+     r"survives the widening at \$z = ([\d.]+)\$", CW["z_vs_equities_wide"])
+check("A4 not certified, and stated as such",
+      CW["certified_ge2"] is False and CW["z_vs_fx_wide"] < 2
+      and "cannot yet promote to a separation" in TEX)
+check("A4 10-coin z consistent with fx.json",
+      CW["z_vs_fx_10coin"] == lc["z_crypto_vs_fx"])
+check("A4 T-protection: widened span == published crypto span",
+      CW["span"][0] == CR["span"][0])
+_need = ((CR["leverage_contrast"]["crypto_leverage"]
+          - FX["leverage_contrast"]["fx_leverage"]) / 2) ** 2 \
+    - FX["leverage_contrast"]["fx_sd"] ** 2
+check("A4 arithmetic re-derived from stored vertices",
+      abs(ar["csd_needed_for_z2"] - _need ** 0.5) < 5e-4)
+check("A4 added coins pass the range gate",
+      CW["range_audit"] and min(CW["range_audit"].values()) > 0.95
+      and len(CW["coins"]) == 17)
+
 # ------------------------------------------------------- 7. methods/related
 print("== methods and related work")
 cite("§8 PBO", r"its PBO of ([\d.]+) is restated", FORENSICS["pbo"]["pbo"])
