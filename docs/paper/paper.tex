@@ -149,10 +149,12 @@ without claiming it as proof.
 
 The battery consists of ten binary events, computed identically on real data
 and on simulated output, with pass criteria fixed before any agent-based run.
-Table~\ref{tab:events} lists them. The events are close-only versions of
-regularities measured and gate-validated in a prior program on $\sim$48 liquid
-US equities and ETFs (2010--2026), so the thresholds are empirical ranges, not
-conventions.
+Table~\ref{tab:events} lists them; Appendix~\ref{app:battery} gives the exact
+statistic definitions and thresholds as implemented, together with the full
+statistic vector at both calibration ends. The events are close-only versions
+of regularities measured and gate-validated in a prior program on $\sim$48
+liquid US equities and ETFs (2010--2026), so the thresholds are empirical
+ranges, not conventions.
 % src: docs/design/DESIGN8.md (event table and calibration amendments)
 
 \begin{table}[t]
@@ -168,19 +170,20 @@ E4 & long-memory clock & 8-week volatility-clock level autocorrelation above thr
 E5 & leverage effect & mean corr$(r_t, \mathrm{RV}_{t+1..10}) \le -0.03$ \\
 E6 & one-clock Gaussianization & kurtosis$(r/\sigma_{5d}) \le 5$ \\
 E7 & clock jumps & AR(1) clock-innovation skew beyond the log-$\chi^2$ noise floor \\
-E8 & arrow of time in the coupling & entropy production significant in $r$, not in vol-deformed $r$ \\
+E8 & arrow of time in the coupling & entropy production significant in $r$ and reduced $\ge 25\%$ by vol deformation \\
 E9 & no sign information & direction bits $\le$ shuffle null (95\%) \\
 E10 & tail asymmetry & gain/loss tail asymmetry at 2.5$\sigma$ \\
 \bottomrule
 \end{tabular}
-\caption{The ten-event battery (final calibrated form). E1, E4, E7 and E10
+\caption{The ten-event battery (final calibrated form; exact estimator
+definitions and thresholds in Appendix~\ref{app:battery}). E1, E4, E7 and E10
 were recalibrated against real data before any ablation was run, under a gate
 requiring real SPY to score 10/10 and geometric Brownian motion exactly 3/10;
 notably, a GJR-GARCH process fails E4 --- exponential memory cannot fake long
-memory. E9 measures the mutual information between public features and the
-next-day return sign with a KSG estimator against a shuffle null
-\citep{kraskov2004}.}
-% src: docs/design/DESIGN8.md events + calibration-phase amendments
+memory. E9 measures the mutual information between three public tape features
+and the next-day return sign with a discrete plug-in estimator against a
+permutation null.}
+% src: docs/design/DESIGN8.md events + calibration-phase amendments; kronos/decathlon.py battery()
 \label{tab:events}
 \end{table}
 
@@ -715,7 +718,7 @@ resolved ($z = 3.89$); the FX--crypto separation is not ($z = 1.44$).}
  & equity cohort & FX & crypto \\
 \midrule
 leverage effect & $-0.0405 \pm 0.0079$ & $+0.005 \pm 0.009$ & $+0.031 \pm 0.016$ \\
-$z$ vs.\ zero & $\approx -5$ & 0.56 & 1.96 \\
+$z$ vs.\ zero & $-5.1$ & 0.56 & 1.97 \\
 $z$ vs.\ FX & 3.89 & --- & 1.44 \\
 instruments positive & 0 of 4 markets & 7 of 13 pairs & 8 of 10 coins \\
 \bottomrule
@@ -725,7 +728,8 @@ Europe, Asia-EM), 2010--2026. FX: 13 liquid crosses, 2010--2026. Crypto: 10
 major coins, 2017--2026. The ordering $-0.041 < +0.005 < +0.031$ is monotone
 in point estimates; the equity edge is statistically certified, the FX--crypto
 edge is inside one-sided noise.}
-% src: research/fx.json leverage_contrast (equity_mean, equity_spread, fx_leverage, fx_sd, z values, n_pairs_positive); research/crypto.json leverage_contrast, per_coin_leverage; docs/FINDINGS.md KRONOS-FX table (z vs zero: ~-5 equities, 1.96 crypto)
+% src: research/fx.json leverage_contrast (equity_mean, equity_spread, fx_leverage, fx_sd, z_fx_vs_zero, z_fx_vs_equities, z_crypto_vs_fx), n_pairs_positive; research/crypto.json leverage_contrast, per_coin_leverage
+% src: z-vs-zero equity and crypto DERIVED as mean/sd from the stored fields: equity_mean/equity_spread = -0.0405/0.0079 = -5.13; crypto_leverage/crypto_sd = 0.0312/0.0158 = 1.97 (crypto.json); checked by docs/paper/check_numbers.py
 \label{tab:triangle}
 \end{table}
 
@@ -747,7 +751,7 @@ sign.
 Honesty about what is certified: the equity edge is resolved (one-sided
 $z = 3.89$ against FX, $z = 4.06$ against crypto), and FX is decisively zero;
 but the FX--crypto edge is $z = 1.44$, inside noise, and crypto itself clears
-zero at only $z \approx 1.96$ --- so ``crypto genuinely positive above an FX
+zero at only $z \approx 2$ --- so ``crypto genuinely positive above an FX
 zero'' is an ordering of point estimates, not a certified separation. The
 residual per-pair scatter in FX lies on the flight-to-quality axis: the three
 most negative crosses are all yen pairs (AUDJPY $-0.046$, GBPJPY $-0.024$,
@@ -863,6 +867,35 @@ but differs in asking the complement --- which facts a flow-based market
 refutation rather than by exhibition.
 % src: research/decathlon.json configs.FC.score
 
+Two adjacent traditions ask closely related questions with different
+instruments. In the heterogeneous-beliefs models of \citet{brock1998},
+the sophistication of agents' expectations is a bifurcation parameter of a
+deterministic pricing map: making agents more forward-looking changes the
+dynamics qualitatively rather than monotonically improving them. Our
+$K$-ladder is a stochastic, capital-bounded cousin of that exercise, and it
+finds the same non-monotonicity in a measured quantity --- the sign leak
+grows as anticipation deepens. The minority-game literature
+\citep{challet1997} and the intermittent agent-based markets of
+\citet{giardina2003} derive stylized facts from the statistical mechanics of
+adaptive agents competing over a scarce resource, with realistic regimes
+appearing near phase boundaries; our battery differs in scoring a fixed list
+of calibrated events rather than exhibiting a regime, but the joint-production
+finding rhymes with that literature's lesson that efficiency and excess
+volatility are properties of one collective state, not separate features.
+
+The paper's E9 event operationalizes the oldest target in the field.
+\citet{samuelson1965} proved that properly anticipated prices fluctuate
+randomly; \citet{fama1970} organized the empirical program around
+informational efficiency; and \citet{grossman1980} showed that full
+informational efficiency is impossible when information is costly --- an
+equilibrium amount of inefficiency must survive to pay the agents who remove
+it. The joint-production result is a mechanical relative of that
+impossibility with the cost relocated: in this model class the residual sign
+information is not a fee paid to arbitrageurs but a by-product of the same
+state-riding flows that generate the volatility structure, and the three
+experiments show it cannot be traded, iterated, or quoted away without taking
+the wildness with it.
+
 The price-impact literature of Bouchaud and coauthors
 \citep{bouchaud2009, bouchaud2018} underlies the paper's central object: the
 idea that order flow is the proximate mover of prices and that liquidity
@@ -903,7 +936,105 @@ this paper; and all six figures are generated from the research JSONs by
 pre-registration documents, including the amendments and the closure clause
 quoted here, are versioned in \texttt{docs/design/}.
 
-\begin{thebibliography}{12}
+\appendix
+
+\section{The battery: exact criteria and calibration statistics}
+\label{app:battery}
+
+This appendix states each event's statistic and pass region exactly as
+implemented in the repository (\texttt{kronos/decathlon.py}, function
+\texttt{battery}; the thresholds were fixed in the DESIGN8 registration and
+its calibration-phase amendments). Notation: $r_t$ are daily returns;
+$\mathrm{RV}_t$ is the 5-day rolling mean of $r^2$ (the close-only volatility
+clock), $\sigma_t = \sqrt{\mathrm{RV}_t}$, and $z_t = r_t/\sigma_t$ the
+deformed (one-clock) return. The weekly clock is built from
+\emph{non-overlapping} 5-day means $w_j$ of $\log r^2$ --- raw weekly
+differences carry an MA(1) artifact on which even GBM's $|\Delta w|$
+autocorrelates, so E4 uses the level and E7 uses AR(1) innovations
+$u_j = w_{j+1} - \bar w(1-\phi) - \phi w_j$ with $\phi$ the fitted AR(1)
+coefficient. $\mathrm{AC}_k(\cdot)$ is the lag-$k$ autocorrelation.
+A configuration passes an event if a majority of its 8 evaluation seeds pass.
+% src: kronos/decathlon.py battery(), weekly_clock_stats(); docs/design/DESIGN8.md amendments
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{llp{6.1cm}}
+\toprule
+\# & Statistic & Pass region \\
+\midrule
+E1 & $\mathrm{AC}_1(r)$ & $[-0.15,\ 0.05]$ \\
+E2 & kurtosis$(r)$ & $[4.5,\ 40]$ \\
+E3 & $\mathrm{AC}_1(|r|)$ and $\mathrm{mean}_{k=5..20}\,\mathrm{AC}_k(|r|)$ & $\ge 0.12$ and $\ge 0.05$ \\
+E4 & $\mathrm{AC}_8(w)$ (weekly clock level) & $\ge 0.12$ \\
+E5 & $\mathrm{mean}_{\tau=1..10}\,\mathrm{corr}(r_t, \mathrm{RV}_{t+\tau})$ & $\le -0.03$ \\
+E6 & kurtosis$(z)$ & $\le 5$ \\
+E7 & skew$(u)$ (weekly clock AR(1) innovations) & $\ge -0.35$ \\
+E8 & $\mathrm{EP}(r)$, $\mathrm{EP}(z)$ (entropy production, bits) & $\mathrm{EP}(r)$ significant and $\mathrm{EP}(z) \le 0.75\,\mathrm{EP}(r)$ \\
+E9 & direction bits $I(\text{features};\, \mathrm{sign}\, r_{t+1})$ & $\le$ 95th percentile of 120 shuffles \\
+E10 & $\#\{r < -2.5 s\} \,/\, \#\{r > +2.5 s\}$, $s = \mathrm{sd}(r)$ & $\ge 1.25$ \\
+\bottomrule
+\end{tabular}
+\caption{Exact pass criteria, as implemented. E7's floor is calibrated
+against the log-$\chi^2$ noise skew of the weekly clock (GBM innovations skew
+$\approx -0.65$; real SPY $-0.22$). E8's entropy production symbolizes the
+series into 3 bins, measures 3-gram irreversibility, and tests against 120
+block-reversal surrogates (random block offsets, blocks reversed with
+probability $1/2$). E9's features are the cartesian product of three tape
+observables --- $\mathrm{sign}(r_t)$, the sign of 21-day momentum, and the
+volatility tercile --- scored by discrete plug-in mutual information with
+Miller--Madow bias correction against a 120-permutation null; the program's
+continuous information channel uses the KSG estimator \citep{kraskov2004},
+but E9's features are discrete by construction.}
+% src: kronos/decathlon.py battery(); kronos/entropyprod.py ep_with_null(); kronos/infobudget.py direction_bits()
+\label{tab:thresholds}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{llrrr}
+\toprule
+Statistic & Event & SPY (real) & GBM (G) & \cfg{FCVM} \\
+\midrule
+$\mathrm{AC}_1(r)$            & E1  & $-0.103$ & $0.001$  & $0.036$ \\
+kurtosis$(r)$                 & E2  & $15.09$  & $3.04$   & $8.79$ \\
+$\mathrm{AC}_1(|r|)$          & E3  & $0.307$  & $-0.001$ & $0.377$ \\
+mean $\mathrm{AC}_{5..20}(|r|)$ & E3 & $0.218$  & $0.002$  & $-0.050$ \\
+$\mathrm{AC}_8(w)$            & E4  & $0.186$  & $-0.018$ & $-0.003$ \\
+leverage                      & E5  & $-0.113$ & $0.007$  & $-0.125$ \\
+kurtosis$(z)$                 & E6  & $2.33$   & $2.13$   & $2.20$ \\
+skew$(u)$                     & E7  & $-0.221$ & $-0.651$ & $-0.408$ \\
+$\mathrm{EP}(r)$ bits         & E8  & $0.0211$ & $0.0002$ & $0.0929$ \\
+$\mathrm{EP}(z)$ bits         & E8  & $0.0141$ & $0.0006$ & $0.1392$ \\
+direction bits                & E9  & $0.0029$ & $0.0001$ & $0.0184$ \\
+tail asymmetry                & E10 & $1.56$   & $0.91$   & $39.96$ \\
+\bottomrule
+\end{tabular}
+\caption{The full statistic vector at the battery's calibration ends (SPY
+10/10, GBM 3/10) and at the flow-only ceiling (\cfg{FCVM}, 5/10); GBM and
+\cfg{FCVM} entries are medians over the 8 evaluation seeds. The table shows
+\emph{how} each score decomposes: GBM passes only E1, E6, E9; \cfg{FCVM}
+matches SPY's magnitudes on E1/E2/E5/E10 but has no clock memory
+($\mathrm{AC}_8(w)\approx 0$ against SPY's $0.186$), fails E8 on the ratio
+criterion ($\mathrm{EP}(z) > 0.75\,\mathrm{EP}(r)$: deformation does not
+reduce its entropy production), and leaks $6\times$ SPY's direction bits.
+Its E7 skew ($-0.408$) sits marginally below the $-0.35$ floor. SPY's
+$\mathrm{EP}(z)$ is significant but 33\% below $\mathrm{EP}(r)$, meeting the
+ratio criterion.}
+% src: research/decathlon.json spy.stats, configs.G.median_stats, configs.FCVM.median_stats
+\label{tab:calib}
+\end{table}
+
+Two calibration facts anchor the thresholds. GBM's weekly-clock innovation
+skew ($-0.651$) is the log-$\chi^2$ noise floor E7 is calibrated against;
+real volatility's up-jumps cancel most of it (SPY $-0.221$). And the E4
+level-autocorrelation criterion is what a GJR-GARCH process fails (clock
+$\mathrm{AC}_8 \approx 0.06$ against the $0.12$ bar): exponential memory
+decays too fast at eight weeks, which is why E4 is the battery's long-memory
+event rather than any Hurst point estimate (the close-only Hurst proxy is
+biased and is recorded as informational only).
+% src: docs/design/DESIGN8.md amendment 1; kronos/decathlon.py comments (E4, E7)
+
+\begin{thebibliography}{17}
 
 \bibitem[Bailey and L{\'o}pez de Prado(2014)]{bailey2014}
 Bailey, D.~H., and M.~L{\'o}pez de Prado (2014).
@@ -927,10 +1058,25 @@ Bouchaud, J.-P., J.~Bonart, J.~Donier, and M.~Gould (2018).
 \emph{Trades, Quotes and Prices: Financial Markets Under the Microscope}.
 Cambridge University Press.
 
+\bibitem[Brock and Hommes(1998)]{brock1998}
+Brock, W.~A., and C.~H. Hommes (1998).
+Heterogeneous beliefs and routes to chaos in a simple asset pricing model.
+\emph{Journal of Economic Dynamics and Control}, 22(8--9), 1235--1274.
+
+\bibitem[Challet and Zhang(1997)]{challet1997}
+Challet, D., and Y.-C. Zhang (1997).
+Emergence of cooperation and organization in an evolutionary game.
+\emph{Physica A}, 246(3--4), 407--418.
+
 \bibitem[Cont(2001)]{cont2001}
 Cont, R. (2001).
 Empirical properties of asset returns: Stylized facts and statistical issues.
 \emph{Quantitative Finance}, 1(2), 223--236.
+
+\bibitem[Fama(1970)]{fama1970}
+Fama, E.~F. (1970).
+Efficient capital markets: A review of theory and empirical work.
+\emph{Journal of Finance}, 25(2), 383--417.
 
 \bibitem[Filimonov and Sornette(2012)]{filimonov2012}
 Filimonov, V., and D.~Sornette (2012).
@@ -947,6 +1093,16 @@ On the estimation of security price volatilities from historical data.
 Gatheral, J., T.~Jaisson, and M.~Rosenbaum (2018).
 Volatility is rough.
 \emph{Quantitative Finance}, 18(6), 933--949.
+
+\bibitem[Giardina and Bouchaud(2003)]{giardina2003}
+Giardina, I., and J.-P. Bouchaud (2003).
+Bubbles, crashes and intermittency in agent based market models.
+\emph{European Physical Journal B}, 31(3), 421--437.
+
+\bibitem[Grossman and Stiglitz(1980)]{grossman1980}
+Grossman, S.~J., and J.~E. Stiglitz (1980).
+On the impossibility of informationally efficient markets.
+\emph{American Economic Review}, 70(3), 393--408.
 
 \bibitem[Kraskov et~al.(2004)]{kraskov2004}
 Kraskov, A., H.~St{\"o}gbauer, and P.~Grassberger (2004).
@@ -965,6 +1121,11 @@ Lux, T., and M.~Marchesi (1999).
 Scaling and criticality in a stochastic multi-agent model of a financial
 market.
 \emph{Nature}, 397(6719), 498--500.
+
+\bibitem[Samuelson(1965)]{samuelson1965}
+Samuelson, P.~A. (1965).
+Proof that properly anticipated prices fluctuate randomly.
+\emph{Industrial Management Review}, 6(2), 41--49.
 
 \end{thebibliography}
 
