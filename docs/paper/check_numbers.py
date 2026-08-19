@@ -193,6 +193,9 @@ check_stat_row("tab:fcvm FCVM", r"\\cfg{FCVM} \(best flow-only\).*?\\\\",
 cite("§2 FCVM vs SPY bits",
      r"E9: ([\d.]+) significant direction bits against\s*SPY's ([\d.]+)",
      FCVM["dir_bits"], spy["dir_bits"])
+cite("§2 sign-leak definition",
+     r"leaks ([\d.]+\d) bits where real\s*SPY shows ([\d.]+\d)",
+     FCVM["dir_bits"], spy["dir_bits"])
 
 # --------------------------------------------------------- 3. experiment I
 print("== experiment I (decathlon2.json)")
