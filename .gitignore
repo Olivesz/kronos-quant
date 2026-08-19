@@ -29,5 +29,3 @@ docs/paper/*.blg
 # OS / editor
 .DS_Store
 
-# Local editor / assistant config (machine-specific)
-.claude/
