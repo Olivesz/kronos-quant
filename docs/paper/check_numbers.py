@@ -506,6 +506,15 @@ check("A4 arithmetic re-derived from stored vertices",
 check("A4 added coins pass the range gate",
       CW["range_audit"] and min(CW["range_audit"].values()) > 0.95
       and len(CW["coins"]) == 17)
+cite("§7 institutional coins (epistemic passage)",
+     r"BTC \(\$(-[\d.]+)\$\) and ETH \(\$(-[\d.]+)\$\), the two most",
+     CR["per_coin_leverage"]["BTC-USD"], CR["per_coin_leverage"]["ETH-USD"])
+check("§7 negative-sign sets: {BTC,ETH} registered, +XMR widened",
+      {k for k, v in CR["per_coin_leverage"].items() if v < 0}
+      == {"BTC-USD", "ETH-USD"}
+      and {k for k, v in CW["per_coin_leverage"].items() if v < 0}
+      == {"BTC-USD", "ETH-USD", "XMR-USD"}
+      and "joined by XMR in the widened one" in TEX)
 
 # ------------------------------------------------------- 7. methods/related
 print("== methods and related work")
