@@ -1,4 +1,7 @@
-% Preprint draft — builds with pdflatex (TinyTeX); figures from make_figures.py.
+\pdfoutput=1
+% ^ arXiv: process with pdflatex (must appear in the first five lines).
+% Preprint — builds with any standard TeX Live (all packages below are TeX
+% Live core; no shell-escape); figures are prebuilt PDFs from make_figures.py.
 % Sources of truth: research/decathlon{,2,3,4}.json, research/fx.json,
 % research/crypto.json, docs/FINDINGS.md, docs/METHODS.md, docs/design/DESIGN{8,18,20,22}.md.
 % Repo convention: no author block in-repo; a byline is added only at submission time.
@@ -12,9 +15,12 @@
 \usepackage[hidelinks]{hyperref}
 \graphicspath{{figures/}}
 
-% Small captions with bold labels (kernel-level; avoids the caption package).
+% Small captions with a bold "Figure N." label. Standard TeX Live path:
+% caption.sty. Fallback for minimal installations that lack caption.sty
+% (e.g. bare TinyTeX): an equivalent kernel-level \@makecaption — same
+% \small text, same bold label, centered when the caption fits one line.
 \makeatletter
-\long\def\@makecaption#1#2{%
+\long\def\kronos@makecaption#1#2{%
   \vskip\abovecaptionskip
   \small\sbox\@tempboxa{\textbf{#1.} #2}%
   \ifdim \wd\@tempboxa >\hsize
@@ -24,6 +30,9 @@
     \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
   \fi
   \vskip\belowcaptionskip}
+\IfFileExists{caption.sty}
+  {\usepackage[font=small,labelfont=bf,labelsep=period]{caption}}
+  {\let\@makecaption\kronos@makecaption}
 \makeatother
 
 \newcommand{\cfg}[1]{\mbox{#1}}
