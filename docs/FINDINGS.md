@@ -441,6 +441,24 @@ smarter agent but a different *kind* of memory: the long-memory clock and
 the coupling arrow live upstream of the flows, in whatever generates them —
 which is where any successor program would have to begin.
 
+## KRONOS-DECATHLON-ADDENDA — calibration audit and power addenda (DESIGN24)
+
+Five measurement addenda to the closed DECATHLON line, registered in
+[DESIGN24](design/DESIGN24.md) and driven by the paper's review notes. No new
+mechanism hypotheses; no Sharpe-ledger entries.
+
+**A0 — the DECA2 tuning grid, exported.** The §3 mechanism numbers in the
+paper (AC1 −0.09 → −0.35, kurt 8.8 → 4.6, bits 0.039 at kA=1) traced to this
+file's DECATHLON-2 narrative, not to JSON. The frozen DESIGN18 grid (18
+settings × tuning seeds 900–903) was re-run with per-setting stat export
+(`decathlon2.json tuning_grid_stats`). **Every narrative number reproduces
+exactly**: ac1 −0.090 at the frozen setting → −0.349 at kA=1/capA=0.05;
+kurt 8.79 (control) → 4.57 at the grid's most capitalized settings; max
+bits 0.0390, at kA=1. The tie structure of the registered pass also
+reproduces (all six kA=0.25 settings at 5/10, plus (0.5, 0.01, 0.001);
+first shot 4/10). The paper's number checker now asserts all of it;
+narrative skips 4 → 1 (the last closes with A1).
+
 ## KRONOS-TRADE — the deployable system
 
 `run_trade.py` turns the findings into trading software. The design is dictated

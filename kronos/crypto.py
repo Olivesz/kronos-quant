@@ -47,15 +47,19 @@ def _clean_crypto(px: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_crypto(start: str = CRYPTO_START, end: str = "2026-06-05",
-                seed: int = 42) -> dict:
+                seed: int = 42, universe: list[str] | None = None,
+                cache_prefix: str = "crypto") -> dict:
     """Cached crypto OHLC + Garman-Klass variance panels.
 
     Returns {"close", "gk", "source"}. Falls back to a seeded synthetic market
     when Yahoo is unreachable so the study still runs offline (the JSON records
-    which source was used).
+    which source was used). universe/cache_prefix default to the DESIGN14
+    10-major universe; DESIGN24 A4 passes the widened 17-coin list with its
+    own cache namespace so the published panel is never touched.
     """
+    universe = CRYPTO_UNIVERSE if universe is None else universe
     os.makedirs(CACHE_DIR, exist_ok=True)
-    paths = {f: os.path.join(CACHE_DIR, f"crypto_{f}_{start}_{end}.csv")
+    paths = {f: os.path.join(CACHE_DIR, f"{cache_prefix}_{f}_{start}_{end}.csv")
              for f in ("open", "high", "low", "close")}
 
     if all(os.path.exists(p) for p in paths.values()):
@@ -63,13 +67,13 @@ def load_crypto(start: str = CRYPTO_START, end: str = "2026-06-05",
                 for f, p in paths.items()}
         source = "yahoo"
     else:
-        ohlc = fetch_yahoo_ohlc(CRYPTO_UNIVERSE, start, end)
+        ohlc = fetch_yahoo_ohlc(universe, start, end)
         if ohlc is not None:
             for f, p in paths.items():
                 ohlc[f].to_csv(p)
             source = "yahoo"
         else:
-            c = generate_synthetic(CRYPTO_UNIVERSE, start, end, seed + 7)
+            c = generate_synthetic(universe, start, end, seed + 7)
             rng = np.random.default_rng(seed + 1)
             o = c.shift(1) * np.exp(rng.normal(0, 0.003, c.shape))
             span = np.abs(rng.normal(0, 0.02, c.shape)) + 0.004   # crypto is wilder

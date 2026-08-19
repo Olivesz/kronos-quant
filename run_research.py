@@ -1027,9 +1027,56 @@ def exp_decathlon(force: bool = False) -> dict:
 # (DESIGN18: anticipatory agents who front-run the vol-targeters' flow)
 # ---------------------------------------------------------------------------
 
+def _deca2_grid_stats() -> dict:
+    """DESIGN24 A0: re-run the DESIGN18 tuning grid (18 settings, tuning
+    seeds 900-903, T=6000, FCVM+A) and export per-setting statistics. No
+    selection is performed; this converts the FINDINGS narrative numbers
+    (AC1 -0.09 -> -0.35, kurt 8.8 -> 4.6, bits 0.039 at kA=1) into JSON."""
+    from kronos.decathlon import run_decathlon
+
+    per_setting = []
+    by_kA_pool: dict[str, dict[str, list]] = {}
+    for kA in (0.25, 0.5, 1.0):
+        pool = by_kA_pool.setdefault(str(kA), {"ac1_r": [], "kurt": [],
+                                               "dir_bits": []})
+        for capA in (0.01, 0.02, 0.05):
+            for sA in (0.001, 0.002):
+                rec = run_decathlon(
+                    n_seeds=4, T=6000, seed0=900, per_seed=True,
+                    configs={"S": dict(fundamentalists=True, chartists=True,
+                                       voltargeters=True, marketmakers=True,
+                                       anticipators=True,
+                                       params={"kA": kA, "capA": capA,
+                                               "sA": sA})})["S"]
+                med = rec["median_stats"]
+                per_setting.append(
+                    {"kA": kA, "capA": capA, "sA": sA, "score": rec["score"],
+                     "ac1_r": round(med["ac1_r"], 4),
+                     "kurt": round(med["kurt"], 4),
+                     "dir_bits": round(med["dir_bits"], 6)})
+                for st in rec["seed_stats"]:
+                    for k in pool:
+                        pool[k].append(st[k])
+                print(f"[decathlon2] grid kA={kA} capA={capA} sA={sA}: "
+                      f"{rec['score']}/10 ac1={med['ac1_r']:+.3f} "
+                      f"kurt={med['kurt']:.2f} bits={med['dir_bits']:.4f}")
+    by_kA = {k: {q: round(float(np.median(v[q])), 4 if q != "dir_bits" else 6)
+                 for q in v} for k, v in by_kA_pool.items()}
+    return {"design": "DESIGN24 A0 (re-run of the DESIGN18 registered grid)",
+            "seeds": "900-903", "T": 6000, "n_settings": len(per_setting),
+            "per_setting": per_setting, "by_kA": by_kA}
+
+
 def exp_decathlon2(force: bool = False) -> dict:
     if not force and (c := load_cached("decathlon2")):
-        print("[decathlon2] cached")
+        if "tuning_grid_stats" in c:
+            print("[decathlon2] cached")
+            return c
+        # DESIGN24 A0 addendum: grid stat export only; published rows untouched
+        t0 = time.time()
+        c["tuning_grid_stats"] = _deca2_grid_stats()
+        print(f"[decathlon2] grid-stats addendum done ({time.time()-t0:.0f}s)")
+        save("decathlon2", c)
         return c
     from kronos.decathlon import CONFIGS2, DEFAULTS, run_decathlon
 
@@ -1045,7 +1092,8 @@ def exp_decathlon2(force: bool = False) -> dict:
                               "5/10, tied across all weak-anticipator "
                               "settings; pre-declared tie-break picked the "
                               "weakest (see DESIGN18 amendment)"},
-           "configs": table}
+           "configs": table,
+           "tuning_grid_stats": _deca2_grid_stats()}
     for name, rec in table.items():
         passes = [k for k, v in rec["events"].items() if v]
         print(f"[decathlon2] {name:7s}: {rec['score']}/10  "
@@ -1060,9 +1108,65 @@ def exp_decathlon2(force: bool = False) -> dict:
 # (DESIGN20: iterate the DESIGN18 anticipation layer K=0/1/5 times)
 # ---------------------------------------------------------------------------
 
+def _deca3_k01_extension(stored_bits: dict | None = None) -> dict:
+    """DESIGN24 A2: the K0-vs-K1 paired comparison at 32 seeds (100-131),
+    fixed budget, one run. Wilcoxon signed-rank primary (two-sided, 0.05),
+    sign test secondary. The first 8 seeds must reproduce the published
+    per-seed bits exactly."""
+    from scipy.stats import binomtest, wilcoxon
+
+    from kronos.decathlon import run_decathlon
+
+    ext = run_decathlon(
+        n_seeds=32, T=6000, seed0=100, per_seed=True,
+        configs={"K0_FCVM": dict(fundamentalists=True, chartists=True,
+                                 voltargeters=True, marketmakers=True),
+                 "K1_DECA2": dict(fundamentalists=True, chartists=True,
+                                  voltargeters=True, marketmakers=True,
+                                  anticipators=True, fixed_point_iters=1)})
+    k0 = np.array([st["dir_bits"] for st in ext["K0_FCVM"]["seed_stats"]])
+    k1 = np.array([st["dir_bits"] for st in ext["K1_DECA2"]["seed_stats"]])
+    if stored_bits is not None:   # byte-identity of the re-run (DESIGN24 A2)
+        for name, arr in (("K0_FCVM", k0), ("K1_DECA2", k1)):
+            pub = stored_bits[name]["per_seed"]
+            got = [round(float(x), 6) for x in arr[:len(pub)]]
+            if got != pub:
+                raise RuntimeError(
+                    f"DESIGN24 A2 byte-identity FAILED for {name}: "
+                    f"first-{len(pub)}-seed bits {got} != published {pub}")
+    d = k1 - k0
+    w = wilcoxon(k1, k0, alternative="two-sided")
+    n_pos = int((d > 0).sum())
+    n_nonzero = int((d != 0).sum())
+    sign_p = float(binomtest(n_pos, n_nonzero, 0.5).pvalue)
+    wil_p = float(w.pvalue)
+    separates = bool(wil_p < 0.05)
+    print(f"[decathlon3] K0-vs-K1 at 32 seeds: medians "
+          f"{np.median(k0):.4f} -> {np.median(k1):.4f}, K1>K0 on "
+          f"{n_pos}/{n_nonzero}, Wilcoxon p={wil_p:.4f} (primary), "
+          f"sign p={sign_p:.4f} -> "
+          f"{'SEPARATES' if separates else 'statistically flat'}")
+    return {"design": "DESIGN24 A2", "seeds": "100-131", "T": 6000,
+            "per_seed": {"K0_FCVM": [round(float(x), 6) for x in k0],
+                         "K1_DECA2": [round(float(x), 6) for x in k1]},
+            "median": {"K0_FCVM": round(float(np.median(k0)), 6),
+                       "K1_DECA2": round(float(np.median(k1)), 6)},
+            "median_diff": round(float(np.median(d)), 6),
+            "n_pos": n_pos, "n_seeds": len(d),
+            "wilcoxon_p": round(wil_p, 4), "sign_test_p": round(sign_p, 4),
+            "separates_at_0.05": separates}
+
+
 def exp_decathlon3(force: bool = False) -> dict:
     if not force and (c := load_cached("decathlon3")):
-        print("[decathlon3] cached")
+        if "k01_extension" in c:
+            print("[decathlon3] cached")
+            return c
+        # DESIGN24 A2 addendum: 32-seed extension only; published rows untouched
+        t0 = time.time()
+        c["k01_extension"] = _deca3_k01_extension(c["dir_bits_vs_K"])
+        print(f"[decathlon3] k01-extension addendum done ({time.time()-t0:.0f}s)")
+        save("decathlon3", c)
         return c
     from kronos.decathlon import CONFIGS3, DEFAULTS, _ant_target_fp, run_decathlon
 
@@ -1150,6 +1254,7 @@ def exp_decathlon3(force: bool = False) -> dict:
                               "tie-break picked the weakest (DESIGN20 "
                               "amendment) — the DECA2 pattern, one level up"},
            "tuned_eval": tuned_rec}
+    out["k01_extension"] = _deca3_k01_extension(bits)
     for name, rec in list(table.items()) + [("K5_TUNED", tuned_rec)]:
         passes = [k for k, v in rec["events"].items() if v]
         print(f"[decathlon3] {name:13s}: {rec['score']}/10  "
@@ -1270,6 +1375,168 @@ def exp_decathlon4(force: bool = False) -> dict:
           + ", ".join(f"{k}={v:+.3f}" for k, v in toy.items()))
     print(f"[decathlon4] done ({time.time()-t0:.0f}s)")
     save("decathlon4", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Experiment 17e (BATTERY-AUDIT): the multi-index 10/10 anchor (DESIGN24 A1)
+# ---------------------------------------------------------------------------
+
+def exp_battery_audit(force: bool = False) -> dict:
+    """DESIGN24 A1: score the battery on the FIXED six-index list (QQQ, DIA,
+    IWM + the transfer studies' local index ETFs). Prediction: >= 9/10 each,
+    misses named; GBM stays 3/10. Also exports the GJR-GARCH clock-AC8
+    calibration reference (closes a check_numbers narrative skip)."""
+    if not force and (c := load_cached("battery_audit")):
+        print("[battery_audit] cached")
+        return c
+    from kronos.decathlon import battery, weekly_clock_stats
+    from kronos.surge import simulate_gjr_world
+    from kronos.transfer import load_universe
+
+    t0 = time.time()
+    px, ohlc, gk, src = get_data()
+    series = {t: px[t].pct_change().dropna() for t in ("QQQ", "DIA", "IWM")}
+    sources = {t: src for t in series}
+    for uni, mk in (("japan", "1306.T"), ("europe", "EXW1.DE"),
+                    ("asia_em", "2800.HK")):
+        u = load_universe(uni, "2010-01-01", "2026-06-05")
+        series[mk] = u["close"][mk].pct_change().dropna()
+        sources[mk] = u["source"]
+
+    indices = {}
+    for name, r in series.items():
+        b = battery(r)
+        misses = [k for k, v in b["events"].items() if not v]
+        indices[name] = {
+            "score": b["score"], "events": b["events"],
+            "failed": misses, "n_days": int(len(r)),
+            "source": sources[name],
+            "stats": {k: round(float(v), 4) for k, v in b["stats"].items()
+                      if isinstance(v, (int, float, np.floating))}}
+        print(f"[battery_audit] {name:8s}: {b['score']}/10"
+              + (f"  missing {', '.join(m.split('_')[0] for m in misses)}"
+                 if misses else "  (all ten)"))
+
+    d1 = load_cached("decathlon") or exp_decathlon(force=False)
+    anchor = {"SPY": d1["spy"]["score"], "GBM": d1["configs"]["G"]["score"]}
+    if anchor != {"SPY": 10, "GBM": 3}:
+        raise RuntimeError(f"calibration anchor moved: {anchor}")
+
+    # GJR-GARCH(1,1) clock reference: the gate suite's leverage world,
+    # battery seeds/T. Exponential memory must sit below the E4 bar (0.12).
+    ac8 = [round(float(weekly_clock_stats(
+        simulate_gjr_world(6000, seed=100 + s)[0])["ac8_level"]), 4)
+        for s in range(8)]
+    gjr = {"per_seed": ac8, "median": round(float(np.median(ac8)), 4),
+           "max": round(float(np.max(ac8)), 4), "e4_bar": 0.12,
+           "all_below_bar": bool(np.max(ac8) < 0.12),
+           "world": "kronos.surge.simulate_gjr_world, seeds 100-107, T=6000"}
+    print(f"[battery_audit] GJR clock AC8: median {gjr['median']:.3f}, "
+          f"max {gjr['max']:.3f} vs E4 bar 0.12 "
+          f"({'all below' if gjr['all_below_bar'] else 'BAR CROSSED'})")
+
+    scores = sorted((v["score"], k) for k, v in indices.items())
+    out = {"design": "DESIGN24 A1", "indices": indices,
+           "min_score": scores[0][0], "min_index": scores[0][1],
+           "prediction_ge9_all": bool(scores[0][0] >= 9),
+           "anchor": anchor, "gjr_clock": gjr}
+    print(f"[battery_audit] min {scores[0][0]}/10 ({scores[0][1]}); "
+          f"prediction >=9 all: {out['prediction_ge9_all']} "
+          f"({time.time()-t0:.0f}s)")
+    save("battery_audit", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Experiment 17f (SCORE-SE): battery-score standard errors (DESIGN24 A3)
+# ---------------------------------------------------------------------------
+
+def exp_score_se(force: bool = False) -> dict:
+    """DESIGN24 A3: seed-level bootstrap SE for every published battery
+    score. Recomputes each config's per-seed event matrix (must reproduce
+    the published majority score exactly — asserted loudly), then resamples
+    the 8 seeds 2000x and takes the SD of the recomputed majority scores."""
+    if not force and (c := load_cached("score_se")):
+        print("[score_se] cached")
+        return c
+    from kronos.decathlon import CONFIGS, run_decathlon
+
+    def boot_se(seed_events: list[dict], n_boot: int = 2000,
+                seed: int = 0) -> float:
+        keys = sorted(seed_events[0])
+        m = np.array([[ev[k] for k in keys] for ev in seed_events])
+        rng = np.random.default_rng(seed)
+        n = len(m)
+        scores = np.empty(n_boot)
+        for i in range(n_boot):
+            votes = m[rng.integers(0, n, n)].sum(axis=0)
+            scores[i] = (votes > n / 2).sum()
+        return float(scores.std())
+
+    published = {
+        "decathlon": {k: load_cached("decathlon")["configs"][k]["score"]
+                      for k in CONFIGS},
+        "decathlon2": {k: load_cached("decathlon2")["configs"][k]["score"]
+                       for k in ("FCVM+A", "FV+A", "F+A")},
+        "decathlon3": {"K5_FIXEDPOINT":
+                       load_cached("decathlon3")["configs"]["K5_FIXEDPOINT"]["score"],
+                       "K5_TUNED": load_cached("decathlon3")["tuned_eval"]["score"]},
+        "decathlon4": {"FCVM+Q1.0":
+                       load_cached("decathlon4")["configs"]["FCVM+Q1.0"]["score"],
+                       "FCVM+Q0.5":
+                       load_cached("decathlon4")["configs"]["FCVM+Q0.5"]["score"],
+                       "Q_TUNED":
+                       load_cached("decathlon4")["contingent_pass"]["tuned_eval"]["score"]},
+    }
+    specs = dict(CONFIGS)
+    specs.update({
+        "FCVM+A": dict(fundamentalists=True, chartists=True, voltargeters=True,
+                       marketmakers=True, anticipators=True),
+        "FV+A": dict(fundamentalists=True, chartists=False, voltargeters=True,
+                     marketmakers=False, anticipators=True),
+        "F+A": dict(fundamentalists=True, chartists=False, voltargeters=False,
+                    marketmakers=False, anticipators=True),
+        "K5_FIXEDPOINT": dict(fundamentalists=True, chartists=True,
+                              voltargeters=True, marketmakers=True,
+                              anticipators=True, fixed_point_iters=5),
+        "K5_TUNED": dict(fundamentalists=True, chartists=True,
+                         voltargeters=True, marketmakers=True,
+                         anticipators=True, fixed_point_iters=5,
+                         params={"kA": 0.05, "capA": 0.005, "sA": 0.001}),
+        "FCVM+Q1.0": dict(fundamentalists=True, chartists=True,
+                          voltargeters=True, marketmakers=True, quote_skew=1.0),
+        "FCVM+Q0.5": dict(fundamentalists=True, chartists=True,
+                          voltargeters=True, marketmakers=True, quote_skew=0.5),
+        "Q_TUNED": dict(fundamentalists=True, chartists=True,
+                        voltargeters=True, marketmakers=True, quote_skew=0.05),
+    })
+
+    t0 = time.time()
+    table = run_decathlon(n_seeds=8, T=6000, seed0=100, per_seed=True,
+                          configs=specs)
+    se, scores = {}, {}
+    for name, rec in table.items():
+        se[name] = round(boot_se(rec["seed_events"]), 3)
+        scores[name] = rec["score"]
+        print(f"[score_se] {name:14s}: {rec['score']}/10  SE {se[name]:.2f}")
+    for exp_name, pubs in published.items():
+        for cfg, pub_score in pubs.items():
+            if scores[cfg] != pub_score:
+                raise RuntimeError(
+                    f"DESIGN24 A3 reproduction FAILED: {exp_name}/{cfg} "
+                    f"recomputed {scores[cfg]}/10 != published {pub_score}/10")
+    out = {"design": "DESIGN24 A3",
+           "method": {"n_boot": 2000, "rng_seed": 0, "unit": "evaluation seed",
+                      "seeds": "100-107", "T": 6000,
+                      "note": "SD of majority-vote scores over 2000 seed "
+                              "resamples; per-seed event matrices reproduce "
+                              "the published scores exactly (asserted)"},
+           "scores": scores, "se": se,
+           "se_min": min(se.values()), "se_max": max(se.values())}
+    print(f"[score_se] SE range [{out['se_min']:.2f}, {out['se_max']:.2f}] "
+          f"({time.time()-t0:.0f}s)")
+    save("score_se", out)
     return out
 
 
@@ -1845,6 +2112,105 @@ def exp_fx(force: bool = False) -> dict:
     return out
 
 
+def exp_crypto_wide(force: bool = False) -> dict:
+    """DESIGN24 A4: the FX-crypto edge — certification arithmetic + the
+    widened 17-coin universe (pre-declared list, real-range + history gates
+    as the only exclusion rules). The published 10-coin vertex (crypto.json)
+    and the FX vertex (fx.json) are frozen; this measures how far
+    cross-sectional widening moves z(crypto vs FX)."""
+    if not force and (c := load_cached("crypto_wide")):
+        print("[crypto_wide] cached")
+        return c
+    from kronos.crypto import CRYPTO_UNIVERSE, load_crypto, per_asset_leverage
+    from kronos.data import CACHE_DIR
+    from kronos.fx import real_range_audit
+    from kronos.hawkes import recovery_curve
+    from kronos.transfer import battery
+
+    WIDE_ADDS = ["TRX-USD", "XMR-USD", "EOS-USD", "NEO-USD", "DASH-USD",
+                 "ZEC-USD", "BAT-USD"]          # fixed in DESIGN24 A4
+    EXCLUDED = {"ATOM-USD": "first data date 2019-03-14 > panel start "
+                            "2017-11-09 (T-protection rule, DESIGN24 A4)"}
+
+    fxj = load_cached("fx") or exp_fx(force=False)
+    crj = load_cached("crypto") or exp_crypto(force=False)
+    lc_fx, lc_cr = fxj["leverage_contrast"], crj["leverage_contrast"]
+    fl, fsd = lc_fx["fx_leverage"], lc_fx["fx_sd"]
+    eq_mean, eq_spread = lc_fx["equity_mean"], lc_fx["equity_spread"]
+
+    # certification arithmetic from the STORED estimates (DESIGN24 A4)
+    cl10, csd10 = lc_cr["crypto_leverage"], lc_cr["crypto_sd"]
+    denom_needed = (cl10 - fl) / 2.0
+    csd_needed = float(np.sqrt(max(denom_needed ** 2 - fsd ** 2, 0.0)))
+    years_now = 8.6                      # 2017-11-09 -> 2026-06-04
+    years_needed = years_now * (csd10 / csd_needed) ** 2
+    arithmetic = {
+        "z_now": lc_fx["z_crypto_vs_fx"],
+        "csd_now": csd10, "fsd": fsd,
+        "csd_needed_for_z2": round(csd_needed, 4),
+        "reduction_factor_needed": round(csd10 / csd_needed, 2),
+        "history_years_now": years_now,
+        "history_years_needed_if_T_only": round(years_needed, 1),
+        "note": "block-bootstrap SDs scale ~1/sqrt(T); crypto daily history "
+                "on Yahoo starts 2017-11-09 for nearly all majors (BTC 2014)"}
+
+    t0 = time.time()
+    cu = load_crypto(universe=CRYPTO_UNIVERSE + WIDE_ADDS,
+                     cache_prefix="crypto_wide")
+    close, gk = cu["close"], cu["gk"]
+    # the two pre-declared gates, re-checked at runtime
+    raw = {f: pd.read_csv(os.path.join(
+        CACHE_DIR, f"crypto_wide_{f}_2017-01-01_2026-06-05.csv"),
+        index_col=0, parse_dates=True) for f in ("open", "high", "low",
+                                                 "close")} \
+        if cu["source"] == "yahoo" else None
+    audit = real_range_audit(raw) if raw is not None else {}
+    bad_range = [p for p, f in audit.items() if f <= 0.95]
+    if bad_range:
+        raise RuntimeError(f"real-range gate failed for {bad_range}")
+    ref_start = pd.Timestamp(crj["span"][0])
+    if close.index[0] != ref_start:
+        raise RuntimeError(
+            f"T-protection violated: widened panel starts {close.index[0]} "
+            f"!= published crypto panel start {ref_start}")
+    print(f"[crypto_wide] {close.shape[1]} coins x {len(close)} days "
+          f"({cu['source']}, {close.index[0].date()} -> "
+          f"{close.index[-1].date()}); range audit min "
+          f"{min(audit.values()) if audit else float('nan'):.4f}")
+
+    curve = recovery_curve(n_rep=8, T=float(len(close)), seed=0)
+    bat = battery(close, gk, curve)
+    lw, sw = float(bat["leverage"][0]), float(bat["leverage"][1])
+    per_coin = per_asset_leverage(close, gk)
+    n_pos = sum(1 for v in per_coin.values() if v > 0)
+    z_wide = (lw - fl) / float(np.sqrt(fsd ** 2 + sw ** 2))
+    z_eq = (lw - eq_mean) / float(np.sqrt(sw ** 2 + eq_spread ** 2))
+    certified = bool(z_wide >= 2.0)
+
+    print(f"[crypto_wide] leverage {lw:+.4f} (sd {sw:.4f}) vs 10-coin "
+          f"{cl10:+.4f} (sd {csd10:.4f}); {n_pos}/{len(per_coin)} positive")
+    print(f"[crypto_wide] z vs FX: {lc_fx['z_crypto_vs_fx']} -> "
+          f"{z_wide:.2f} ({'CERTIFIED' if certified else 'still < 2'}); "
+          f"z vs equities {z_eq:.2f}")
+    out = {"design": "DESIGN24 A4", "coins": list(close.columns),
+           "added": WIDE_ADDS, "excluded": EXCLUDED,
+           "span": [str(close.index[0].date()), str(close.index[-1].date())],
+           "source": cu["source"],
+           "range_audit": {p: round(f, 4) for p, f in audit.items()},
+           "arithmetic": arithmetic,
+           "leverage_wide": round(lw, 4), "sd_wide": round(sw, 4),
+           "per_coin_leverage": {k: round(v, 4) for k, v in per_coin.items()},
+           "n_pos": n_pos, "n_coins": len(per_coin),
+           "z_vs_fx_wide": round(z_wide, 2), "z_vs_fx_10coin":
+           lc_fx["z_crypto_vs_fx"], "z_vs_equities_wide": round(z_eq, 2),
+           "certified_ge2": certified,
+           "battery_wide": {k: [round(float(v[0]), 4), round(float(v[1]), 4)]
+                            for k, v in bat.items()}}
+    print(f"[crypto_wide] done in {time.time()-t0:.0f}s")
+    save("crypto_wide", out)
+    return out
+
+
 def exp_edge(force: bool = False) -> dict:
     """DESIGN15 before/after, reproducible: reconstructs the LEGACY (inverted-
     throttle) overlay inline for the baseline row, then measures fix-only and
@@ -1989,12 +2355,15 @@ EXPERIMENTS = {
     "decathlon2": exp_decathlon2,
     "decathlon3": exp_decathlon3,
     "decathlon4": exp_decathlon4,
+    "battery_audit": exp_battery_audit,
+    "score_se": exp_score_se,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,
     "transfer": exp_transfer,
     "crypto": exp_crypto,
     "fx": exp_fx,
+    "crypto_wide": exp_crypto_wide,
     "edge": exp_edge,
     "harvest": exp_harvest,
     "vollab": exp_vollab,
