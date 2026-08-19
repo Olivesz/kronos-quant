@@ -32,6 +32,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Emit today's ledger row (strict fetch; failures write GAP rows)
+        id: emit
+        continue-on-error: true
         run: python run_live.py --emit
 
       - name: Congruence check (report-only; breaches surface in the log)
@@ -48,3 +50,9 @@ jobs:
             git commit -m "live: ledger row $(date -u +%F) [skip ci]"
             git push
           fi
+
+      - name: Surface emit status (GAP days stay visible as failed runs)
+        if: steps.emit.outcome == 'failure'
+        run: |
+          echo "emit wrote a GAP row (committed above) — marking run red for visibility"
+          exit 1
