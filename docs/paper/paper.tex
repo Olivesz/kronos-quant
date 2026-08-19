@@ -160,7 +160,9 @@ result; it is a measurement.
 
 The headline mechanism result is easy to state. Adding one layer of
 anticipation to the minimal market leaves its score unchanged and moves the
-sign leak one derivative earlier; iterating anticipation five deep contracts
+sign leak --- the residual forecastability of next-day return signs, defined
+precisely in Section~\ref{sec:battery} --- one derivative earlier; iterating
+anticipation five deep contracts
 the model-space forecastable flow by a factor of four while the leaked sign
 information in the realized prices moves the wrong way (median direction
 bits 0.0184 $\to$ 0.0200 $\to$ 0.0257; the depth-five rise holds on 7 of 8
@@ -242,9 +244,10 @@ parameters, linear impact. Log price $p_t$ moves by
 \begin{equation}
 r_t \;=\; \lambda\,\bigl[\,D^{\mathrm{fund}}_t + D^{\mathrm{chart}}_t +
 D^{\mathrm{vol}}_t + D^{\mathrm{mm}}_t + D^{\mathrm{noise}}_t\,\bigr],
+\label{eq:market}
 \end{equation}
 %
-with
+with price-impact coefficient $\lambda$;
 $D^{\mathrm{fund}} = k_F\,(V_t - p_t)$ for a random-walk log fundamental $V$;
 $D^{\mathrm{chart}} = k_C \tanh(m_t/s)$ for an EWMA trend signal $m$;
 $D^{\mathrm{vol}} = k_V\,(L_t - L_{t-1})$ for volatility-targeters (hereafter
@@ -338,10 +341,12 @@ target, so leverage ends at $L_{\mathrm{eq}} = \min(L_{\max}, 1)$ ---
 %
 holds inventory proportional to the forecast, capped by capital,
 $I^*_t = \mathrm{clip}(k_A \hat F_t, \pm \mathrm{cap}_A)$, and trades the
-inventory change plus execution noise. The unwind is automatic: as vol reverts
+inventory change plus execution noise of scale $s_A$. The unwind is automatic:
+as vol reverts
 and the targeters re-lever, the forecast decays and the anticipator sells into
 exactly that mechanical bid. Three parameters
-$(k_A, \mathrm{cap}_A, s_A)$, frozen before any battery run.
+$(k_A, \mathrm{cap}_A, s_A)$ --- response, capital, noise --- frozen before
+any battery run.
 % src: docs/design/DESIGN18.md (agent spec)
 
 Three gates license the mechanism before any score is read (the pattern is
@@ -423,7 +428,7 @@ anticipate \emph{each other} --- the fixed point of mutual anticipation.
 The fixed-point stack makes each layer's unwind part of what is anticipated.
 Layer $k$ front-runs the \emph{residual} forecastable total flow --- the
 mechanical flow plus the deterministic future unwind of the $k-1$ layers
-beneath it:
+beneath it (time subscripts suppressed):
 %
 \begin{equation}
 \mathrm{resid}_0 = \hat F, \qquad
@@ -492,7 +497,7 @@ effect).}
 forecastable-flow fraction $\beta_K$ measured on the deterministic toy world,
 falling exactly as $(1-k_A)^K$ --- $1.000 \to 0.750 \to 0.237$. Dashed line and
 open squares (right axis): the E9 direction bits measured in the simulated
-market at the same $K$ (open circles: the eight evaluation seeds), medians
+market at the same $K$ (open circles: the 8 evaluation seeds), medians
 rising $0.0184 \to 0.0200 \to 0.0257$; the $K{=}5$ rise holds on 7 of 8
 paired seeds. The operator removes forecastable
 flow in model space; the market re-creates sign information in price space.
@@ -527,7 +532,8 @@ less anticipation at every opportunity, never more.
 % src: research/decathlon3.json tuning (grid, note), tuned_eval; docs/design/DESIGN20.md amendment
 
 The algebra explains the failure sharply. Away from the caps, the $K$-layer
-stack is equivalent to \emph{one} anticipator of strength $1-(1-k_A)^K$:
+stack is equivalent to \emph{one} anticipator of strength $1-(1-k_A)^K$
+(the telescoped sum in Eq.~\eqref{eq:stack}):
 mutual anticipation of this operator class deepens into a stronger single
 anticipator, and Experiment~I already measured that stronger is worse. The
 contraction that defines the fixed point is an open-loop property, licensed by
@@ -560,10 +566,12 @@ q_t = \lambda_Q\,\lambda\,\hat F_t, \qquad
 r_t = \lambda\,D_t + (q_t - q_{t-1}),
 \end{equation}
 %
-with skew strength $\lambda_Q \in \{1.0, 0.5\}$ fixed in advance
+with $D_t$ the total flow in brackets in Eq.~\eqref{eq:market} and skew
+strength $\lambda_Q \in \{1.0, 0.5\}$ fixed in advance
 ($\lambda_Q = 0$ is byte-identical to the unmodified simulator). Because the
 maker's forecast state \emph{is} the targeters' public state, the quote
-revision telescopes exactly against the mechanical flow,
+revision telescopes exactly against the mechanical flow
+$f^{\mathrm{mech}}_t = D^{\mathrm{vol}}_t$,
 $q_t - q_{t-1} = -\lambda_Q\,\lambda\, f^{\mathrm{mech}}_t$: at full skew the
 mechanical flow's entire price impact is absorbed into the level by algebraic
 identity, not by tuning, and the realized return keeps only the unforecastable
@@ -878,7 +886,8 @@ volatility clustering; the same deformation-first discipline shapes the
 battery's E8 event.
 % src: research/reflex.json median_n_raw=0.6827, median_n_def=0.2459, per_asset (48 assets); docs/FINDINGS.md KRONOS-REFLEX
 Rough volatility \citep{gatheral2018} motivates the battery's long-memory
-clock event E4: the measurement program replicated $H \approx 0.10$ on 16
+clock event E4: the measurement program replicated a Hurst exponent
+$H \approx 0.10$ on 16
 years of SPY range-based volatility, and E4 is calibrated so that
 exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
 event no flow configuration and no rationality layer ever bought, consistent
@@ -989,12 +998,16 @@ quoted here, are versioned in \texttt{docs/design/}.
 \section{The battery: exact criteria and calibration statistics}
 \label{app:battery}
 
-This appendix states each event's statistic and pass region exactly as
+Table~\ref{tab:thresholds} states each event's statistic and pass region
+exactly as
 implemented in the repository (\texttt{kronos/decathlon.py}, function
 \texttt{battery}; the thresholds were fixed in the DESIGN8 registration and
-its calibration-phase amendments). Notation: $r_t$ are daily returns;
+its calibration-phase amendments), and Table~\ref{tab:calib} gives the full
+statistic vector at both calibration ends and at the flow-only ceiling.
+Notation: $r_t$ are daily returns;
 $\mathrm{RV}_t$ is the 5-day rolling mean of $r^2$ (the close-only volatility
-clock), $\sigma_t = \sqrt{\mathrm{RV}_t}$, and $z_t = r_t/\sigma_t$ the
+clock), $\sigma_t = \sqrt{\mathrm{RV}_t}$ (written $\sigma_{5d}$ in
+Table~\ref{tab:events}), and $z_t = r_t/\sigma_t$ the
 deformed (one-clock) return. The weekly clock is built from
 \emph{non-overlapping} 5-day means $w_j$ of $\log r^2$ --- raw weekly
 differences carry an MA(1) artifact on which even GBM's $|\Delta w|$
