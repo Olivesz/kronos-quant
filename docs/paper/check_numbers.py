@@ -306,6 +306,24 @@ cite("§4 regression kurt", r"kurtosis \$([\d.]+) \\to ([\d.]+)\$\) and crash",
 cite("§4 regression tail", r"ratio \$([\d.]+) \\to ([\d.]+)\$\)",
      m1["tail_asym"], m5["tail_asym"])
 
+# --- the 32-seed K0-vs-K1 extension (DESIGN24 A2) -------------------------
+ext = D3["k01_extension"]
+check("A2 budget: 32 seeds, 100-131",
+      ext["n_seeds"] == 32 and ext["seeds"] == "100-131")
+for _k in ("K0_FCVM", "K1_DECA2"):
+    check(f"A2 prefix byte-identity {_k}",
+          ext["per_seed"][_k][:8] == bits[_k]["per_seed"])
+cite("§3 extension flat",
+     r"above control on (\d+) of (\d+) seeds, two-sided Wilcoxon\s*"
+     r"\$p = ([\d.]+)\$",
+     ext["n_pos"], ext["n_seeds"], ext["wilcoxon_p"])
+cite("§4 extension medians",
+     r"medians \$([\d.]+)\$ versus\s*\$([\d.]+)\$, Wilcoxon \$p = ([\d.]+)\$",
+     ext["median"]["K0_FCVM"], ext["median"]["K1_DECA2"], ext["wilcoxon_p"])
+check("A2 verdict consistent (flat, stated as such)",
+      ext["separates_at_0.05"] is False
+      and len(re.findall(r"flat at 32 seeds|statistically flat", TEX)) >= 3)
+
 grid3 = {(g["kA"], g["capA"]): g["score"] for g in D3["tuning"]["grid"]}
 check("DECA3 grid winner kA=0.05 among tied best",
       grid3[(0.05, 0.005)] == 5 and max(grid3.values()) == 5)

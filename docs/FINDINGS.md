@@ -474,6 +474,18 @@ calibration-local split. Bonus: the GJR-GARCH clock reference is now
 executable (`battery_audit.json gjr_clock`: median AC8 0.034, max 0.086,
 every seed below the 0.12 bar) — checker narrative skips 1 → 0.
 
+**A2 — the one-layer E9 step is statistically flat at 32 seeds.** The
+K0-vs-K1 paired comparison (DECA3's 0.0184 → 0.0200 medians, 4–4 at 8
+seeds) was extended once, under a fixed pre-registered budget, to seeds
+100–131. Result: K1 > K0 on 19/32 seeds, 32-seed medians 0.0195 vs 0.0194,
+two-sided Wilcoxon **p = 0.57** (primary), sign test p = 0.38 — the
+one-layer step is a point estimate inside seed noise, exactly as the paper
+disclosed. Only the depth trend (K=5's rise, 7/8 paired seeds) is licensed,
+and the paper now says so with the test attached
+(`decathlon3.json k01_extension`; first 8 seeds reproduce the published
+per-seed bits exactly — asserted at run time). F3's per-seed scatter now
+shows all 32 seeds at K∈{0,1}.
+
 ## KRONOS-TRADE — the deployable system
 
 `run_trade.py` turns the findings into trading software. The design is dictated
