@@ -111,8 +111,8 @@ def f1_scorecard():
 
 # ---------------------------------------------------------------- F2
 def f2_bits():
-    labels = ["FCVM", "$+$A ($K{=}1$)", "$+$A ($K{=}5$)",
-              "$+$Q ($\\lambda_Q{=}0.5$)", "$+$Q ($\\lambda_Q{=}1$)"]
+    labels = ["FCVM", "$+$A\n$K{=}1$", "$+$A\n$K{=}5$",
+              "$+$Q\n$\\lambda_Q{=}0.5$", "$+$Q\n$\\lambda_Q{=}1$"]
     series = [D3["dir_bits_vs_K"]["K0_FCVM"],
               D3["dir_bits_vs_K"]["K1_DECA2"],
               D3["dir_bits_vs_K"]["K5_FIXEDPOINT"],
@@ -205,22 +205,26 @@ def f4_wildfacts():
 
     fig, axes = plt.subplots(2, 2, figsize=(3.4, 2.6), sharex=True)
     (a, b), (c, d) = axes
-    for ax in axes.flat:
+    for ax, letter in zip(axes.flat, "abcd"):
         ax.set_xticks(lams)
         ax.spines[["top", "right"]].set_visible(False)
         ax.tick_params(labelsize=6.5)
+        ax.set_title(f"({letter})", loc="left", fontsize=7, pad=2)
 
     a.plot(lams, kurt, "o-", color="black", ms=3.5, lw=1.0)
     a.axhline(3.0, color="0.6", lw=0.6, ls=":")
     a.text(0.03, 3.35, "Gaussian", fontsize=6, color="0.45", ha="left")
+    a.set_ylim(2.3, max(kurt) + 0.7)
     a.set_title("kurtosis", fontsize=7, pad=2)
 
     b.plot(lams, lev, "o-", color="black", ms=3.5, lw=1.0)
     b.axhline(0.0, color="0.6", lw=0.6, ls=":")
+    b.set_ylim(min(lev) - 0.014, 0.012)
     b.set_title(r"leverage corr$(r_t,\mathrm{RV}_{t+1..10})$", fontsize=7,
                 pad=2)
 
     c.plot(lams, ac1a, "o-", color="black", ms=3.5, lw=1.0)
+    c.set_ylim(min(ac1a) - 0.04, max(ac1a) + 0.04)
     c.set_title(r"vol clustering AC$_1(|r|)$", fontsize=7, pad=2)
     c.set_xlabel(r"quote skew $\lambda_Q$", fontsize=7)
 
@@ -260,19 +264,23 @@ def f5_triangle():
         ax.errorbar([x], [lev[k]], yerr=[sds[k]], fmt="o", color="black",
                     ms=4, capsize=2.5, lw=1.0, zorder=3)
 
+    # Cohort-separation bars: equity cohort (centre of the four universes)
+    # vs FX, and FX vs crypto — drawn below all data so neither bar reads as
+    # a pairwise comparison with a single universe.
     z_eq_fx = FX["leverage_contrast"]["z_fx_vs_equities"]
     z_fx_cr = FX["leverage_contrast"]["z_crypto_vs_fx"]
-    ax.annotate(f"$z={z_eq_fx}$", xy=(3.7, -0.062), fontsize=7, ha="center")
-    ax.annotate("", xy=(4.55, -0.052), xytext=(2.9, -0.052),
+    ax.annotate(f"$z={z_eq_fx}$", xy=(3.05, -0.081), fontsize=7, ha="center")
+    ax.annotate("", xy=(4.6, -0.070), xytext=(1.5, -0.070),
                 arrowprops=dict(arrowstyle="-", lw=0.6, color="0.3"))
-    ax.annotate(f"$z={z_fx_cr}$", xy=(5.4, -0.062), fontsize=7, ha="center")
-    ax.annotate("", xy=(6.15, -0.052), xytext=(4.7, -0.052),
+    ax.annotate(f"$z={z_fx_cr}$", xy=(5.4, -0.081), fontsize=7, ha="center")
+    ax.annotate("", xy=(6.2, -0.070), xytext=(4.6, -0.070),
                 arrowprops=dict(arrowstyle="-", lw=0.6, color="0.3"))
 
     ax.set_xticks(xs)
     ax.set_xticklabels(names)
     ax.set_ylabel(r"leverage effect corr$(r_t,\mathrm{RV}_{t+1..10})$")
     ax.set_xlim(-0.6, 6.9)
+    ax.set_ylim(-0.092, 0.085)
     ax.spines[["top", "right"]].set_visible(False)
     fig.savefig(OUT / "leverage_triangle.pdf")
     plt.close(fig)
@@ -319,9 +327,9 @@ def f6_gate():
 
     ax.text(5, 0.15,
             "e.g. X32c: $\\beta_K$ contracts "
-            f"{betas[0]:.2f}$\\to${betas[1]:.2f}$\\to${betas[2]:.2f};   "
+            f"${betas[0]:.2f} \\to {betas[1]:.2f} \\to {betas[2]:.2f}$;   "
             "X34c: leak corr "
-            f"{corr0:.2f}$\\to${corr1:.2f}, flow unchanged",
+            f"${corr0:.2f} \\to {corr1:.2f}$, flow unchanged",
             ha="center", va="bottom", fontsize=6, color="0.25")
     fig.savefig(OUT / "gate_schematic.pdf")
     plt.close(fig)
