@@ -120,12 +120,13 @@ def check_row(label, line_regex, score, failed, bits, score_cell=1,
 
 
 def check_stat_row(label, line_regex, actuals):
-    """Numeric-only table row: every number in the row, in order."""
+    """Numeric-only table row: every number in the row, in order.
+    En/em dashes (`--`, `---`) are separators, not minus signs."""
     m = re.search(line_regex, TEX)
     if not m:
         check(label, False, f"row not found: {line_regex!r}")
         return
-    cited = re.findall(r"[-+]?\d+\.?\d*", m.group(0).rstrip("\\"))
+    cited = re.findall(r"[-+]?\d+\.?\d*", m.group(0).rstrip("\\").replace("--", " "))
     if len(cited) != len(actuals):
         check(label, False, f"{len(cited)} numbers in row, expected {len(actuals)}: {cited}")
         return
@@ -136,7 +137,8 @@ def check_stat_row(label, line_regex, actuals):
 
 # ------------------------------------------------------------------ 0. src audit
 print("== src-comment audit")
-named = set(re.findall(r"([a-z0-9_]+)\.json", TEX))
+named = {n.replace("\\", "")                       # tex-escaped \_ in body text
+         for n in re.findall(r"([a-z0-9_\\]+)\.json", TEX)}
 for n in sorted(named):
     check(f"src json exists: {n}.json", (RESEARCH / f"{n}.json").exists())
 
@@ -424,6 +426,43 @@ check_pm("tab:deca4 Q0.5 ±", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.5\$\).*?\\\\",
          "FCVM+Q0.5")
 check_pm("tab:deca4 tuned ±", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.05\$\).*?\\\\",
          "Q_TUNED")
+
+# --------------------------------------------- 5c. data table (fx.json laws)
+print("== descriptive-statistics table (fx.json laws)")
+_L = FX["laws"]
+_span = {"fx": (2010, 2026), "crypto": (2017, 2026)}
+_counts = {"US": 49, "japan": 29, "europe": 36, "asia_em": 29,
+           "fx": len(FX["per_pair_leverage"]), "crypto": len(CR["per_coin_leverage"])}
+for _row, _uni in [("US equities", "US"), ("Japan equities", "japan"),
+                   ("Europe equities", "europe"), ("Asia-EM equities", "asia_em"),
+                   ("FX crosses", "fx"), ("Cryptocurrencies", "crypto")]:
+    _lev = (_L["leverage"]["values"][_uni] if _uni != "crypto"
+            else CR["leverage_contrast"]["crypto_leverage"])
+    _kurt = _L["kurt"]["values"].get(_uni, None)
+    _kdef = _L["kurt_def"]["values"].get(_uni, None)
+    _y0, _y1 = _span.get(_uni, (2010, 2026))
+    check_stat_row(f"tab:data {_row}", rf"{re.escape(_row)} +&.*?\\\\",
+                   [_counts[_uni], _y0, _y1, _kurt, _kdef, _lev])
+check("tab:data crypto leverage == laws value",
+      abs(_L["leverage"]["values"]["crypto"]
+          - CR["leverage_contrast"]["crypto_leverage"]) < 5e-4)
+check("tab:data crypto span year == crypto.json span", CR["span"][0][:4] == "2017")
+check("tab:data FX/equity span == fx.json span",
+      FX["span"][0][:4] == "2010" and FX["span"][1][:4] == "2026")
+
+# instrument counts against the versioned universe lists
+_cfg_text = (ROOT / "config.py").read_text()
+_um = re.search(r"UNIVERSE = \[(.*?)\]", _cfg_text, re.S)
+check("tab:data US count == config.py UNIVERSE",
+      _um is not None and len(re.findall(r'"[A-Z.\-]+"', _um.group(1))) == 49)
+_tr_text = (ROOT / "kronos" / "transfer.py").read_text()
+for _name, _n in [("japan", 29), ("europe", 36), ("asia_em", 29)]:
+    _bm = re.search(rf'"{_name}":\s*\{{.*?"tickers":\s*\[(.*?)\]', _tr_text, re.S)
+    check(f"tab:data {_name} count == transfer.py UNIVERSES",
+          _bm is not None
+          and len(re.findall(r'"[A-Z0-9.\-]+"', _bm.group(1))) == _n)
+check("tab:data FX count == fx.json pairs", len(FX["pairs"]) == 13)
+check("tab:data crypto count == crypto.json coins", len(CR["coins"]) == 10)
 
 # ------------------------------------------------------------- 6. triangle
 print("== the triangle (fx.json / crypto.json)")

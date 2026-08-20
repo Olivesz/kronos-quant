@@ -1,18 +1,22 @@
 """Generate every figure for the preprint from research/*.json.
 
 Reads ONLY the research JSONs (research/decathlon.json, decathlon2.json,
-decathlon3.json, decathlon4.json, fx.json, crypto.json) — no hand-entered
-numbers.  Outputs LaTeX-sized PDF figures (single-column, ~3.4 in wide,
-monochrome-friendly) into docs/paper/figures/.
+decathlon3.json, decathlon4.json, fx.json, crypto.json, battery_audit.json,
+score_se.json) — no hand-entered numbers.  Outputs LaTeX-sized PDF figures
+(single-column, ~3.4 in wide, monochrome-friendly) into docs/paper/figures/.
 
 Figures
 -------
 F1  battery_scorecard.pdf   ten-event scorecard heat-strip: SPY vs the ablation ladder
 F2  e9_bits_configs.pdf     E9 direction bits across every rationality config
 F3  deca3_inversion.pdf     the DECA3 inversion: forecastable flow falls, leaked bits rise
-F4  deca4_wildfacts.pdf     DECA4 wild-fact medians vs quote-skew lambda
+F4  deca4_wildfacts.pdf     DECA4 amplitude-fact medians vs quote-skew lambda
 F5  leverage_triangle.pdf   the leverage effect across equities / FX / crypto
-F6  gate_schematic.pdf      the convict-and-exonerate gate pattern
+F6  gate_schematic.pdf      the size/power validation gate pattern
+F7  leverage_perasset.pdf   per-instrument leverage across the three venue classes
+F8  audit_matrix.pdf        multi-index battery audit: events x indices
+F9  tuning_grid.pdf         Experiment I tuning grid: score by (kA, capA, sA)
+F10 score_se.pdf            battery scores with seed-bootstrap SEs, all configs
 
 Build note: matplotlib is a PAPER-BUILD-ONLY dependency.  It is deliberately
 NOT in requirements.txt / project dependencies; install it into the venv ad
@@ -46,6 +50,8 @@ D3 = load("decathlon3")
 D4 = load("decathlon4")
 FX = load("fx")
 CR = load("crypto")
+BA = load("battery_audit")
+SE = load("score_se")
 
 # Cross-file consistency (the FCVM control is shared byte-for-byte).
 assert D3["dir_bits_vs_K"]["K0_FCVM"]["per_seed"] == \
@@ -323,8 +329,8 @@ def f6_gate():
         "synthetic world,\neffect ABSENT by construction", 6.5, "0.92")
     arrow(2.5, 5.8, 2.5, 4.7)
     arrow(7.5, 5.8, 7.5, 4.7)
-    box(0.9, 3.5, 3.2, 1.2, "must CONVICT\n(power)", 6.5)
-    box(5.9, 3.5, 3.2, 1.2, "must EXONERATE\n(size)", 6.5)
+    box(0.9, 3.5, 3.2, 1.2, "must detect\n(power)", 6.5)
+    box(5.9, 3.5, 3.2, 1.2, "must stay silent\n(size)", 6.5)
     arrow(3.6, 3.4, 4.6, 2.4)
     arrow(6.4, 3.4, 5.4, 2.4)
     box(2.6, 1.0, 4.8, 1.4,
@@ -340,6 +346,159 @@ def f6_gate():
     plt.close(fig)
 
 
+# ---------------------------------------------------------------- F7
+def f7_perasset():
+    """Per-instrument leverage effect, grouped by venue class."""
+    eq = FX["leverage_contrast"]["equity_values"]
+    eq_names = {"US": "US", "japan": "Japan", "europe": "Europe",
+                "asia_em": "Asia-EM"}
+    fx_items = sorted(FX["per_pair_leverage"].items(), key=lambda kv: kv[1])
+    cr_items = sorted(CR["per_coin_leverage"].items(), key=lambda kv: kv[1])
+    eq_items = sorted(eq.items(), key=lambda kv: kv[1])
+
+    labels, vals, colors = [], [], []
+    for k, v in eq_items:
+        labels.append(eq_names[k]); vals.append(v); colors.append("0.20")
+    for k, v in fx_items:
+        name = k.replace("=X", "")
+        if len(name) == 3:          # Yahoo quotes majors as USD-based "JPY=X"
+            name = "USD" + name
+        labels.append(name); vals.append(v); colors.append("0.50")
+    for k, v in cr_items:
+        labels.append(k.replace("-USD", "")); vals.append(v); colors.append("0.78")
+
+    n_eq, n_fx = len(eq_items), len(fx_items)
+    xs, x, gap = [], 0.0, 1.6
+    for i in range(len(labels)):
+        if i in (n_eq, n_eq + n_fx):
+            x += gap
+        xs.append(x)
+        x += 1.0
+
+    fig, ax = plt.subplots(figsize=(5.9, 2.3))
+    ax.axhline(0, color="0.35", lw=0.7, zorder=1)
+    ax.bar(xs, vals, width=0.82, color=colors, edgecolor="black", lw=0.4,
+           zorder=2)
+    ax.set_xticks(xs)
+    ax.set_xticklabels(labels, rotation=60, ha="right", fontsize=5.8)
+    ax.set_ylabel(r"leverage effect corr$(r_t,\mathrm{RV}_{t+1..10})$",
+                  fontsize=7)
+    for cx, name in [(sum(xs[:n_eq]) / n_eq, "equity universes"),
+                     (sum(xs[n_eq:n_eq + n_fx]) / n_fx, "FX crosses"),
+                     (sum(xs[n_eq + n_fx:]) / len(cr_items), "cryptocurrencies")]:
+        ax.text(cx, 0.088, name, ha="center", va="top", fontsize=7)
+    ax.set_ylim(-0.075, 0.095)
+    ax.set_xlim(xs[0] - 0.9, xs[-1] + 0.9)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.savefig(OUT / "leverage_perasset.pdf")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------- F8
+def f8_audit_matrix():
+    """Multi-index battery audit: events x indices pass/fail matrix."""
+    order = ["QQQ", "DIA", "IWM", "1306.T", "EXW1.DE", "2800.HK"]
+    rows = [("SPY (anchor)", D1["spy"]["events"], D1["spy"]["score"])]
+    for name in order:
+        rec = BA["indices"][name]
+        rows.append((name, rec["events"], rec["score"]))
+
+    n_r, n_c = len(rows), len(EVENTS)
+    fig, ax = plt.subplots(figsize=(3.4, 0.24 * n_r + 0.55))
+    for i, (label, ev, score) in enumerate(rows):
+        y = n_r - 1 - i
+        for j, e in enumerate(EVENTS):
+            passed = ev[e]
+            ax.add_patch(Rectangle((j, y), 0.92, 0.86,
+                                   facecolor="0.15" if passed else "white",
+                                   edgecolor="0.4", linewidth=0.5))
+        ax.text(-0.25, y + 0.43, label, ha="right", va="center", fontsize=7)
+        ax.text(n_c + 0.35, y + 0.43, f"{score}/10", ha="left", va="center",
+                fontsize=7)
+    for j, s in enumerate(EVENT_SHORT):
+        ax.text(j + 0.46, n_r + 0.12, s, ha="center", va="bottom", fontsize=6.5)
+    ax.set_xlim(-3.2, n_c + 1.3)
+    ax.set_ylim(-0.15, n_r + 0.5)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    fig.savefig(OUT / "audit_matrix.pdf")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------- F9
+def f9_tuning_grid():
+    """Experiment I tuning grid: battery score by (kA, capA, sA)."""
+    cells = {(c["kA"], c["capA"], c["sA"]): c
+             for c in D2["tuning_grid_stats"]["per_setting"]}
+    kas = [0.25, 0.5, 1.0]
+    cols = [(a, s) for a in (0.01, 0.02, 0.05) for s in (0.001, 0.002)]
+    frozen = (D2["frozen_params"]["kA"], D2["frozen_params"]["capA"],
+              D2["frozen_params"]["sA"])
+    first = (D2["tuning"]["first_shot"]["kA"], D2["tuning"]["first_shot"]["capA"],
+             D2["tuning"]["first_shot"]["sA"])
+
+    fig, ax = plt.subplots(figsize=(3.4, 1.75))
+    for i, ka in enumerate(kas):
+        for j, (capa, sa) in enumerate(cols):
+            c = cells[(ka, capa, sa)]
+            sc = c["score"]
+            shade = str(0.95 - 0.13 * sc)
+            ax.add_patch(Rectangle((j, len(kas) - 1 - i), 1, 1,
+                                   facecolor=shade, edgecolor="0.3", lw=0.5))
+            ax.text(j + 0.5, len(kas) - 1 - i + 0.5, str(sc), ha="center",
+                    va="center", fontsize=8,
+                    color="white" if sc >= 5 else "black")
+            key = (ka, capa, sa)
+            if key == frozen:
+                ax.add_patch(Rectangle((j + 0.06, len(kas) - 1 - i + 0.06),
+                                       0.88, 0.88, fill=False, edgecolor="black",
+                                       lw=1.4))
+            if key == first:
+                ax.text(j + 0.88, len(kas) - 1 - i + 0.14, "*", ha="center",
+                        va="center", fontsize=9,
+                        color="white" if sc >= 5 else "black")
+    ax.set_xticks([j + 0.5 for j in range(len(cols))])
+    ax.set_xticklabels([f"{a:g}/{s:g}" for a, s in cols], fontsize=6)
+    ax.set_yticks([len(kas) - 1 - i + 0.5 for i in range(len(kas))])
+    ax.set_yticklabels([f"$k_A={k:g}$" for k in kas], fontsize=7)
+    ax.set_xlabel(r"$\mathrm{cap}_A$ / $s_A$", fontsize=7)
+    ax.set_xlim(0, len(cols))
+    ax.set_ylim(0, len(kas))
+    ax.tick_params(length=0)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    fig.savefig(OUT / "tuning_grid.pdf")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------- F10
+def f10_score_se():
+    """Battery scores with seed-bootstrap SEs for every published config."""
+    order = ["G", "F", "FC", "FV", "FCV", "FCVM", "FCVMH", "FCVM+A", "FV+A",
+             "F+A", "K5_FIXEDPOINT", "K5_TUNED", "FCVM+Q1.0", "FCVM+Q0.5",
+             "Q_TUNED"]
+    pretty = {"K5_FIXEDPOINT": "K=5 (frozen)", "K5_TUNED": "K=5 (tuned)",
+              "FCVM+Q1.0": r"FCVM+Q ($\lambda_Q{=}1$)",
+              "FCVM+Q0.5": r"FCVM+Q ($\lambda_Q{=}0.5$)",
+              "Q_TUNED": r"FCVM+Q ($\lambda_Q{=}0.05$)"}
+    labels = [pretty.get(k, k) for k in order]
+    scores = [SE["scores"][k] for k in order]
+    ses = [SE["se"][k] for k in order]
+
+    fig, ax = plt.subplots(figsize=(3.4, 2.6))
+    ys = list(range(len(order)))[::-1]
+    ax.axvline(5, color="0.6", lw=0.7, ls=":", zorder=1)
+    ax.errorbar(scores, ys, xerr=ses, fmt="o", color="black", ms=3.2,
+                capsize=2, lw=0.9, zorder=2)
+    ax.set_yticks(ys)
+    ax.set_yticklabels(labels, fontsize=6.5)
+    ax.set_xlabel("battery score (events passed, of 10)", fontsize=7)
+    ax.set_xlim(0, 10.4)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.savefig(OUT / "score_se.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     f1_scorecard()
     f2_bits()
@@ -347,4 +506,8 @@ if __name__ == "__main__":
     f4_wildfacts()
     f5_triangle()
     f6_gate()
-    print("wrote 6 figures to", OUT)
+    f7_perasset()
+    f8_audit_matrix()
+    f9_tuning_grid()
+    f10_score_se()
+    print("wrote 10 figures to", OUT)

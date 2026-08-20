@@ -387,10 +387,47 @@ the power analysis of Section~\ref{sec:triangle} and leaves the registered
 10-coin panel untouched.
 % src: research/crypto.json coins, span; research/crypto_wide.json coins, added, excluded, span
 
-Descriptive statistics for the calibration anchor appear in
-Table~\ref{tab:calib} (Appendix~\ref{app:battery}) alongside the battery's
-threshold definitions; cross-venue descriptive statistics are reported with
-the external-validity analysis in Section~\ref{sec:triangle}.
+\subsection{Descriptive statistics}
+\label{sec:data:desc}
+
+Table~\ref{tab:data} reports universe-level descriptive statistics for the
+six panels used in the cross-venue analysis. Two regularities in the table
+organize the paper. First, the kurtosis of volatility-deformed returns sits
+near the Gaussian value in every venue while raw kurtosis does not:
+conditionally on their own volatility path, daily returns are close to
+Gaussian everywhere, which is what the battery's event E6 tests in
+simulation. Second, the leverage effect changes sign across venues ---
+negative in every equity universe, indistinguishable from zero in FX,
+positive in point estimate in cryptocurrencies --- and that ordering is the
+external-validity evidence analyzed in Section~\ref{sec:triangle}. The full
+statistic vector for the battery's calibration anchor (SPY) appears in
+Table~\ref{tab:calib} of Appendix~\ref{app:battery}.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrlrrr}
+\toprule
+Panel & $N$ & Span & kurtosis & kurtosis (deformed) & leverage effect \\
+\midrule
+US equities        & 49 & 2010--2026 & 13.1 & 3.4 & $-0.047$ \\
+Japan equities     & 29 & 2010--2026 & 8.9  & 3.3 & $-0.039$ \\
+Europe equities    & 36 & 2010--2026 & 11.3 & 3.6 & $-0.046$ \\
+Asia-EM equities   & 29 & 2010--2026 & 8.4  & 3.8 & $-0.030$ \\
+FX crosses         & 13 & 2010--2026 & 7.6  & 2.7 & $+0.005$ \\
+Cryptocurrencies   & 10 & 2017--2026 & 16.6 & 4.5 & $+0.031$ \\
+\bottomrule
+\end{tabular}
+\caption{Universe-level descriptive statistics. $N$ is the number of
+instruments on each registered list (per-instrument coverage screens may
+drop instruments from individual analyses). Statistics are the measurement
+program's pooled universe-level estimates: kurtosis of daily returns,
+kurtosis of volatility-deformed returns $r_t/\hat\sigma_t$, and the
+leverage effect $\mathrm{corr}(r_t, \mathrm{RV}_{t+1..10})$. The
+deformed-kurtosis column collapses toward the Gaussian in every venue; the
+leverage column changes sign across venues.}
+% src: research/fx.json laws.kurt/kurt_def/leverage values; research/crypto.json laws; instrument counts config.py UNIVERSE, kronos/transfer.py UNIVERSES, fx.json pairs, crypto.json coins
+\label{tab:data}
+\end{table}
 
 \section{Methodology}
 \label{sec:methods}
@@ -839,7 +876,7 @@ has one.
 % src: research/decathlon2.json configs; docs/FINDINGS.md DECATHLON-2
 
 The reason the attempt fails is itself the finding. The tuning grid is
-monotone: the harder the
+monotone (Figure~\ref{fig:tuning}): the harder the
 anticipator trades, the worse the market scores. Efficiency breaks (its unwind
 adds reversal: AC$_1$ falls from $-0.09$ at the frozen setting toward $-0.35$
 at $k_A = 1$), the
@@ -848,6 +885,20 @@ $8.8 \to 4.6$ from the control to the grid's most capitalized settings), and
 the sign leak \emph{grows} (up to 0.039 bits at full
 strength $k_A = 1$). The full grid --- per-setting scores and statistics ---
 is exported with the archived results.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{tuning_grid}
+\caption{The Experiment I tuning grid (tuning seeds 900--903, disjoint from
+evaluation): battery score by anticipator response $k_A$, capital
+$\mathrm{cap}_A$, and execution-noise scale $s_A$. Darker cells score
+higher. The score is non-increasing in every strengthening direction; the
+tied best settings are the weakest anticipators. The heavy box marks the
+tie-break selection (the frozen evaluation setting); the asterisk marks the
+pre-registered first-shot setting.}
+% src: research/decathlon2.json tuning_grid_stats.per_setting, frozen_params, tuning.first_shot
+\label{fig:tuning}
+\end{figure}
 % src: research/decathlon2.json tuning_grid_stats (per_setting: ac1_r -0.090 at kA=0.25/capA=0.01/sA=0.001, -0.349 at kA=1.0/capA=0.05/sA=0.001; kurt 4.57 at kA=0.5/capA=0.05/sA=0.001; max dir_bits 0.0390 at kA=1); configs.FCVM.median_stats.kurt=8.79
 The mechanism is structural, not parametric: the anticipator's inventory is a
 function of the same slow public volatility state as the flow it front-runs,
@@ -1161,8 +1212,22 @@ not by more coins, more crosses, or a different test --- and we report it
 as what it is: an ordering the data cannot yet promote to a separation.
 % src: research/crypto_wide.json arithmetic (csd_now, csd_needed_for_z2, reduction_factor_needed 1.59, history_years_needed_if_T_only 21.7, history_years_now 8.6), leverage_wide, sd_wide, n_pos/n_coins, z_vs_fx_wide, z_vs_equities_wide; docs/design/DESIGN24.md A4
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{leverage_perasset}
+\caption{The leverage effect per instrument, grouped by venue class: the
+four equity-universe estimates, the 13 FX crosses, and the 10 registered
+cryptocurrencies, each sorted within its group. Every equity universe is
+negative; the FX crosses scatter symmetrically about zero along the
+flight-to-quality axis; the coins are predominantly positive, with BTC and
+ETH the exceptions.}
+% src: research/fx.json leverage_contrast.equity_values, per_pair_leverage; research/crypto.json per_coin_leverage
+\label{fig:perasset}
+\end{figure}
+
 The
-residual per-pair scatter in FX lies on the flight-to-quality axis: the three
+residual per-pair scatter in FX (Figure~\ref{fig:perasset}) lies on the
+flight-to-quality axis: the three
 most negative crosses are all yen pairs (AUDJPY $-0.046$, GBPJPY $-0.024$,
 EURJPY $-0.022$ --- yen strength is risk-off, so ``down $\to$ vol up'' is
 flight-to-quality mimicking the leverage effect), and the most positive is
@@ -1286,11 +1351,14 @@ certified separation.
 \section*{Code and data availability}
 \label{sec:repro}
 
+\begin{sloppypar}
 Every number in this paper is regenerable from the public repository. The
-research JSONs consumed by the figures and tables ---
-\texttt{decathlon.json}, \texttt{decathlon2.json}, \texttt{decathlon3.json},
-\texttt{decathlon4.json}, \texttt{fx.json} and \texttt{crypto.json}, all
-under \texttt{research/} --- are versioned in the repository and rebuilt by
+research JSONs consumed by the figures and tables --- under
+\texttt{research/}: \texttt{decathlon.json}, \texttt{decathlon2.json},
+\texttt{decathlon3.json}, \texttt{decathlon4.json}, \texttt{fx.json},
+\texttt{crypto.json}, \texttt{crypto\_wide.json},
+\texttt{battery\_audit.json}, and \texttt{score\_se.json} --- are versioned
+in the repository and rebuilt by
 \texttt{run\_research.py}; the battery code is identical for real data and
 simulated output; the gate suite runs in continuous integration on every
 commit, including the byte-identity pins that protect every published row in
@@ -1298,6 +1366,7 @@ this paper; and every figure is generated from the research JSONs by
 \texttt{docs/paper/make\_figures.py} with no hand-entered values. The
 pre-registration documents, including the amendments and the closure clause
 quoted here, are versioned in \texttt{docs/design/}.
+\end{sloppypar}
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
@@ -1429,7 +1498,19 @@ recorded in the registration rules out the union-calendar padding of the
 foreign panels as the cause (native-calendar re-runs score the same or
 lower). The battery's absolute anchor is therefore a US-equity statement;
 all conclusions in this paper are comparative and unaffected.
+Figure~\ref{fig:auditmatrix} shows the full event-by-index pass/fail
+matrix.
 % src: docs/design/DESIGN24.md A1 (registration, result, hygiene probe); research/battery_audit.json
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{audit_matrix}
+\caption{The multi-index calibration audit as an event-by-index matrix
+(filled = pass). The clock-structure and sign events (E7, E8, E9) recur
+among the non-US misses.}
+% src: research/battery_audit.json indices.*.events; research/decathlon.json spy.events
+\label{fig:auditmatrix}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
@@ -1463,11 +1544,22 @@ The seed-bootstrap standard-error method of Section~\ref{sec:battery} was
 applied to every configuration published in this paper (fifteen in total,
 spanning the ablation ladder and all three experiments). The bootstrap
 reproduces every published majority-vote score exactly before resampling,
-and the resulting SEs range from 0.00 to 0.49 events; configurations whose
+and the resulting SEs range from 0.00 to 0.49 events
+(Figure~\ref{fig:scorese}); configurations whose
 per-seed event counts sit at a majority knife-edge (\cfg{F}, the frozen
 $K{=}5$ stack, \cfg{FCVMH}) carry the largest SEs, while the headline
 comparisons (\cfg{FCVM}, \cfg{FCVM+A}, the tuned configurations) are tight.
 % src: research/score_se.json (method, scores, se)
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{score_se}
+\caption{Battery scores with seed-bootstrap standard errors for every
+configuration published in this paper. The dotted guide marks the 5/10
+flow-only ceiling. No SE exceeds half an event.}
+% src: research/score_se.json scores, se
+\label{fig:scorese}
+\end{figure}
 
 \paragraph{The widened cryptocurrency universe.}
 The registered widening of the crypto panel from 10 to 17 majors
