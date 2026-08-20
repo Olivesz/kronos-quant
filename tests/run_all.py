@@ -31,6 +31,8 @@ GATES = [
     "test_decathlon3.py",
     # KRONOS-DECATHLON-4 gate (quote-skewing maker: byte-identity, causality, leak absorption)
     "test_decathlon4.py",
+    # DESIGN25 referee-program gate (whitened-MI estimator, t3 flag, rescorer identity)
+    "test_robustness.py",
     # KRONOS-CRITICAL gate
     "test_critical.py",
     # KRONOS-REFLEX gate

@@ -273,6 +273,7 @@ def simulate_abm(T: int = 6000, seed: int = 0,
                  voltargeters: bool = True, marketmakers: bool = True,
                  hetero: bool = False, anticipators: bool = False,
                  fixed_point_iters: int = 0, quote_skew: float = 0.0,
+                 fund_t3_scale: float = 0.0,
                  params: dict | None = None) -> pd.Series:
     """Returns a pd.Series of daily returns from the minimal market.
 
@@ -294,7 +295,16 @@ def simulate_abm(T: int = 6000, seed: int = 0,
     forecastable flow's impact is absorbed into the price LEVEL and the
     return keeps only the unforecastable surprise. No inventory, no unwind,
     no execution noise, no RNG draws — default 0.0 is byte-identical to
-    today's simulator (gate X34a)."""
+    today's simulator (gate X34a).
+
+    fund_t3_scale (DESIGN25 R4): a SECOND wildness source — heavy-tailed
+    fundamental innovations. When nonzero, the fundamental value moves by
+    fund_t3_scale * t(3) in place of sV * N(0,1) (df = 3 fixed by
+    registration; scale calibrated once, DESIGN25). The t-shocks reach
+    returns through the fundamentalist flow kF*(V - price), OUTSIDE the
+    span of the vol-state forecast F_hat — wildness is no longer identical
+    to forecastable flow. Default 0.0 keeps the draw sequence byte-identical
+    to the published simulator (gate X36d)."""
     p = dict(DEFAULTS)
     if params:
         p.update(params)
@@ -319,7 +329,10 @@ def simulate_abm(T: int = 6000, seed: int = 0,
     # (= quote_skew*lam*F_hat(initial state), which is exactly 0: the world
     #  starts at the vol target, L=1, so the initial flow forecast vanishes)
     for t in range(T):
-        V += p["sV"] * rng.normal()
+        if fund_t3_scale:
+            V += fund_t3_scale * rng.standard_t(3)
+        else:
+            V += p["sV"] * rng.normal()
         m = (1 - m_speeds) * m + m_speeds * r_prev
         sig2 = (1 - s_speeds) * sig2 + s_speeds * r_prev ** 2
 

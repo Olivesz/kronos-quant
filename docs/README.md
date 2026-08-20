@@ -38,9 +38,10 @@ arc, or jump to a finding.
 | 17 | [DESIGN17.md](design/DESIGN17.md) | FX: the microstructure triangle | FX leverage is **statistically zero** (+0.005, z vs 0 = 0.56) and separable from every equity market (z = 3.89) — the triangle equity −0.04 / FX ~0 / crypto +0.03 is monotone, though the FX–crypto edge stays inside noise (z = 1.44). |
 | 18 | [DESIGN18.md](design/DESIGN18.md) | Is expectation the missing organ? | A causal, gate-verified anticipatory agent front-running the vol-targeters' flow **does not break the 5/10 ceiling — the hypothesis is refuted**: one layer of expectation reproduces the sign leak one derivative earlier instead of removing it. |
 | 19 | [DESIGN19.md](design/DESIGN19.md) | The harvest gap | The regime label captures only **~18%** of the monthly sign information (gap 0.021 bits, CI excludes 0); the unharvested carrier is 21-day momentum — measured against enumerated ground truth (X31). |
-| 20 | [DESIGN20.md](design/DESIGN20.md) | The fixed point of mutual anticipation | Iterating the anticipation operator (K=5, gate-verified to contract open-loop) **does not close the sign leak — it grows it**: the K-layer stack is equivalent to one stronger anticipator, and the 5/10 ceiling stands against the strongest member of its own critique. |
+| 20 | [DESIGN20.md](design/DESIGN20.md) | The fixed point of mutual anticipation | Iterating the anticipation operator (K=5, gate-verified to contract open-loop) **does not close the sign leak — it grows it**: the K-layer stack is equivalent to one stronger anticipator, and the 5/10 ceiling stands against the strongest member of its own critique. *(The "grows" half was later attributed to induced reversal — see 25.)* |
 | 21 | [DESIGN21.md](design/DESIGN21.md) | The momentum tilt | HARVEST's bits, harvested: a frozen ±15% exposure tilt on 21d momentum — Sharpe 1.05 → **1.07**, both eras improve, cap verified, **DSR 0.73 → 0.75 after charging** (PBO 0.45 restated). |
 | 22 | [DESIGN22.md](design/DESIGN22.md) | Price-setting rationality — the line closes | A maker that QUOTES against the forecastable flow (exact impact absorption, gate-verified to the identity) scores **1/10** — the leak doesn't close, the wildness dies, and per the pre-registered closure clause **the 5/10 ceiling is declared structural and the DESIGN8 line closes**. |
+| 25 | [DESIGN25.md](design/DESIGN25.md) | Referee attribution & robustness | The published inversion **dies on attribution**: at matched effective strength depth adds nothing (p = 0.0028), and the bits-rise is induced one-lag reversal scored as sign information — under AR(1) whitening the rises reverse. What survives is sharper: rationality **converts** a genuine nonlinear leak into reversal (0.0197 → 0.0036 whitened, never to zero), wildness is flow-generated (t(3) fundamentals don't save it), the ceiling survives kM re-equilibration (best re-tuned Q world: bits 0.0016, score **2/10**) and ±20% threshold perturbation. |
 
 ## How the research maps to code
 
@@ -58,6 +59,7 @@ before real data ever touches the estimator:
 | Decathlon-2 (18) | `kronos/decathlon.py` | `tests/test_decathlon2.py` (X30) |
 | Decathlon-3 (20) | `kronos/decathlon.py` | `tests/test_decathlon3.py` (X32) |
 | Decathlon-4 (22) | `kronos/decathlon.py` | `tests/test_decathlon4.py` (X34) |
+| Decathlon-R (25) | `kronos/robustness.py` | `tests/test_robustness.py` (X36) |
 | Critical (9) | `kronos/critical.py` | `tests/test_critical.py` (X20) |
 | Reflex (10) | `kronos/hawkes.py` | `tests/test_reflex.py` (X21) |
 | Constants (11) | `kronos/constants.py` | `tests/test_constants.py` (X22) |

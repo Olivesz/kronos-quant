@@ -22,6 +22,7 @@ studies extend the battery to Japan, Europe, Asia-EM, crypto (2017–2026), and
 - [KRONOS-DECATHLON-2 — is expectation the missing organ?](#kronos-decathlon-2--is-expectation-the-missing-organ)
 - [KRONOS-DECATHLON-3 — the fixed point of mutual anticipation](#kronos-decathlon-3--the-fixed-point-of-mutual-anticipation)
 - [KRONOS-DECATHLON-4 — the ceiling is structural; the line closes](#kronos-decathlon-4--the-ceiling-is-structural-the-line-closes)
+- [KRONOS-DECATHLON-R — referee-driven robustness and attribution](#kronos-decathlon-r--referee-driven-robustness-and-attribution)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
@@ -510,6 +511,114 @@ FX–crypto edge is certifiable only by accrual of history (~2039 at these
 point estimates); §7 now argues this as a bound in the body
 (`research/crypto_wide.json`; crypto.json's registered 10-coin vertex
 untouched).
+
+## KRONOS-DECATHLON-R — referee-driven robustness and attribution
+
+Three independent referee reports on the DECATHLON paper returned
+major-revision verdicts on the content: a depth/strength confound in the
+K-ladder, an AC1 confound in the E9 statistic (corr(AC1, bits) = −0.89
+across the archived grid), 8-seed power on the two surviving "leak grows"
+comparisons, wildness ≡ forecastable flow by construction, a market never
+re-equilibrated around the added rationality, and integer scores on
+marginal thresholds. All six were answered under one registration
+([DESIGN25](design/DESIGN25.md): hypotheses, budgets — 272 battery runs +
+64 non-battery sims, held exactly — and decision rules fixed before any
+run; gate **X36** licenses the new whitened-MI estimator on an analytic
+AR(1) world before any measurement; `research/robustness.json`). The
+DESIGN8 closure clause stays closed: this is attribution and robustness of
+existing results, not a new attempt on the ceiling. The verdicts, stated
+as which claim survives:
+
+**The published inversion is DEAD.** Two independent executions:
+
+- *R1 (matched strength).* The published K-ladder compared depth at
+  different effective strengths (1−(1−kA)^K). Holding effective strength
+  at 0.25 exactly — K=1 with kA=0.25 vs K=5 with per-layer kA=0.0559125 —
+  on seeds 100–131, depth-5 leaks *less* than depth-1: medians 0.0176 vs
+  0.0194, Wilcoxon p = 0.0028, depth-5 higher on 6/32 seeds. (Realized
+  strengths, caps included: 0.2237 depth-1 vs 0.2500 depth-5 — the
+  depth-5 arm ran slightly *stronger* and still leaked less.) The K-axis
+  of the published Figure 3 was a strength axis (grid Spearman
+  ρ(kA, bits) = 0.892). "Deeper anticipation grows the sign leak" is dead
+  as a depth attribution.
+- *R2 (E9 attribution).* The battery's E9 conditions on sign(r_t), so
+  induced one-lag reversal is mechanically scored as sign information —
+  and that is what the rises were. Control FCVM's leak is *not* linear:
+  AR(1)-whitened bits 0.0197 ≈ raw 0.0184, significant 8/8. Every
+  rationality layer **converts** the leak: whitened (nonlinear) bits fall
+  monotonically 0.0197 → 0.0112 (K1) → 0.0038 (K5) / 0.0036 (Q1.0) while
+  the sign_t-alone component rises 0.0101 → 0.0220 / 0.0206 and AC1 is
+  driven to −0.25. Under whitening the published rises don't just vanish,
+  they reverse (whitened arm−control differences negative on 8/8 seeds,
+  p = 0.0078, all four arms); the sign-component share of the raw rise
+  exceeds 100% (2.21 at K5, 1.84 at Q1.0); conditional MI given sign_t
+  falls in every arm. Per the pre-registered rule: **"the market
+  re-creates sign information in price space" is WITHDRAWN.**
+
+**The rises are real measurements of the wrong thing (R3).** The 32-seed
+extensions (A2 protocol) settle the power question the referees raised:
+K5-frozen 0.0258 vs control 0.0195, 28/32 seeds, Wilcoxon p < 1e-4; Q1.0
+0.0239, 26/32, p < 1e-4. The 7-of-8 claims were not noise — the raw
+statistic robustly rises. Composed with R2, what it robustly measures is
+E1-breakage: intervention-induced reversal, not information.
+
+**What survives is sharper than what died.** The leak never closes:
+whitened bits remain significant on 8/8 seeds in *every* configuration,
+floor ≈ 0.0033 — even for the exact-absorption maker. The correct
+mechanism statement, replacing the inversion: **bolt-on rationality
+converts a genuine multi-day sign leak into one-lag microstructure
+reversal — absorbing most of it, never closing it — and pays for the
+conversion with the wild facts.** The conversion is monotone in
+intervention strength and operator-independent (trading layers and the
+pricing rule behave identically).
+
+**Joint production survives, scoped (R4).** With a second wildness source
+— Student-t(3) fundamental innovations, scale fixed by one registered
+calibration shot (variance-matching won: median kurt 8.82 vs FCVM's 8.79)
+— the control FCVM-T3 sits at 5/10 failing exactly FCVM's five events,
+and full absorption still deletes the wildness: FCVM-T3+Q1.0 scores 1/10,
+kurt 3.06, leak persisting at 0.0229 bits. The t-tails die because the
+fundamentalist channel is a structural tail filter (kF = 0.15 spreads a
+V-jump over ~7 days; the calibration ladder is non-monotone — larger t3
+scales *lower* total kurtosis). So the claim is scoped honestly: joint
+production is structural to *flow-generated* wildness; whether efficiency
+and wildness are separately purchasable given a genuinely absorption-proof
+exogenous wildness source is untested by this design and would need a
+different injection point (e.g. heavy-tailed noise-trader flow).
+
+**The ceiling survives re-equilibration (R5).** Re-tuning kM (6
+candidates, tuning seeds 900–903, least-re-equilibration tie-break)
+alongside each rationality layer: the K1 arm keeps kM = 0.30 (the frozen
+value) and stays 5/10 on eval with FCVM's failure set; the Q1.0 arm picks
+kM = 0.10 and scores **2/10** (E1, E6) — while its direction bits collapse
+to median 0.0016 (0.0007–0.0032 per seed, still E9-significant). That
+world is the program's cleanest joint-production exhibit: adapted
+liquidity plus exact absorption gets within a hair of sign-efficiency and
+the price is every wild fact at once. "Bolt-on rationality fails" is not
+frozen-balance artifact — at least not through the liquidity channel.
+
+**The integer rhetoric survives threshold perturbation (R6).** All 12
+numeric thresholds perturbed ±10%/±20% one at a time (E9 is a permutation
+test — no threshold to perturb; E8's significance flag likewise fixed),
+scores rescored from per-seed statistics (8 configs reproduced by one
+asserted deterministic rerun each). Under all 48 perturbations: FCVM
+remains the maximum simulated score, its failure set never changes, GBM
+stays 3/10, SPY stays 10/10 at ±10% (9/10 only at E8-ratio −20%).
+Headline rows are frozen at ±10% (FCVM 5, FCVM+A 5, K5-tuned 5, Q-tuned
+5, FV 5, FCV 5); the knife edges live in non-headline rows and are named
+(Q0.5, FCVMH, K5-frozen; full bands in the JSON).
+
+**Net effect on the published paper** (edits belong to the paper pass, not
+this study): the abstract's "deeper anticipation grows the sign leak" and
+the "re-created in price space" reading must go; Figure 3's rising curve
+is an artifact curve; the surviving paper is about *conversion* (leak →
+reversal, measured cleanly by the whitened decomposition), *non-closure*
+(significant whitened floor everywhere), *joint production of
+sign-efficiency and flow-generated wildness* (now demonstrated three
+independent ways, including the near-closure 2/10 world), and a ceiling
+that is robust to thresholds and to liquidity re-equilibration. That is a
+different — and better-supported — headline than the one the referees
+struck down.
 
 ## KRONOS-TRADE — the deployable system
 

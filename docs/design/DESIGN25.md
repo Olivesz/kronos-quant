@@ -381,3 +381,88 @@ actually survives.
   standard above, including any dissolution of published claims.
 - Results recorded in this file's amendment section after the runs, as in
   DESIGN18/20/22/24.
+
+## Results (recorded after the runs; budgets held — 272 battery runs + 64
+## non-battery sims, exactly as registered; gate X36 green first)
+
+- **R1 — the depth attribution is DEAD.** At effective strength 0.25 on
+  both arms (seeds 100–131), depth-5 leaks LESS than depth-1: medians
+  0.017572 vs 0.019372, Wilcoxon p = 0.0028, depth-5 > depth-1 on only 6/32
+  seeds. Realized-strength caveat (registered): the caps bind for the single
+  strong layer but never for the five weak ones — realized strengths 0.2237
+  (depth 1) vs 0.2500 (depth 5), a 10.5% relative gap whose direction
+  STRENGTHENS the verdict (the depth-5 arm ran slightly stronger and still
+  leaked less). The published K-axis was a strength axis
+  (grid Spearman ρ(kA, bits) = 0.892, corr(AC1, bits) = −0.893). Depth-1
+  arm reproduced the stored A2 K1 vector exactly (asserted).
+- **R2 — the inversion is an artifact; the rise is induced reversal.**
+  Control FCVM's leak is NOT linear: whitened bits 0.0197 ≈ raw 0.0184,
+  significant 8/8 (φ̂ = +0.036). Every intervention CONVERTS the leak:
+  whitened (nonlinear) bits fall monotonically 0.0197 → 0.0112 (K1) →
+  0.0038 (K5) / 0.0036 (Q1.0), while the sign_t-alone component rises
+  0.0101 → 0.0147 → 0.0220 / 0.0206 with AC1 driven to −0.25. The raw rises
+  vanish under whitening — in fact reverse: whitened diffs vs control are
+  NEGATIVE on 0/8 positive seeds, p = 0.0078, for K1, K5, Q0.5 AND Q1.0;
+  the sign-component share of the raw rise exceeds 1 (2.21 K5, 1.84 Q1.0);
+  conditional MI given sign_t falls in every arm (p = 0.0078). Per the
+  decision rule: the "re-created in price space" reading is **WITHDRAWN**;
+  the licensed claims are (i) the leak never closes — whitened bits stay
+  significant 8/8 in every configuration, floor ≈ 0.0033 — and (ii) the
+  interventions actually absorb MOST of the genuine nonlinear leak while
+  manufacturing one-lag reversal that the E9 statistic scores higher.
+- **R3 — the raw rises are real and well-powered, and R2 says what they
+  are.** K5-frozen: 32-seed median 0.025761 vs control 0.019459, 28/32,
+  Wilcoxon p < 1e-4. Q1.0: 0.023851, 26/32, p < 1e-4. Both rises STAND at
+  32 seeds — the referees' power concern is answered — and by R2 they are
+  measured E1-breakage (induced linear reversal), not sign information.
+  Composed verdict per the registered rule: "grows" is replaced by
+  "converts"; "does not close" stands.
+- **R4 — wildness still dies; the claim scopes to flow-generated
+  wildness.** Calibration selected the variance-matching scale (mult 1.0,
+  median kurt 8.82 vs target 8.79; ladder non-monotone — larger t3 scales
+  LOWER total kurtosis by drowning the spiral). FCVM-T3 control: 5/10,
+  fails exactly FCVM's five events, kurt 7.93, bits 0.0201. FCVM-T3+Q1.0:
+  1/10 (E6 only), kurt 3.06, bits 0.0229 — the t(3) tails do NOT survive
+  absorption because the fundamentalist channel (kF = 0.15) spreads a
+  V-jump over ~7 days: it is a structural tail filter. Registered branch 3
+  fires: the joint-production claim is structural to FLOW-GENERATED
+  wildness and is scoped to exactly that. The stronger separation the
+  referees hypothesized (efficiency and wildness separately purchasable)
+  remains UNTESTED by this design — a fundamental-channel t3 source cannot
+  express one-day wildness at any registered scale; testing it would need a
+  different injection point (e.g. heavy-tailed noise-trader flow), which is
+  outside this registration.
+- **R5 — the ceiling survives re-equilibration.** Arm a (K1 anticipator):
+  grid {5,4,5,5,4,4}, tie-break keeps kM = 0.30 (the frozen value), eval
+  5/10, FCVM's failure set. Arm b (Q1.0): grid {2,2,1,1,1,1}, winner
+  kM = 0.10, eval 2/10 (E1, E6) — and its bits collapse to median 0.0016
+  (per-seed 0.0007–0.0032, still E9-significant): with adapted liquidity,
+  full absorption comes within a hair of closing the sign leak and the
+  price is EVERYTHING ELSE — the cleanest joint-production demonstration in
+  the program. Ceiling survives; claim scoped to the one parameter tested.
+- **R6 — the integer rhetoric survives; knife edges named.** Baseline
+  reproduced for all 15 configs + SPY. Under all 48 single-threshold
+  perturbations (±10/20%): FCVM stays the maximum simulated score
+  (ceiling invariant HOLDS in 48/48), FCVM's failure set never changes,
+  G stays 3/10, SPY stays 10/10 at ±10% and drops to 9 only at
+  e8_ratio −20%. Headline rows are frozen at ±10% (FCVM, FCVM+A, K5-tuned,
+  Q-tuned, FV, FCV all [5,5]); knife edges at ±10% are confined to
+  non-headline rows: Q0.5 (e1_lo +10%, e2_lo −10%), FCVMH (e1_lo/e2_lo
+  −10%), K5-frozen (e5 −10%). Full ±20% bands in
+  research/robustness.json.
+
+**Composed verdict (the reporting standard applied):** the published
+centerpiece — "deeper anticipation grows the sign leak; the market
+re-creates the information in price space" — is DEAD, on the paper's own
+archived data plus the registered extensions: the K-axis was a strength
+axis (R1) and the bits-rise is induced one-lag reversal scored as sign
+information by a statistic that conditions on sign_t (R2), robustly so at
+32 seeds (R3). What SURVIVES is stronger than what was lost: bolt-on
+rationality CONVERTS a genuine multi-day sign leak into microstructure
+reversal — absorbing most of it, never closing it (whitened floor
+≈ 0.0033 bits, significant 8/8 everywhere, down from control's 0.0197) —
+and pays for the conversion with the wild facts, which are flow-generated
+(R4) and cannot be rescued by re-equilibrating liquidity provision (R5);
+the 5/10 ceiling and both calibration anchors are threshold-robust (R6).
+If the surviving claim retitles the paper, the honest title is about
+CONVERSION and JOINT PRODUCTION, not about a leak that grows.

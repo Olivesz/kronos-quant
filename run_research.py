@@ -1541,6 +1541,533 @@ def exp_score_se(force: bool = False) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Experiment 17g (ROBUSTNESS): the DESIGN25 referee program — attribution and
+# robustness of the closed DECATHLON line (R1-R6). Gate X36 must be green
+# before this runs; all budgets/decision rules are fixed in DESIGN25.
+# ---------------------------------------------------------------------------
+
+def _paired_tests(a: np.ndarray, b: np.ndarray) -> dict:
+    """b vs a: two-sided Wilcoxon (primary) + two-sided sign test."""
+    from scipy.stats import binomtest, wilcoxon
+
+    d = b - a
+    w = float(wilcoxon(b, a, alternative="two-sided").pvalue)
+    n_pos = int((d > 0).sum())
+    n_nz = int((d != 0).sum())
+    sp = float(binomtest(n_pos, n_nz, 0.5).pvalue)
+    return {"median_diff": round(float(np.median(d)), 6), "n_pos": n_pos,
+            "n": len(d), "wilcoxon_p": round(w, 4), "sign_test_p": round(sp, 4),
+            "separates_at_0.05": bool(w < 0.05)}
+
+
+def _rob_r1(d3: dict) -> dict:
+    """R1: exact matched-strength depth test at effective strength 0.25."""
+    from kronos.decathlon import battery, simulate_abm
+    from kronos.robustness import realized_strength
+
+    kA5 = 1.0 - 0.75 ** 0.2            # 1-(1-kA5)^5 = 0.25 exactly
+    arms = {
+        "depth1": (1, dict(fundamentalists=True, chartists=True,
+                           voltargeters=True, marketmakers=True,
+                           anticipators=True, fixed_point_iters=1), None),
+        "depth5": (5, dict(fundamentalists=True, chartists=True,
+                           voltargeters=True, marketmakers=True,
+                           anticipators=True, fixed_point_iters=5,
+                           params={"kA": kA5}), {"kA": kA5}),
+    }
+    bits, beta = {}, {}
+    for name, (K, cfg, pr) in arms.items():
+        bb, rs = [], []
+        for i, sd in enumerate(range(100, 132)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            bb.append(round(float(battery(r, seed=i)["stats"]["dir_bits"]), 6))
+            rs.append(round(realized_strength(r.to_numpy(), pr, K=K), 4))
+        bits[name], beta[name] = bb, rs
+    stored_k1 = d3["k01_extension"]["per_seed"]["K1_DECA2"]
+    if bits["depth1"] != stored_k1:
+        raise RuntimeError("R1 depth1 arm does not reproduce the stored "
+                           "DESIGN24 A2 K1 vector — identity broken")
+    tests = _paired_tests(np.array(bits["depth1"]), np.array(bits["depth5"]))
+
+    # the strength axis assembled from archived data (no new runs)
+    d2 = load_cached("decathlon2")
+    eval_axis = [
+        {"arm": "K0", "depth": 0, "eff_strength": 0.0,
+         "median_bits": d3["dir_bits_vs_K"]["K0_FCVM"]["median"]},
+        {"arm": "K1_frozen", "depth": 1, "eff_strength": 0.25,
+         "median_bits": d3["dir_bits_vs_K"]["K1_DECA2"]["median"]},
+        {"arm": "K5_tuned", "depth": 5, "eff_strength": round(1 - 0.95 ** 5, 4),
+         "median_bits": d3["tuned_eval"]["median_stats"]["dir_bits"]},
+        {"arm": "K5_frozen", "depth": 5, "eff_strength": round(1 - 0.75 ** 5, 4),
+         "median_bits": d3["dir_bits_vs_K"]["K5_FIXEDPOINT"]["median"]},
+    ]
+    grid = d2["tuning_grid_stats"]["per_setting"]
+    from scipy.stats import spearmanr
+    rho = float(spearmanr([g["kA"] for g in grid],
+                          [g["dir_bits"] for g in grid])[0])
+    c_ac1 = float(np.corrcoef([g["ac1_r"] for g in grid],
+                              [g["dir_bits"] for g in grid])[0, 1])
+    med1, med5 = np.median(bits["depth1"]), np.median(bits["depth5"])
+    depth_wins = bool(tests["separates_at_0.05"] and tests["median_diff"] > 0)
+    verdict = ("depth has an effect beyond strength" if depth_wins else
+               "depth adds nothing at matched strength: the published "
+               "K-axis was a strength axis; 'deeper anticipation grows the "
+               "sign leak' is DEAD as a depth attribution — strength grows "
+               "the leak")
+    print(f"[robustness] R1 matched strength 0.25: depth1 median {med1:.4f} "
+          f"vs depth5 {med5:.4f}, Wilcoxon p={tests['wilcoxon_p']:.4f}, "
+          f"depth5>depth1 on {tests['n_pos']}/{tests['n']} -> "
+          f"{'DEPTH EFFECT' if depth_wins else 'depth adds nothing'}")
+    return {"protocol": "seeds 100-131, T=6000, both arms at effective "
+                        "strength 0.25 exactly; depth1 asserted byte-equal "
+                        "to the stored DESIGN24 A2 K1 vector",
+            "kA_depth5": round(kA5, 7),
+            "per_seed_bits": bits,
+            "median_bits": {k: round(float(np.median(v)), 6)
+                            for k, v in bits.items()},
+            "realized_strength": {
+                k: {"per_seed": v, "median": round(float(np.median(v)), 4)}
+                for k, v in beta.items()},
+            "tests_depth5_vs_depth1": tests,
+            "strength_axis": {"eval_arms": eval_axis,
+                              "tuning_grid_spearman_kA_bits": round(rho, 3),
+                              "tuning_grid_corr_ac1_bits": round(c_ac1, 3)},
+            "verdict": verdict}
+
+
+def _rob_r2(d3: dict, d4: dict) -> dict:
+    """R2: E9 attribution — per-feature MI decomposition + AR(1) whitening."""
+    from kronos.decathlon import _acf, simulate_abm
+    from kronos.robustness import (ar1_whiten, e9_bits, e9_decomposition,
+                                   sign_ac1)
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    configs = {
+        "FCVM": dict(base),
+        "K1": dict(base, anticipators=True, fixed_point_iters=1),
+        "K5_FROZEN": dict(base, anticipators=True, fixed_point_iters=5),
+        "Q0.5": dict(base, quote_skew=0.5),
+        "Q1.0": dict(base, quote_skew=1.0),
+    }
+    stored = {
+        "FCVM": d3["dir_bits_vs_K"]["K0_FCVM"]["per_seed"],
+        "K1": d3["dir_bits_vs_K"]["K1_DECA2"]["per_seed"],
+        "K5_FROZEN": d3["dir_bits_vs_K"]["K5_FIXEDPOINT"]["per_seed"],
+        "Q0.5": d4["dir_bits_vs_lambda"]["FCVM+Q0.5"]["per_seed"],
+        "Q1.0": d4["dir_bits_vs_lambda"]["FCVM+Q1.0"]["per_seed"],
+    }
+    per = {}
+    for name, cfg in configs.items():
+        rows = {"raw_bits": [], "raw_sig": [], "ac1_r": [], "sign_ac1": [],
+                "phi_hat": [], "whitened_bits": [], "whitened_sig": [],
+                "mi_sign": [], "mi_mom": [], "mi_vol": [], "mi_joint": [],
+                "cmi_given_sign": [], "cmi_sig": []}
+        for i, sd in enumerate(range(100, 108)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            raw = e9_bits(r, seed=i)
+            if round(raw["bits"], 6) != stored[name][i]:
+                raise RuntimeError(f"R2 world regeneration broken for {name} "
+                                   f"seed {sd}: {raw['bits']:.6f} != stored "
+                                   f"{stored[name][i]}")
+            phi, w = ar1_whiten(r)
+            wb = e9_bits(w, seed=i)
+            dec = e9_decomposition(r, seed=i)
+            rows["raw_bits"].append(round(raw["bits"], 6))
+            rows["raw_sig"].append(int(raw["significant"]))
+            rows["ac1_r"].append(round(_acf(r.to_numpy(), 1), 4))
+            rows["sign_ac1"].append(round(sign_ac1(r), 4))
+            rows["phi_hat"].append(round(phi, 4))
+            rows["whitened_bits"].append(round(wb["bits"], 6))
+            rows["whitened_sig"].append(int(wb["significant"]))
+            rows["mi_sign"].append(round(dec["sign"]["bits"], 6))
+            rows["mi_mom"].append(round(dec["mom"]["bits"], 6))
+            rows["mi_vol"].append(round(dec["vol"]["bits"], 6))
+            rows["mi_joint"].append(round(dec["joint"]["bits"], 6))
+            rows["cmi_given_sign"].append(round(dec["cmi_given_sign"]["bits"], 6))
+            rows["cmi_sig"].append(int(dec["cmi_given_sign"]["significant"]))
+        per[name] = rows
+        print(f"[robustness] R2 {name:9s}: raw {np.median(rows['raw_bits']):.4f} "
+              f"(sig {sum(rows['raw_sig'])}/8) | whitened "
+              f"{np.median(rows['whitened_bits']):.4f} "
+              f"(sig {sum(rows['whitened_sig'])}/8) | sign-alone "
+              f"{np.median(rows['mi_sign']):.4f} | CMI "
+              f"{np.median(rows['cmi_given_sign']):.4f} "
+              f"(sig {sum(rows['cmi_sig'])}/8) | AC1 "
+              f"{np.median(rows['ac1_r']):+.3f}")
+
+    ctrl = per["FCVM"]
+    tests = {}
+    for arm in ("K1", "K5_FROZEN", "Q0.5", "Q1.0"):
+        a = per[arm]
+        tests[arm] = {
+            "raw": _paired_tests(np.array(ctrl["raw_bits"]),
+                                 np.array(a["raw_bits"])),
+            "whitened": _paired_tests(np.array(ctrl["whitened_bits"]),
+                                      np.array(a["whitened_bits"])),
+            "sign_component": _paired_tests(np.array(ctrl["mi_sign"]),
+                                            np.array(a["mi_sign"])),
+            "cmi": _paired_tests(np.array(ctrl["cmi_given_sign"]),
+                                 np.array(a["cmi_given_sign"]))}
+
+    verdicts = {}
+    for arm in ("K5_FROZEN", "Q1.0"):
+        t = tests[arm]
+        survives = bool(t["whitened"]["separates_at_0.05"]
+                        and t["whitened"]["median_diff"] > 0)
+        raw_d = t["raw"]["median_diff"]
+        sign_share = (t["sign_component"]["median_diff"] / raw_d
+                      if raw_d else float("nan"))
+        verdicts[arm] = {
+            "rise_survives_whitening": survives,
+            "sign_component_share_of_raw_rise": round(float(sign_share), 3),
+            "verdict": ("the rise survives the linear-reversal control; "
+                        "the inversion stands with the confound excluded"
+                        if survives else
+                        "the rise is the induced linear-reversal channel: "
+                        "it vanishes under AR(1) whitening — the "
+                        "'re-created in price space' reading is WITHDRAWN")}
+    ctrl_whit_sig = sum(ctrl["whitened_sig"])
+    control_leak = {
+        "whitened_sig_seeds": ctrl_whit_sig,
+        "verdict": ("control's leak survives whitening — the flow-generated "
+                    "leak is not one-lag linear structure"
+                    if ctrl_whit_sig > 4 else
+                    "control's own E9 leak is one-lag linear sign structure: "
+                    "whitened bits are insignificant on a majority of seeds")}
+    return {"protocol": "seeds 100-107, worlds regenerated and asserted "
+                        "against stored per-seed bits; decomposition + "
+                        "AR(1)-whitened recomputation per DESIGN25 R2",
+            "per_config": per, "tests_vs_control": tests,
+            "verdicts": verdicts, "control_leak": control_leak}
+
+
+def _rob_r3(d3: dict, d4: dict) -> dict:
+    """R3: 32-seed extensions of the K5-frozen and Q1.0 rises (A2 protocol)."""
+    from kronos.decathlon import battery, simulate_abm
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    arms = {
+        "K5_FROZEN": (dict(base, anticipators=True, fixed_point_iters=5),
+                      d3["dir_bits_vs_K"]["K5_FIXEDPOINT"]["per_seed"]),
+        "Q1.0": (dict(base, quote_skew=1.0),
+                 d4["dir_bits_vs_lambda"]["FCVM+Q1.0"]["per_seed"]),
+    }
+    k0 = np.array(d3["k01_extension"]["per_seed"]["K0_FCVM"])
+    out = {"protocol": "seeds 100-131, T=6000, one run, no extension "
+                       "(DESIGN24 A2 protocol); control = the stored A2 "
+                       "32-seed K0 vector; first 8 seeds asserted against "
+                       "the published per-seed bits",
+           "control_median": round(float(np.median(k0)), 6), "arms": {}}
+    for name, (cfg, pub8) in arms.items():
+        bb = []
+        for i, sd in enumerate(range(100, 132)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            bb.append(round(float(battery(r, seed=i)["stats"]["dir_bits"]), 6))
+        if bb[:8] != pub8:
+            raise RuntimeError(f"R3 {name}: first-8 byte-identity FAILED")
+        t = _paired_tests(k0, np.array(bb))
+        rises = bool(t["separates_at_0.05"] and t["median_diff"] > 0)
+        out["arms"][name] = {
+            "per_seed": bb, "median": round(float(np.median(bb)), 6),
+            "tests_vs_control": t,
+            "verdict": ("the rise STANDS at 32 seeds" if rises else
+                        "the 7-of-8 rise DISSOLVES: statistically flat at "
+                        "32 seeds; 'grows' downgrades to 'does not close'")}
+        print(f"[robustness] R3 {name}: 32-seed median {np.median(bb):.4f} vs "
+              f"control {np.median(k0):.4f}, >ctrl on {t['n_pos']}/{t['n']}, "
+              f"Wilcoxon p={t['wilcoxon_p']:.4f} -> "
+              f"{'RISES' if rises else 'flat'}")
+    return out
+
+
+def _rob_r4(d1: dict) -> dict:
+    """R4: second wildness source — t(3) fundamentals, absorption re-test."""
+    from kronos.decathlon import DEFAULTS, run_decathlon, simulate_abm
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    target_kurt = d1["configs"]["FCVM"]["median_stats"]["kurt"]
+    unit = DEFAULTS["sV"] / np.sqrt(3.0)      # variance-matching t(3) scale
+    ladder = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+    calib = []
+    for mult in ladder:
+        ks = []
+        for sd in range(900, 904):
+            r = simulate_abm(T=6000, seed=sd, fund_t3_scale=mult * unit,
+                             **base)
+            ks.append(float(r.kurtosis()) + 3.0)
+        calib.append({"mult": mult, "scale": round(mult * unit, 6),
+                      "median_kurt": round(float(np.median(ks)), 3)})
+        print(f"[robustness] R4 calib mult={mult}: median kurt "
+              f"{np.median(ks):.2f} (target {target_kurt:.2f})")
+    best = min(calib, key=lambda c: abs(c["median_kurt"] - target_kurt))
+    scale = best["mult"] * unit
+
+    table = run_decathlon(
+        n_seeds=8, T=6000, seed0=100, per_seed=True,
+        configs={"FCVM_T3": dict(base, fund_t3_scale=scale),
+                 "FCVM_T3_Q1.0": dict(base, fund_t3_scale=scale,
+                                      quote_skew=1.0)})
+    rows = {}
+    for name, rec in table.items():
+        rows[name] = {
+            "score": rec["score"], "events": rec["events"],
+            "median_stats": {k: round(float(rec["median_stats"][k]), 4)
+                             for k in ("ac1_r", "kurt", "ac1_absr", "ac_slow",
+                                       "leverage", "kurt_z", "clock_skew_u",
+                                       "dir_bits", "tail_asym")},
+            "dir_bits_per_seed": [round(st["dir_bits"], 6)
+                                  for st in rec["seed_stats"]]}
+        passes = [k for k, v in rec["events"].items() if v]
+        print(f"[robustness] R4 {name:13s}: {rec['score']}/10 "
+              f"({', '.join(p.split('_')[0] for p in passes)}) kurt "
+              f"{rec['median_stats']['kurt']:.2f} bits "
+              f"{rec['median_stats']['dir_bits']:.4f}")
+    q = table["FCVM_T3_Q1.0"]
+    tails_survive = bool(q["events"]["E2_fat_tails"])
+    leak_persists = not bool(q["events"]["E9_no_sign_info"])
+    if tails_survive and leak_persists:
+        verdict = ("tails survive full absorption while the leak persists: "
+                   "the wildness-deletion half of Experiment III was "
+                   "parameterization-bound (wildness == forecastable flow by "
+                   "construction); non-closure of the leak is demonstrated "
+                   "in a world where that identity is broken. The asymmetric "
+                   "wild facts (E5/E7/E10) are reported separately — see "
+                   "events.")
+    elif tails_survive:
+        verdict = ("tails survive absorption AND the leak closes — joint "
+                   "production fails in the enriched world; the published "
+                   "claim does not generalize")
+    else:
+        verdict = ("wildness still dies under absorption even with an "
+                   "exogenous t(3) source: the published claim is structural "
+                   "to flow-generated wildness and is scoped to exactly that")
+    return {"protocol": "one pre-registered calibration shot (6-scale ladder "
+                        "x tuning seeds 900-903, kurtosis only), then eval "
+                        "seeds 100-107, DESIGN22 protocol",
+            "calibration": {"ladder": calib, "target_kurt":
+                            round(float(target_kurt), 3),
+                            "selected_mult": best["mult"],
+                            "selected_scale": round(scale, 6)},
+            "configs": rows,
+            "tails_survive_absorption": tails_survive,
+            "leak_persists": leak_persists, "verdict": verdict}
+
+
+def _rob_r5() -> dict:
+    """R5: bounded re-equilibration — kM re-tuned alongside each rationality
+    layer (6 candidates, tuning seeds 900-903, least-re-equilibration
+    tie-break), winner read once on eval seeds."""
+    from kronos.decathlon import run_decathlon
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    arms = {"A_K1": dict(base, anticipators=True, fixed_point_iters=1),
+            "Q1.0": dict(base, quote_skew=1.0)}
+    cand = [0.0, 0.10, 0.20, 0.30, 0.45, 0.60]
+    out = {"protocol": "kM in {0.0,0.10,0.20,0.30,0.45,0.60}, tuning seeds "
+                       "900-903 majority-of-4, selection on total score, "
+                       "tie-break min |kM-0.30| then smaller kM; winner read "
+                       "once on eval seeds 100-107", "arms": {}}
+    ceiling_broken = False
+    for name, cfg in arms.items():
+        grid = []
+        for v in cand:
+            g = run_decathlon(n_seeds=4, T=6000, seed0=900,
+                              configs={"C": dict(cfg, params={"kM": v})})
+            grid.append({"kM": v, "score": g["C"]["score"]})
+            print(f"[robustness] R5 {name} kM={v}: {g['C']['score']}/10 "
+                  "(tuning)")
+        best = max(g["score"] for g in grid)
+        winner = sorted((abs(g["kM"] - 0.30), g["kM"]) for g in grid
+                        if g["score"] == best)[0][1]
+        ev = run_decathlon(n_seeds=8, T=6000, seed0=100, per_seed=True,
+                           configs={"W": dict(cfg, params={"kM": winner})})
+        rec = ev["W"]
+        exceeded = rec["score"] > 5
+        ceiling_broken = ceiling_broken or exceeded
+        out["arms"][name] = {
+            "grid": grid, "winner_kM": winner,
+            "eval": {"score": rec["score"], "events": rec["events"],
+                     "dir_bits_per_seed": [round(st["dir_bits"], 6)
+                                           for st in rec["seed_stats"]],
+                     "median_dir_bits": round(
+                         rec["median_stats"]["dir_bits"], 6)},
+            "exceeds_ceiling": bool(exceeded)}
+        passes = [k for k, v in rec["events"].items() if v]
+        print(f"[robustness] R5 {name} winner kM={winner}: {rec['score']}/10 "
+              f"on eval ({', '.join(p.split('_')[0] for p in passes)})")
+    out["ceiling_survives_requilibration"] = not ceiling_broken
+    out["verdict"] = (
+        "a re-equilibrated arm EXCEEDS 5/10: the published structural-"
+        "ceiling claim is wrong as stated — the ceiling was partly an "
+        "artifact of frozen liquidity provision" if ceiling_broken else
+        "the 5/10 ceiling survives re-equilibration of liquidity provision "
+        "(kM re-tuned jointly with each rationality layer); the structural "
+        "claim strengthens, scoped to the one parameter tested")
+    return out
+
+
+def _rob_r6(d1: dict, d2: dict, d3: dict, d4: dict) -> dict:
+    """R6: threshold robustness — every numeric threshold perturbed one at a
+    time by +-10%/+-20%; scores rescored from per-seed statistics."""
+    from kronos.decathlon import CONFIGS, CONFIGS2, run_decathlon
+    from kronos.robustness import THRESHOLDS, rescore_config, rescore_events
+
+    # per-seed stats + published E9 verdict + published score, per config
+    pool: dict[str, dict] = {}
+
+    def add(name, seed_stats, events, score):
+        pool[name] = {"seed_stats": seed_stats,
+                      "e9": bool(events["E9_no_sign_info"]),
+                      "published": int(score)}
+
+    add("FCVM", d3["configs"]["K0_FCVM"]["seed_stats"],
+        d3["configs"]["K0_FCVM"]["events"], d3["configs"]["K0_FCVM"]["score"])
+    add("FCVM+A", d3["configs"]["K1_DECA2"]["seed_stats"],
+        d3["configs"]["K1_DECA2"]["events"], d3["configs"]["K1_DECA2"]["score"])
+    add("K5_FROZEN", d3["configs"]["K5_FIXEDPOINT"]["seed_stats"],
+        d3["configs"]["K5_FIXEDPOINT"]["events"],
+        d3["configs"]["K5_FIXEDPOINT"]["score"])
+    add("K5_TUNED", d3["tuned_eval"]["seed_stats"],
+        d3["tuned_eval"]["events"], d3["tuned_eval"]["score"])
+    add("Q1.0", d4["configs"]["FCVM+Q1.0"]["seed_stats"],
+        d4["configs"]["FCVM+Q1.0"]["events"], d4["configs"]["FCVM+Q1.0"]["score"])
+    add("Q0.5", d4["configs"]["FCVM+Q0.5"]["seed_stats"],
+        d4["configs"]["FCVM+Q0.5"]["events"], d4["configs"]["FCVM+Q0.5"]["score"])
+    add("Q_TUNED", d4["contingent_pass"]["tuned_eval"]["seed_stats"],
+        d4["contingent_pass"]["tuned_eval"]["events"],
+        d4["contingent_pass"]["tuned_eval"]["score"])
+
+    # reproduction reruns for the 8 configs without archived per-seed stats
+    rerun_specs = {k: dict(CONFIGS[k]) for k in
+                   ("G", "F", "FC", "FV", "FCV", "FCVMH")}
+    rerun_specs.update({k: dict(CONFIGS2[k]) for k in ("FV+A", "F+A")})
+    published = {**{k: d1["configs"][k]["score"] for k in
+                    ("G", "F", "FC", "FV", "FCV", "FCVMH")},
+                 **{k: d2["configs"][k]["score"] for k in ("FV+A", "F+A")}}
+    pub_events = {**{k: d1["configs"][k]["events"] for k in
+                     ("G", "F", "FC", "FV", "FCV", "FCVMH")},
+                  **{k: d2["configs"][k]["events"] for k in ("FV+A", "F+A")}}
+    table = run_decathlon(n_seeds=8, T=6000, seed0=100, per_seed=True,
+                          configs=rerun_specs)
+    for name, rec in table.items():
+        if rec["score"] != published[name]:
+            raise RuntimeError(f"R6 reproduction FAILED for {name}: "
+                               f"{rec['score']} != {published[name]}")
+        add(name, rec["seed_stats"], pub_events[name], published[name])
+
+    # baseline: the rescorer must reproduce every published score exactly
+    for name, rec in pool.items():
+        got = rescore_config(rec["seed_stats"], THRESHOLDS, rec["e9"])["score"]
+        if got != rec["published"]:
+            raise RuntimeError(f"R6 baseline rescore FAILED for {name}: "
+                               f"{got} != {rec['published']}")
+    spy = d1["spy"]
+    spy_base = rescore_events(spy["stats"], THRESHOLDS,
+                              spy["events"]["E9_no_sign_info"])
+    if sum(spy_base.values()) != spy["score"]:
+        raise RuntimeError("R6 SPY baseline rescore FAILED")
+    print(f"[robustness] R6 baseline: all {len(pool)} configs + SPY "
+          "reproduce published scores at the published thresholds")
+
+    deltas = (-0.20, -0.10, 0.10, 0.20)
+    per_pert = []      # every (threshold, delta): all scores + invariants
+    for th_name in THRESHOLDS:
+        for d in deltas:
+            th = dict(THRESHOLDS)
+            th[th_name] = th[th_name] * (1 + d)
+            scores = {n: rescore_config(rec["seed_stats"], th, rec["e9"])
+                      for n, rec in pool.items()}
+            fcvm = scores["FCVM"]["score"]
+            max_sim = max(s["score"] for s in scores.values())
+            spy_s = int(sum(rescore_events(
+                spy["stats"], th, spy["events"]["E9_no_sign_info"]).values()))
+            fail_set = sorted(k for k, v in scores["FCVM"]["events"].items()
+                              if not v)
+            per_pert.append({
+                "threshold": th_name, "delta": d,
+                "scores": {n: s["score"] for n, s in scores.items()},
+                "spy": spy_s,
+                "fcvm_is_max": bool(fcvm == max_sim),
+                "fcvm_fail_set": fail_set})
+
+    bands = {}
+    for n in pool:
+        for lim, tag in ((0.10, "band_10pct"), (0.20, "band_20pct")):
+            vals = [p["scores"][n] for p in per_pert if abs(p["delta"]) <= lim + 1e-9]
+            bands.setdefault(n, {})[tag] = [int(min(vals)), int(max(vals))]
+    spy_band = {tag: [int(min(v)), int(max(v))] for tag, v in
+                (("band_10pct", [p["spy"] for p in per_pert
+                                 if abs(p["delta"]) <= 0.10 + 1e-9]),
+                 ("band_20pct", [p["spy"] for p in per_pert]))}
+    ceiling_holds = all(p["fcvm_is_max"] for p in per_pert)
+    base_fail = sorted(k for k, v in d3["configs"]["K0_FCVM"]["events"].items()
+                       if not v)
+    failset_breaks = [f"{p['threshold']}@{p['delta']:+.0%}" for p in per_pert
+                      if p["fcvm_fail_set"] != base_fail]
+    knife = sorted({f"{p['threshold']}@{p['delta']:+.0%}:{n}"
+                    for p in per_pert if abs(p["delta"]) <= 0.10 + 1e-9
+                    for n in p["scores"]
+                    if p["scores"][n] != pool[n]["published"]})
+    print(f"[robustness] R6: ceiling invariant {'HOLDS' if ceiling_holds else 'BREAKS'} "
+          f"under all 48 perturbations; SPY band 20% {spy_band['band_20pct']}; "
+          f"knife-edge moves at 10%: {len(knife)}")
+    return {"protocol": "12 numeric thresholds x {-20,-10,+10,+20}% one at a "
+                        "time; E9 (permutation test) and E8's significance "
+                        "flag held at published verdicts; majority-vote "
+                        "rescoring from per-seed stats; 8 configs reproduced "
+                        "by one deterministic rerun each (asserted)",
+            "baseline_reproduced": True,
+            "score_bands": bands, "spy_band": spy_band,
+            "ceiling_invariant_holds": bool(ceiling_holds),
+            "fcvm_failset_changes": failset_breaks,
+            "knife_edge_moves_at_10pct": knife,
+            "per_perturbation": per_pert,
+            "verdict": ("the comparative structure (FCVM is the maximum, "
+                        "its failure set, SPY/GBM anchors) survives every "
+                        "single-threshold perturbation up to +-20%; integer "
+                        "scores move only at the named knife edges"
+                        if ceiling_holds else
+                        "a perturbation breaks the ceiling ordering — see "
+                        "per_perturbation; the published integer rhetoric "
+                        "does not survive and is rescoped")}
+
+
+def exp_robustness(force: bool = False) -> dict:
+    """DESIGN25: the referee program — R1 matched-strength depth test, R2 E9
+    attribution (AC1 confound), R3 32-seed extensions, R4 second wildness
+    source, R5 bounded re-equilibration, R6 threshold robustness. Gate X36
+    licenses the new estimators before any response variable is read."""
+    if not force and (c := load_cached("robustness")):
+        print("[robustness] cached")
+        return c
+    t0 = time.time()
+    d1 = load_cached("decathlon")
+    d2 = load_cached("decathlon2")
+    d3 = load_cached("decathlon3")
+    d4 = load_cached("decathlon4")
+    if not all((d1, d2, d3, d4)):
+        raise RuntimeError("robustness needs the published decathlon caches")
+    out = {"design": "DESIGN25",
+           "budget": {"battery_runs": {"R1": 64, "R3": 64, "R4": 16,
+                                       "R5": 64, "R6": 64, "total": 272},
+                      "non_battery_sims": {"R2": 40, "R4_calibration": 24},
+                      "note": "fixed in DESIGN25 before any run"},
+           "strength_depth": _rob_r1(d3),
+           "e9_attribution": _rob_r2(d3, d4),
+           "ext32": _rob_r3(d3, d4),
+           "t3_absorption": _rob_r4(d1),
+           "requilibration": _rob_r5(),
+           "threshold_robustness": _rob_r6(d1, d2, d3, d4)}
+    print(f"[robustness] done ({time.time()-t0:.0f}s)")
+    save("robustness", out)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Experiment 18 (CRITICAL): are crashes critical transitions or shocks?
 # ---------------------------------------------------------------------------
 
@@ -2357,6 +2884,7 @@ EXPERIMENTS = {
     "decathlon4": exp_decathlon4,
     "battery_audit": exp_battery_audit,
     "score_se": exp_score_se,
+    "robustness": exp_robustness,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,
