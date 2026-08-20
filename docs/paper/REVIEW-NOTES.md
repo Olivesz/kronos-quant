@@ -78,3 +78,20 @@ findings, per the registrations' honesty clauses.
 weaknesses: every previously listed item is either closed by a registered
 measurement or converted into an in-paper, checker-asserted bound. Further
 passes are churn; the next state change is submission.
+
+## What the checker cannot see (demonstrated, 2026-08-20)
+
+`check_numbers.py` verifies number–source fidelity (329 assertions), not claim
+composition. Tested by deliberate fraud: three passages were appended in which
+every number was real and correctly `% src`-tethered but the joining claim was
+false — (a) "front-running *reduces* the leak, 0.0184 → 0.0176" welding the
+K0 baseline to the tuned-Q config as a fake causal effect (the honest pair is
+0.0184 → 0.0200); (b) "widening *raises* z from 1.16 to 3.71" welding
+z-vs-FX to z-vs-equities as one trend; (c) "the audit *confirms* venue
+robustness: DIA 10/10, 2800.HK 5/10" — a gloss the numbers refute. The
+checker passed all three at 329/329. **Composed-claim falsity is invisible to
+mechanical tethering by construction.** The defenses that exist for this
+class are the adversarial referee passes (which caught one real instance:
+the K0→K1 "rise" overclaim) and the human read. Reader guidance: trust any
+single number; verify any sentence that *joins* two numbers into a
+comparison, trend, or causal claim against the named JSON fields.
