@@ -191,12 +191,46 @@ the multi-venue calibration audit, and robustness material.
 \section{Related work}
 \label{sec:related}
 
-\citet{cont2001} fixed the stylized-facts target list this battery
-operationalizes; our contribution to that program is calibration at both ends
-(real data 10/10, GBM exactly 3/10) so that partial scores are interpretable.
+\subsection{Stylized facts of asset returns}
+\label{sec:related:facts}
+
+Heavy tails in speculative price changes were documented by
+\citet{mandelbrot1963}; \citet{cont2001} fixed the canonical list of
+stylized facts --- heavy tails, volatility clustering, the leverage effect,
+near-absence of linear return autocorrelation, gain/loss asymmetry --- that
+this paper's battery operationalizes, and our contribution to that program
+is calibration at both ends (real data 10/10, GBM exactly 3/10) so that
+partial scores are interpretable. In reduced form, volatility clustering is
+captured by the ARCH family \citep{engle1982, bollerslev1986}, with
+asymmetric extensions such as GJR-GARCH \citep{glosten1993} adding the
+leverage channel. The battery deliberately includes an event this family
+fails: amplitude correlations in real data decay hyperbolically rather than
+exponentially \citep{ding1993}, a message sharpened by the rough-volatility
+literature \citep{gatheral2018}. The measurement program behind this paper
+replicated a Hurst exponent $H \approx 0.10$ on 16
+years of SPY range-based volatility, and event E4 is calibrated so that
+exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
+event no flow configuration and no rationality layer ever bought, consistent
+with rough volatility's message that the clock's memory is structural, not
+flow-generated.
+% src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
+Time-reversal asymmetry, the target of event E8, is a documented stylized
+fact in its own right \citep{zumbach2009}. Outside equities, the
+stylized-facts program has been extended to cryptocurrency markets
+\citep{urquhart2016, zhang2018}, whose distinct flow structure
+Section~\ref{sec:triangle} exploits.
+
+\subsection{Heterogeneous-agent models}
+\label{sec:related:ham}
+
 The agent-based literature descending from \citet{lux1999} and surveyed by
-\citet{lebaron2006} established that fundamentalist--chartist interaction
-buys fat tails and clustering; our ablation reproduces that result (and its
+\citet{lebaron2000, lebaron2006} and \citet{hommes2006} established that
+fundamentalist--chartist interaction
+buys fat tails and clustering, whether through switching between predictor
+types, herding in the communication structure \citep{cont2000}, or the
+destabilizing feedback of technical strategies on the price they condition
+on \citep{farmer2002, chiarella2009}. Our ablation reproduces the classical
+result (and its
 fragility: chartists without market makers destroy efficiency, scoring 1/10)
 but differs in asking the complement --- which facts a flow-based market
 \emph{cannot} buy at any rationality depth, established by pre-registered
@@ -204,14 +238,15 @@ refutation rather than by exhibition.
 % src: research/decathlon.json configs.FC.score
 
 Two adjacent traditions ask closely related questions with different
-instruments. In the heterogeneous-beliefs models of \citet{brock1998},
+instruments. In the heterogeneous-beliefs models of
+\citet{brock1997, brock1998},
 the sophistication of agents' expectations is a bifurcation parameter of a
 deterministic pricing map: making agents more forward-looking changes the
 dynamics qualitatively rather than monotonically improving them. Our
 $K$-ladder is a stochastic, capital-bounded cousin of that exercise, and it
 finds the same non-monotonicity in a measured quantity --- the sign leak
 grows as anticipation deepens. The minority-game literature
-\citep{challet1997} and the intermittent agent-based markets of
+\citep{challet1997, challet2004} and the intermittent agent-based markets of
 \citet{giardina2003} derive stylized facts from the statistical mechanics of
 adaptive agents competing over a scarce resource, with realistic regimes
 appearing near phase boundaries; our battery differs in scoring a fixed list
@@ -219,18 +254,38 @@ of calibrated events rather than exhibiting a regime, but the joint-production
 finding is consistent with that literature's lesson that efficiency and excess
 volatility are properties of one collective state, not separate features.
 
+\subsection{Market efficiency and the sign channel}
+\label{sec:related:eff}
+
 The battery's E9 event operationalizes the oldest target in the field.
 \citet{samuelson1965} proved that properly anticipated prices fluctuate
-randomly; \citet{fama1970} organized the empirical program around
-informational efficiency; and \citet{grossman1980} showed that full
-informational efficiency is impossible when information is costly --- an
-equilibrium amount of inefficiency must survive to pay the agents who remove
+randomly, and \citet{fama1970} organized the empirical program around
+informational efficiency. A classical argument holds that when information
+is costly, full informational efficiency cannot be an equilibrium: some
+residual predictability must survive to compensate the agents who remove
 it. The joint-production result is a mechanical relative of that
-impossibility with the cost relocated: in this model class the residual sign
+argument with the cost relocated: in this model class the residual sign
 information is not a fee paid to arbitrageurs but a by-product of the same
 state-dependent flows that generate the volatility structure, and the three
 experiments show it cannot be traded, iterated, or quoted away without taking
 the amplitude facts with it.
+
+\subsection{The leverage effect}
+\label{sec:related:leverage}
+
+The classical explanations of the equity leverage effect are financial
+leverage in the firm's capital structure \citep{christie1982} and
+volatility feedback through the equity risk premium \citep{bekaert2000};
+\citet{bouchaud2001} measured the effect's retarded temporal structure
+across individual stocks and indices and modeled it directly at the
+price-process level. Both classical mechanisms are equity-specific, which
+is what makes the cross-venue comparison of Section~\ref{sec:triangle}
+informative: a currency is not a levered claim on productive assets and
+carries no equity risk premium, so whatever return--volatility asymmetry
+survives outside equities must have another source.
+
+\subsection{Order flow, price impact, and de-leveraging feedback}
+\label{sec:related:flow}
 
 The price-impact literature of Bouchaud and coauthors
 \citep{bouchaud2009, bouchaud2018} underlies the paper's central object: the
@@ -239,32 +294,42 @@ provision digests predictable flow. Our quote-skewing maker is a minimal
 formalization of perfect digestion --- and Experiment~III's finding that exact
 absorption deletes the volatility dynamics along with the leak is, in that
 vocabulary, a statement that the market's amplitude structure \emph{is} its
-undigested flow. \citet{filimonov2012} measured near-critical reflexivity in
+undigested flow. The de-leveraging spiral at the model's core is a minimal
+form of the funding-liquidity feedback of \citet{brunnermeier2009} and of
+the procyclical intermediary leverage documented by \citet{adrian2010}: a
+volatility rise forces balance-sheet contraction, and the contraction moves
+prices. Volatility-targeting mandates, which hard-wire this feedback into a
+mechanical trading rule, are the model's concrete instance of the
+mechanism.
+
+\subsection{Reflexivity and endogeneity}
+\label{sec:related:reflex}
+
+\citet{filimonov2012} measured near-critical reflexivity in
 markets via
-the Hawkes branching ratio; the measurement program behind this paper found
-that result replicates raw (branching ratio $0.68$ across 48 US assets) but
+the Hawkes branching ratio, and \citet{hardiman2013} showed the estimate is
+sensitive to kernel specification, finding near-critical values throughout
+two decades of data. The measurement program behind this paper found
+the raw result replicates (branching ratio $0.68$ across 48 US assets) but
 collapses to $0.25$ --- a no-self-excitation null --- once events are deformed
 by the volatility clock, so most apparent reflexivity at the daily horizon is
 volatility clustering; the same deformation-first discipline shapes the
 battery's E8 event.
 % src: research/reflex.json median_n_raw=0.6827, median_n_def=0.2459, per_asset (48 assets); docs/FINDINGS.md KRONOS-REFLEX
-Rough volatility \citep{gatheral2018} motivates the battery's long-memory
-clock event E4: the measurement program replicated a Hurst exponent
-$H \approx 0.10$ on 16
-years of SPY range-based volatility, and E4 is calibrated so that
-exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
-event no flow configuration and no rationality layer ever bought, consistent
-with rough volatility's message that the clock's memory is structural, not
-flow-generated.
-% src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
 
-The classical readings of the equity leverage effect --- firm capital
-structure \citep{black1976} and volatility feedback through the equity risk
-premium \citep{bekaert2000} --- are equity-specific mechanisms, which is
-what makes the cross-venue comparison of Section~\ref{sec:triangle}
-informative. Finally, the paper's accounting culture --- trial ledgers,
-deflated performance statistics, pre-registered budgets --- follows the
-multiple-testing literature in finance \citep{bailey2014, bailey2017}.
+\subsection{Multiple testing and pre-registration in finance}
+\label{sec:related:prereg}
+
+\citet{harvey2016} documented the multiple-testing problem behind the
+factor literature and argued that published findings should clear
+substantially higher evidential hurdles; \citet{bailey2014} and
+\citet{bailey2017} supplied the deflated Sharpe ratio and the probability
+of backtest overfitting as concrete corrections. The protocol of
+Section~\ref{sec:prereg} --- pre-registered hypotheses, bounded search
+budgets, deterministic tie-breaks, and refutation criteria honored when
+they fire --- is that program's counterpart for mechanism research rather
+than performance research: it is what makes the negative results of
+Section~\ref{sec:results} reportable as measurements.
 
 \section{Data and descriptive statistics}
 \label{sec:data}
@@ -302,7 +367,8 @@ The FX panel contains 13 liquid crosses --- twelve majors plus USDMXN as a
 pre-declared emerging-market stress case --- over 2010--2026, the same span
 as the equity universes. Yahoo FX bars occasionally carry degenerate ranges
 (high equal to low, or the range pinned to $|$close$-$open$|$), which would
-invalidate range-based variance estimation; a screen measured the fraction
+invalidate range-based variance estimation \citep{garman1980}; a screen
+measured the fraction
 of days with a real intraday range per pair before the study design was
 locked. All 13 pairs pass the pre-declared 95\% bar (measured real-range
 fractions 99.88--100.00\%), and none were dropped.
@@ -364,7 +430,8 @@ E10 & tail asymmetry & gain/loss tail asymmetry at 2.5$\sigma$ \\
 definitions and thresholds in Appendix~\ref{app:battery}). E1, E4, E7 and E10
 were recalibrated against real data before any ablation was run, under a gate
 requiring real SPY to score 10/10 and geometric Brownian motion exactly 3/10;
-notably, a GJR-GARCH process fails E4 --- exponential memory cannot mimic long
+notably, a GJR-GARCH process \citep{glosten1993} fails E4 --- exponential
+memory cannot mimic long
 memory. E9 measures the mutual information between three public tape features
 and the next-day return sign with a discrete plug-in estimator against a
 permutation null.}
@@ -477,7 +544,8 @@ Sharpe ratios \citep{bailey2014} beside a combinatorially cross-validated
 probability of backtest overfitting \citep{bailey2017}; the program's standing
 rule is that its PBO of 0.45 is restated beside any Sharpe claim. This paper
 makes mechanism claims, not performance claims, but the same accounting
-culture --- count the shots, publish the misses --- produced it.
+culture \citep{harvey2016} --- count the trials, publish the failures ---
+produced it.
 % src: research/forensics.json pbo.pbo=0.4455; docs/METHODS.md sections 5 and 8; docs/FINDINGS.md (PBO 0.45 standing rule)
 
 \section{The model}
@@ -505,7 +573,9 @@ leverage rule $L = \min(L_{\max}, \sigma^{*}/\hat\sigma)$ against an EWMA
 variance estimate $\hat\sigma^2$;
 a one-lag market-maker flow $D^{\mathrm{mm}} = -k_M\, r_{t-1}$; and i.i.d.\
 noise. The volatility-targeting flow is the reflexive ingredient: a vol spike
-forces de-leveraging (selling), which moves price, which raises vol. The
+forces de-leveraging (selling), which moves price, which raises vol --- the
+minimal form of the leverage-constraint feedbacks of \citet{brunnermeier2009}
+and \citet{adrian2010}. The
 market-maker ingredient was added at the calibration stage, before any
 ablation was scored, when tuning showed that vol-targeting flows structurally
 leak momentum --- their de-leveraging is serially correlated --- and that in
@@ -1047,7 +1117,7 @@ Table~\ref{tab:triangle} and Figure~\ref{fig:triangle} give the measurement,
 using an estimator battery identical across the three vertices (realized
 variance from daily OHLC ranges via Garman--Klass \citep{garman1980}). The
 classical readings of the equity effect --- firm capital structure
-\citep{black1976} and volatility feedback through the equity risk premium
+\citep{christie1982} and volatility feedback through the equity risk premium
 \citep{bekaert2000} --- are equity-specific mechanisms, which is exactly what
 makes the cross-venue comparison informative: a currency is not a levered
 claim and carries no equity premium, so whatever asymmetry survives outside
@@ -1229,6 +1299,9 @@ this paper; and every figure is generated from the research JSONs by
 pre-registration documents, including the amendments and the closure clause
 quoted here, are versioned in \texttt{docs/design/}.
 
+\bibliographystyle{plainnat}
+\bibliography{paper}
+
 \appendix
 
 \section{The battery: exact criteria and calibration statistics}
@@ -1279,7 +1352,8 @@ block-reversal surrogates (random block offsets, blocks reversed with
 probability $1/2$). E9's features are the Cartesian product of three tape
 observables --- $\mathrm{sign}(r_t)$, the sign of 21-day momentum, and the
 volatility tercile --- scored by discrete plug-in mutual information with
-Miller--Madow bias correction against a 120-permutation null; the program's
+Miller--Madow bias correction \citep[see][]{paninski2003} against a
+120-permutation null; the program's
 continuous information channel uses the KSG estimator \citep{kraskov2004},
 but E9's features are discrete by construction. The volatility tercile is cut
 on full-sample quantiles: E9 is a measurement of information content,
@@ -1403,111 +1477,5 @@ essentially unchanged while moving the pooled leverage estimate to $+0.026$
 (14 of 17 coins positive), which is the measured demonstration that the
 FX--crypto separation is history-bound rather than cross-section-bound.
 % src: research/crypto_wide.json leverage_wide, sd_wide, n_pos, n_coins
-
-\begin{thebibliography}{17}
-
-\bibitem[Bailey and L{\'o}pez de Prado(2014)]{bailey2014}
-Bailey, D.~H., and M.~L{\'o}pez de Prado (2014).
-The deflated Sharpe ratio: Correcting for selection bias, backtest
-overfitting, and non-normality.
-\emph{Journal of Portfolio Management}, 40(5), 94--107.
-
-\bibitem[Bailey et~al.(2017)]{bailey2017}
-Bailey, D.~H., J.~Borwein, M.~L{\'o}pez de Prado, and Q.~J. Zhu (2017).
-The probability of backtest overfitting.
-\emph{Journal of Computational Finance}, 20(4), 39--69.
-
-\bibitem[Bekaert and Wu(2000)]{bekaert2000}
-Bekaert, G., and G.~Wu (2000).
-Asymmetric volatility and risk in equity markets.
-\emph{Review of Financial Studies}, 13(1), 1--42.
-
-\bibitem[Black(1976)]{black1976}
-Black, F. (1976).
-Studies of stock price volatility changes.
-In \emph{Proceedings of the 1976 Meetings of the American Statistical
-Association, Business and Economic Statistics Section}, 177--181.
-
-\bibitem[Bouchaud et~al.(2009)]{bouchaud2009}
-Bouchaud, J.-P., J.~D. Farmer, and F.~Lillo (2009).
-How markets slowly digest changes in supply and demand.
-In T.~Hens and K.~R. Schenk-Hopp{\'e} (eds.),
-\emph{Handbook of Financial Markets: Dynamics and Evolution}, North-Holland.
-
-\bibitem[Bouchaud et~al.(2018)]{bouchaud2018}
-Bouchaud, J.-P., J.~Bonart, J.~Donier, and M.~Gould (2018).
-\emph{Trades, Quotes and Prices: Financial Markets Under the Microscope}.
-Cambridge University Press.
-
-\bibitem[Brock and Hommes(1998)]{brock1998}
-Brock, W.~A., and C.~H. Hommes (1998).
-Heterogeneous beliefs and routes to chaos in a simple asset pricing model.
-\emph{Journal of Economic Dynamics and Control}, 22(8--9), 1235--1274.
-
-\bibitem[Challet and Zhang(1997)]{challet1997}
-Challet, D., and Y.-C. Zhang (1997).
-Emergence of cooperation and organization in an evolutionary game.
-\emph{Physica A}, 246(3--4), 407--418.
-
-\bibitem[Cont(2001)]{cont2001}
-Cont, R. (2001).
-Empirical properties of asset returns: Stylized facts and statistical issues.
-\emph{Quantitative Finance}, 1(2), 223--236.
-
-\bibitem[Fama(1970)]{fama1970}
-Fama, E.~F. (1970).
-Efficient capital markets: A review of theory and empirical work.
-\emph{Journal of Finance}, 25(2), 383--417.
-
-\bibitem[Filimonov and Sornette(2012)]{filimonov2012}
-Filimonov, V., and D.~Sornette (2012).
-Quantifying reflexivity in financial markets: Toward a prediction of flash
-crashes.
-\emph{Physical Review E}, 85(5), 056108.
-
-\bibitem[Garman and Klass(1980)]{garman1980}
-Garman, M.~B., and M.~J. Klass (1980).
-On the estimation of security price volatilities from historical data.
-\emph{Journal of Business}, 53(1), 67--78.
-
-\bibitem[Gatheral et~al.(2018)]{gatheral2018}
-Gatheral, J., T.~Jaisson, and M.~Rosenbaum (2018).
-Volatility is rough.
-\emph{Quantitative Finance}, 18(6), 933--949.
-
-\bibitem[Giardina and Bouchaud(2003)]{giardina2003}
-Giardina, I., and J.-P. Bouchaud (2003).
-Bubbles, crashes and intermittency in agent based market models.
-\emph{European Physical Journal B}, 31(3), 421--437.
-
-\bibitem[Grossman and Stiglitz(1980)]{grossman1980}
-Grossman, S.~J., and J.~E. Stiglitz (1980).
-On the impossibility of informationally efficient markets.
-\emph{American Economic Review}, 70(3), 393--408.
-
-\bibitem[Kraskov et~al.(2004)]{kraskov2004}
-Kraskov, A., H.~St{\"o}gbauer, and P.~Grassberger (2004).
-Estimating mutual information.
-\emph{Physical Review E}, 69(6), 066138.
-
-\bibitem[LeBaron(2006)]{lebaron2006}
-LeBaron, B. (2006).
-Agent-based computational finance.
-In L.~Tesfatsion and K.~L. Judd (eds.),
-\emph{Handbook of Computational Economics}, Vol.~2, North-Holland,
-1187--1233.
-
-\bibitem[Lux and Marchesi(1999)]{lux1999}
-Lux, T., and M.~Marchesi (1999).
-Scaling and criticality in a stochastic multi-agent model of a financial
-market.
-\emph{Nature}, 397(6719), 498--500.
-
-\bibitem[Samuelson(1965)]{samuelson1965}
-Samuelson, P.~A. (1965).
-Proof that properly anticipated prices fluctuate randomly.
-\emph{Industrial Management Review}, 6(2), 41--49.
-
-\end{thebibliography}
 
 \end{document}

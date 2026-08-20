@@ -1,8 +1,9 @@
-# Build the preprint: figures (from research/*.json) then pdflatex twice.
-# pdflatex: TinyTeX if present, else whatever is on PATH.
+# Build the preprint: figures (from research/*.json), then pdflatex + bibtex.
+# pdflatex/bibtex: TinyTeX if present, else whatever is on PATH.
 # Python: the repo venv (../../.venv); matplotlib is a paper-build-only dep.
 
 PDFLATEX := $(firstword $(wildcard $(HOME)/Library/TinyTeX/bin/universal-darwin/pdflatex) pdflatex)
+BIBTEX   := $(firstword $(wildcard $(HOME)/Library/TinyTeX/bin/universal-darwin/bibtex) bibtex)
 PYTHON   := $(firstword $(wildcard ../../.venv/bin/python) python3)
 
 FIGS = figures/battery_scorecard.pdf figures/e9_bits_configs.pdf \
@@ -13,29 +14,34 @@ FIGS = figures/battery_scorecard.pdf figures/e9_bits_configs.pdf \
 
 all: paper.pdf
 
-# Verify every derivable number in paper.tex against research/*.json and the
-# battery code's thresholds. Exits nonzero on any mismatch.
+# Two verification stages, both hard gates:
+#   1. check_numbers.py     -- every derivable number vs research/*.json
+#   2. check_references.py  -- every bib entry vs its registered identifier
 check:
 	$(PYTHON) check_numbers.py
+	$(PYTHON) check_references.py
 
-# Clean arXiv submission tarball under dist/. Contents: paper.tex + the
-# prebuilt figure PDFs (bibliography is inline thebibliography — no .bbl).
+# Clean arXiv submission tarball under dist/. Contents: paper.tex, the
+# prebuilt figure PDFs, and paper.bbl (arXiv runs pdflatex, not bibtex, and
+# consumes the shipped .bbl; paper.bib is deliberately not packed).
 # The staged copy is smoke-built with two pdflatex passes before packing, so
 # the tarball is known to compile standalone; the tarball itself contains
 # only the pristine sources.
 arxiv: paper.pdf check
 	rm -rf dist
 	mkdir -p dist/arxiv/figures
-	cp paper.tex dist/arxiv/
+	cp paper.tex paper.bbl dist/arxiv/
 	cp $(FIGS) dist/arxiv/figures/
 	cd dist/arxiv && $(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex >/dev/null \
 		&& $(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex >/dev/null
 	@grep -qE "Warning.*(Citation|Reference).*undefined" dist/arxiv/paper.log \
 		&& { echo "arxiv smoke build: undefined refs"; exit 1; } || true
-	tar -C dist/arxiv -czf dist/arxiv.tar.gz paper.tex figures
+	tar -C dist/arxiv -czf dist/arxiv.tar.gz paper.tex paper.bbl figures
 	@echo "wrote dist/arxiv.tar.gz:"; tar -tzf dist/arxiv.tar.gz
 
-paper.pdf: paper.tex $(FIGS)
+paper.pdf: paper.tex paper.bib $(FIGS)
+	$(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex
+	$(BIBTEX) paper
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error paper.tex
 
