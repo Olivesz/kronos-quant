@@ -49,16 +49,16 @@ Evidence from Three Pre-Registered Refutations}
 \begin{abstract}
 \noindent
 Agent-based models of financial markets typically reproduce the stylized
-facts of asset returns piecemeal: a given model is shown to match a subset
-of the facts, and unsuccessful attempts to match the remainder are rarely
-reported. This paper scores minimal flow-based markets against a fixed
+facts of asset returns piecemeal: models are exhibited that match subsets
+of the facts, and failed attempts on the remainder are rarely reported.
+This paper scores minimal flow-based markets against a fixed
 ten-event battery calibrated so that real equity data passes all ten events
 and geometric Brownian motion exactly three. A market of fundamentalists,
 chartists, volatility-targeting investors, and market makers attains five of
 ten events, and its failures are diagnostic: the missing events concern long
-memory, time-irreversibility, and the information content of price signs. We
-then test, in three pre-registered experiments with pre-specified refutation
-criteria, whether added rationality can close the gap: (i) an anticipatory
+memory, time-irreversibility, and the information content of price signs.
+Three pre-registered experiments with pre-specified refutation
+criteria then test whether added rationality can close the gap: (i) an anticipatory
 agent that front-runs the forecastable flow; (ii) the fixed point of mutual
 anticipation, iterated to depth five; (iii) a price-setting market maker
 that provably absorbs the forecastable component into the price level. All
@@ -69,12 +69,12 @@ tails (kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$),
 and volatility clustering together with the predictability. We conclude
 that, in this model class, sign efficiency and the heavy-tailed,
 asymmetric volatility regularities are jointly produced by the same
-state-dependent flows and cannot be purchased separately. Cross-venue
+state-dependent flows and cannot be obtained separately. Cross-venue
 evidence --- the leverage effect ordered by market structure across
 equities ($-0.04$), foreign exchange ($\approx 0$), and cryptocurrencies
 ($+0.03$) --- is consistent with the proposed mechanism. All results are
 pre-registered, validated against synthetic ground truth, and regenerable
-from the public repository.
+from the repository.
 % src: abstract, docs/paper/OUTLINE.md; leverage values research/fx.json leverage_contrast
 \par\medskip
 \noindent\textit{Keywords:} stylized facts; agent-based models; market
@@ -108,7 +108,7 @@ stylized facts can a minimal flow-based market reproduce when all of them
 are scored jointly on a fixed, pre-calibrated instrument rather than
 exhibited selectively? Second, can bounded rationality --- introduced as a
 trading agent, iterated toward its fixed point, or embedded in the pricing
-rule itself --- buy the facts such a market misses, in particular the
+rule itself --- supply the facts such a market misses, in particular the
 near-absence of sign information in prices? Third, is the mechanism that
 answers the first two questions consistent with how the amplitude facts
 vary across real trading venues with different flow structures?
@@ -210,7 +210,7 @@ literature \citep{gatheral2018}. The measurement program behind this paper
 replicated a Hurst exponent $H \approx 0.10$ on 16
 years of SPY range-based volatility, and event E4 is calibrated so that
 exponential-memory processes (GJR-GARCH) fail it --- which is exactly the
-event no flow configuration and no rationality layer ever bought, consistent
+event no flow configuration and no rationality layer ever produced, consistent
 with rough volatility's message that the clock's memory is structural, not
 flow-generated.
 % src: research/rough.json daily.H=0.1013; docs/design/DESIGN8.md amendment 1 (GJR fails E4)
@@ -226,14 +226,14 @@ Section~\ref{sec:triangle} exploits.
 The agent-based literature descending from \citet{lux1999} and surveyed by
 \citet{lebaron2000, lebaron2006} and \citet{hommes2006} established that
 fundamentalist--chartist interaction
-buys fat tails and clustering, whether through switching between predictor
+generates fat tails and clustering, whether through switching between predictor
 types, herding in the communication structure \citep{cont2000}, or the
 destabilizing feedback of technical strategies on the price they condition
 on \citep{farmer2002, chiarella2009}. Our ablation reproduces the classical
 result (and its
 fragility: chartists without market makers destroy efficiency, scoring 1/10)
 but differs in asking the complement --- which facts a flow-based market
-\emph{cannot} buy at any rationality depth, established by pre-registered
+\emph{cannot} reproduce at any rationality depth, established by pre-registered
 refutation rather than by exhibition.
 % src: research/decathlon.json configs.FC.score
 
@@ -243,7 +243,7 @@ instruments. In the heterogeneous-beliefs models of
 the sophistication of agents' expectations is a bifurcation parameter of a
 deterministic pricing map: making agents more forward-looking changes the
 dynamics qualitatively rather than monotonically improving them. Our
-$K$-ladder is a stochastic, capital-bounded cousin of that exercise, and it
+$K$-ladder is a stochastic, capital-bounded analogue of that exercise, and it
 finds the same non-monotonicity in a measured quantity --- the sign leak
 grows as anticipation deepens. The minority-game literature
 \citep{challet1997, challet2004} and the intermittent agent-based markets of
@@ -479,7 +479,8 @@ permutation null.}
 Calibration pins both ends of the scale: real SPY (close-only) scores 10/10;
 a pure GBM scores exactly 3/10, passing only E1, E6 and E9 --- Gaussian worlds
 are efficient, trivially one-clock, and carry no sign information. Everything
-between 3 and 10 is what a mechanism must buy. Two scoping remarks apply. The
+between 3 and 10 is what a candidate mechanism must supply. Two scoping
+remarks apply. The
 thresholds are empirical ranges from a US program, and a registered audit on
 six further indices (Table~\ref{tab:audit} in Appendix~\ref{app:audit})
 measures how far the joint anchor extends: DIA also scores 10/10, QQQ and IWM
@@ -538,7 +539,7 @@ continuous-integration suite runs all 39 verification gates (the numbered gates 
 refutation criteria --- is committed to the repository before any evaluation
 run, and the version-control history is the timestamp; there is no external
 registry. Each experiment fixed, before any evaluation run: hypotheses (with
-one starred primary), the full parameter set, the evaluation protocol (8
+one designated primary), the full parameter set, the evaluation protocol (8
 seeds, IDs 100--107, $T = 6000$, majority vote per event, identical across
 all three experiments so ablations are paired seed-for-seed), a refutation
 (``kill'')
@@ -546,7 +547,7 @@ criterion, and a bounded tuning budget --- one grid pass on disjoint tuning seed
 only under a pre-declared trigger, with a deterministic pre-declared tie-break
 (``weakest intervention wins''). Amendments were permitted only before
 evaluation data was read, and each is recorded in the registration documents
-with its trigger. Two facts about this protocol did real work. First, the
+with its trigger. Two features of this protocol proved consequential. First, the
 refutation criteria fired three times and were honored three times. Second,
 the
 tie-break rule turned the tuning passes themselves into evidence: in all three
@@ -563,7 +564,8 @@ Three practices matter for the trustworthiness of small numeric differences.
 (1) \emph{Byte-identity pins}: every new mechanism ships behind a flag, and a
 gate asserts that flag-off output is byte-identical to the pre-change
 simulator, so the calibration (SPY 10/10, GBM 3/10) and all previously
-published rows are protected across the entire arc; Experiment~II's $K{=}1$
+published rows are protected across the entire experimental sequence;
+Experiment~II's $K{=}1$
 reproduces Experiment~I's published configuration exactly, and Experiment
 III's $\lambda_Q{=}0$ reproduces both. (2) \emph{Causality gates}: tampering
 with future inputs must leave the trade or quote prefix bit-identical (and the
@@ -619,8 +621,9 @@ leak momentum --- their de-leveraging is serially correlated --- and that in
 reality such flow is absorbed by liquidity provision.
 % src: docs/design/DESIGN8.md (model spec; amendment 2)
 
-Parameters were hand-set once on the full configuration to produce sane
-volatility levels and pass E1--E3 only, and were not tuned per configuration
+Parameters were set by hand once, on the full configuration, to produce
+realistic volatility levels and pass E1--E3 only, and were not tuned per
+configuration
 or per event; ablations zero out flows and change nothing else. Eight seeds
 per configuration, $T = 6000$; an event passes if a majority of seeds pass.
 % src: docs/design/DESIGN8.md honesty constraints
@@ -631,8 +634,8 @@ per configuration, $T = 6000$; an event passes if a majority of seeds pass.
 The vol-targeters' flow is mechanical and forecastable from public information
 alone: their mandate ($L = \min(L_{\max},\sigma^*/\hat\sigma)$) and their
 estimator (an EWMA of squared returns at a known speed) are both computable
-from the price tape. The anticipatory agent A is handed exactly that and
-nothing else. At each step it reconstructs $\hat\sigma^2_t$ from the return
+from the price tape. The anticipatory agent A is given exactly that information and nothing
+else. At each step it reconstructs $\hat\sigma^2_t$ from the return
 history, forecasts the integrated future mechanical flow under the one belief
 that defines vol-targeting --- volatility reverts to the targeters' own
 target, so leverage ends at $L_{\mathrm{eq}} = \min(L_{\max}, 1)$ ---
@@ -659,7 +662,8 @@ SPY-10/GBM-3 calibration; (b) the forecast is causal --- tampering with future
 returns leaves the trade prefix unchanged; (c) on a deterministic synthetic
 world with a perfectly predictable mechanical flow, the anticipator profits
 \emph{and} damps the flow's price impact, from 1.00 to 0.75 per unit of
-arriving flow. The agent demonstrably functions. The pre-registered
+arriving flow. The gates establish that the agent functions as designed.
+The pre-registered
 refutation criterion: if the frozen configuration does not exceed 5/10 on the
 evaluation seeds, the expectation hypothesis is refuted.
 % src: docs/design/DESIGN18.md (gates X30a-c, kill criterion); docs/FINDINGS.md DECATHLON-2
@@ -725,7 +729,8 @@ market obeys the argument.
 \label{sec:model:maker}
 
 Experiments I and II eliminate every agent that \emph{trades} against the
-forecastable flow: an anticipator's inventory rides the same slow public
+forecastable flow: an anticipator's inventory is driven by the same slow
+public
 state, so its trades re-leak what they absorb. One hypothesis survives that
 diagnosis: price-\emph{setting} rationality --- a market maker who does not
 trade but quotes, pre-adjusting the price by the expected impact of the
@@ -789,7 +794,7 @@ fundamentalists alone (F) score the Gaussian 3/10. Chartists without
 liquidity provision are destabilizing: \cfg{FC} scores 1/10, because the
 momentum leak destroys
 even efficiency. The vol-targeters are the decisive ingredient:
-\cfg{FV} jumps to 5/10, buying the asymmetric amplitude facts --- fat tails
+\cfg{FV} jumps to 5/10, generating the asymmetric amplitude facts --- fat tails
 (E2),
 the leverage effect (E5), clock jumps (E7), crash asymmetry (E10) --- because
 the de-leveraging spiral is the only flow that reacts to volatility and reacts
@@ -822,15 +827,15 @@ SPY's 0.0029) or generate long memory and the coupling arrow.}
 The ceiling is 5/10 and the five missing events constitute a diagnosis
 (Table~\ref{tab:fcvm}). \cfg{FCVM} fails E3 (slow volatility clustering), E4
 (long-memory clock), E7 (clock jumps, marginally), E8 (the arrow in the
-coupling), and E9 (information-free signs). The E9 failure is the paper's
-through-line, so we give it a name used throughout: the \emph{sign leak} ---
+coupling), and E9 (information-free signs). The E9 failure is central to the
+remainder of the paper, so we give it a name used throughout: the \emph{sign leak} ---
 a significant excess of E9's statistic, the \emph{direction bits}
 $I(\text{tape features};\, \mathrm{sign}\, r_{t+1})$, over its shuffle null.
 \cfg{FCVM} leaks 0.0184 bits where real SPY shows 0.0029. The leak has a
 known source: the vol-targeters' de-/re-leveraging drift is serially
 correlated and forecastable from the tape, and a one-lag market maker cannot
-absorb a multi-day drift. The natural hypothesis --- the one this
-paper's arc tests to destruction --- is that the missing ingredient is
+absorb a multi-day drift. The natural hypothesis --- the one the three
+experiments test --- is that the missing ingredient is
 \emph{expectation}: rational agents who anticipate the predictable flow should
 arbitrage the sign leak away and perhaps stretch the volatility episodes into
 long memory.
@@ -853,7 +858,7 @@ Config & Score & Failed events & E9 bits (median) \\
 \end{tabular}
 \caption{Experiment I ablation (8 evaluation seeds, majority vote; $\pm$ is
 the seed-bootstrap SE of the score, Section~\ref{sec:battery}). Adding the
-anticipator changes nothing that was supposed to change: the failure set is
+anticipator changes none of the targeted quantities: the failure set is
 identical and the direction bits do not fall.}
 % src: research/decathlon2.json configs (scores, events, median_stats.dir_bits)
 \label{tab:deca2}
@@ -861,7 +866,7 @@ identical and the direction bits do not fall.}
 
 Table~\ref{tab:deca2} shows the outcome. The refutation criterion is met:
 \cfg{FCVM+A} scores 5/10 with a failure set identical to the control's. The
-events expectation was supposed to buy did not move --- the direction bits
+events expectation was hypothesized to supply did not move --- the direction bits
 did not move toward zero (medians $0.0184 \to 0.0200$; the paired comparison,
 extended to 32 seeds under a registered fixed budget, is statistically flat
 --- the anticipator above control on 19 of 32 seeds, two-sided Wilcoxon
@@ -870,9 +875,9 @@ $p = 0.57$ --- so the licensed reading at one layer is
 % src: research/decathlon3.json k01_extension (n_pos 19/32, wilcoxon_p 0.5733; K1 is byte-identical to FCVM+A)
 The interaction hypothesis --- that the anticipator can act only through the
 flow it fronts --- held: without vol-targeters the anticipator
-buys nothing (\cfg{F+A} $=$ \cfg{F} $=$ 3/10) --- expectation needs a
-predictable flow to trade against; it simply does not repair anything when it
-has one.
+contributes nothing (\cfg{F+A} $=$ \cfg{F} $=$ 3/10) --- expectation requires
+a predictable flow to trade against; having one, however, repairs none of the
+missing events.
 % src: research/decathlon2.json configs; docs/FINDINGS.md DECATHLON-2
 
 The reason the attempt fails is itself the finding. The tuning grid is
@@ -965,7 +970,7 @@ the model-space forecastable flow falls $1.000 \to 0.750 \to 0.237$ while the
 market-space sign leak rises $0.0184 \to 0.0200 \to 0.0257$ bits in the
 medians, with $K{=}5$ above the control on 7 of 8 paired seeds. (The
 one-layer step inside that rise is a point estimate within seed noise ---
-the registered 32-seed extension comes back flat, medians $0.0195$ versus
+the registered 32-seed extension is statistically flat, medians $0.0195$ versus
 $0.0194$, Wilcoxon $p = 0.57$ --- so the ladder licenses the depth trend,
 not the single-layer increment.) The frozen
 $K{=}5$ stack is moreover a two-event regression: its aggregate unwind adds
@@ -973,18 +978,19 @@ reversal (AC$_1$: $-0.075 \to -0.247$, breaking E1) and it absorbs the very
 spiral that generates the leverage effect (E5 fails, $-0.095 \to -0.030$),
 while tails erode (kurtosis $6.8 \to 5.3$) and crash asymmetry collapses (tail
 ratio $44.8 \to 4.3$). Rational front-running at depth does not merely fail to
-buy the missing events; at carry-over strength it removes amplitude facts the
+supply the missing events; at carry-over strength it removes amplitude facts the
 market already had.
 % src: research/decathlon3.json configs K1_DECA2/K5_FIXEDPOINT median_stats
 
 The regression triggered the pre-registered contingent pass: six candidates on
-disjoint tuning seeds came back 5/10 at best, tied across the three weakest
+disjoint tuning seeds returned a best score of 5/10, tied across the three weakest
 settings, and the pre-declared tie-break again selected the weakest ---
 $k_A = 0.05$, an effective stack strength of $1 - 0.95^5 = 0.226$,
-\emph{weaker than Experiment~I's single frozen layer} (0.25). Read once on the
-evaluation seeds: 5/10, failing exactly the control's five events. The
-selection pattern of Experiment~I repeats one level up: the battery pays for
-less anticipation at every opportunity, never more.
+\emph{weaker than Experiment~I's single frozen layer} (0.25). Evaluated once
+on the evaluation seeds, the selected setting scores 5/10, failing exactly
+the control's five events. The selection pattern of Experiment~I repeats one
+level up: the tuning criterion rewards weaker anticipation at every
+opportunity, never stronger.
 % src: research/decathlon3.json tuning (grid, note), tuned_eval; docs/design/DESIGN20.md amendment
 
 The algebra explains the failure sharply. Away from the caps, the $K$-layer
@@ -997,8 +1003,8 @@ the gate against an exogenous tape; it does not survive closed-loop
 equilibrium, because every layer's inventory is a function of the same slow
 public volatility state, so the stack's own price impact regenerates exactly
 the forecastable structure the model says it removes. Model-space forecastable
-flow down, market-space sign leak up: this is the sharpest statement we
-know of why the rational-expectations limit cannot be reached by stacking
+flow down, market-space sign leak up: this is, to our knowledge, the
+sharpest available statement of why the rational-expectations limit cannot be reached by stacking
 boundedly-capitalized flow traders.
 % src: docs/FINDINGS.md DECATHLON-3 (mechanism paragraph)
 
@@ -1046,7 +1052,7 @@ forecastable impact exactly --- and the sign leak does not close. Bits stay
 flat at half skew (0.0180 versus 0.0184) and \emph{grow} at full skew (0.0237,
 higher than the control on 7 of 8 seeds). The leak was never the
 vol-targeters' drift alone: Experiment~I's original attribution is overturned.
-It lives distributed across \emph{all} the state-riding flows --- chartist
+It lives distributed across \emph{all} the state-dependent flows --- chartist
 momentum, fundamentalist reversion, the one-lag maker's partial absorption ---
 and deleting the spiral's impact strips away the amplitude structure that was
 masking
@@ -1063,13 +1069,14 @@ generator of the amplitude facts. Full absorption removes the fat tails
 (kurtosis
 $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$), crash asymmetry
 (tail ratio $40 \to 1.1$) and volatility clustering (AC$_1(|r|)$
-$0.38 \to 0.06$) in one stroke. Half skew regresses too (3/10), so the
-contingent pass fired: the six-candidate ladder came back flat at 5/10 for
+$0.38 \to 0.06$) simultaneously. Half skew regresses as well (3/10), so the
+contingent pass fired: the six-candidate grid returned a uniform 5/10 for
 every $\lambda_Q \le 0.30$, and the pre-declared weakest-skew tie-break picked
 $\lambda_Q = 0.05$ --- the same selection pattern a third time, now for a
-pricing rule. Read once on the evaluation seeds: 5/10, failing exactly the
-control's five events. The battery pays for the least rationality at every
-opportunity, in every agent class.
+pricing rule. Evaluated once on the evaluation seeds, the selected setting
+scores 5/10, failing exactly the control's five events. Across all three
+experiments and all three agent classes, the tuning criterion selects the
+weakest rational intervention available.
 % src: research/decathlon4.json configs, contingent_pass (grid, winner_lambda, tuned_eval)
 
 \begin{figure}[t]
@@ -1095,7 +1102,8 @@ component and the asymmetric amplitude facts are the same object:
 %
 \begin{enumerate}
 \item an agent who \emph{trades} against the forecastable flow adds its own
-  forecastable flow, because its inventory rides the same slow public state
+  forecastable flow, because its inventory is driven by the same slow public
+  state
   --- the leak moves one derivative earlier (Experiment~I);
 \item stacking such agents to the fixed point of mutual anticipation is
   algebraically one stronger such agent, and re-leaks harder while the
@@ -1109,8 +1117,8 @@ component and the asymmetric amplitude facts are the same object:
 %
 Sign efficiency and the amplitude facts are not separate dials: in a market
 moved by
-state-riding flows they are jointly produced, and no bolt-on layer of
-rationality --- trading, iterated, or price-setting --- buys the five missing
+state-dependent flows they are jointly produced, and no added layer of
+rationality --- trading, iterated, or price-setting --- supplies the five missing
 events (E3, E4, E7, E8, E9). What the minimal market lacks is not a smarter
 agent but a different kind of memory: the long-memory clock and the coupling
 arrow live upstream of the flows, in whatever generates them.
@@ -1121,7 +1129,8 @@ arrow live upstream of the flows, in whatever generates them.
 
 The model mechanism makes the amplitude channel a property of the \emph{flow
 structure}: the leverage effect in the minimal market exists because a
-one-directional, state-riding de-leveraging flow exists, and dies when that
+one-directional, state-dependent de-leveraging flow exists, and disappears
+when that
 flow's impact is removed (Figure~\ref{fig:wildfacts}). A weak but testable
 empirical counterpart follows: across real asset classes, the leverage effect
 should
@@ -1185,7 +1194,8 @@ positive and only BTC ($-0.043$) and ETH ($-0.019$) retaining the equity-style
 sign.
 % src: research/fx.json laws.leverage.values, per_pair_leverage; research/crypto.json per_coin_leverage
 
-The certified and the merely suggested must be separated here: the equity
+A distinction between what is statistically certified and what is suggested
+by point estimates is required here: the equity
 edge is resolved (one-sided
 $z = 3.89$ against FX, $z = 4.06$ against crypto), and FX is decisively zero;
 but the FX--crypto edge is $z = 1.44$, inside noise, and crypto itself clears
