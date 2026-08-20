@@ -274,7 +274,7 @@ check("toy betas match theory", all(
 bits = D3["dir_bits_vs_K"]
 med = {k: bits[k]["median"] for k in bits}
 cite("§4 result medians",
-     r"falls \$1\.000 \\to 0\.750 \\to 0\.237\$ while the\s*market-space sign leak rises \$([\d.]+) \\to ([\d.]+) \\to ([\d.]+)\$ bits",
+     r"falls \$1\.000 \\to 0\.750 \\to 0\.237\$ while the\s*raw E9 statistic rises \$([\d.]+) \\to ([\d.]+) \\to ([\d.]+)\$ bits",
      med["K0_FCVM"], med["K1_DECA2"], med["K5_FIXEDPOINT"])
 k0s, k1s, k5s = (bits["K0_FCVM"]["per_seed"], bits["K1_DECA2"]["per_seed"],
                  bits["K5_FIXEDPOINT"]["per_seed"])
@@ -362,7 +362,7 @@ q1s, fs = (D4["dir_bits_vs_lambda"]["FCVM+Q1.0"]["per_seed"],
 check("Q1.0 > control on 7 of 8 seeds", sum(a > b_ for a, b_ in zip(q1s, fs)) == 7)
 cite("§5 bits half vs control", r"flat at half skew \(([\d.]+) versus ([\d.]+)\)",
      bits4["FCVM+Q0.5"], bits4["FCVM"])
-cite("§5 bits full", r"grow} at full skew \(([\d.]+),", bits4["FCVM+Q1.0"])
+cite("§5 bits full", r"rises at full skew \(([\d.]+),", bits4["FCVM+Q1.0"])
 
 mF, mQ1 = c4["FCVM"]["median_stats"], c4["FCVM+Q1.0"]["median_stats"]
 cite("wildfacts kurt (all occurrences share values)", r"kurtosis\s*\$([\d.]+) \\to ([\d.]+)\$", mF["kurt"], mQ1["kurt"])
@@ -373,6 +373,260 @@ cite("§5 clustering", r"AC\$_1\(\|r\|\)\$\s*\$([\d.]+) \\to ([\d.]+)\$",
      mF["ac1_absr"], mQ1["ac1_absr"])
 cite("§5 efficiency break", r"AC\$_1\$: \$\+([\d.]+) \\to (-[\d.]+)\$",
      mF["ac1_r"], mQ1["ac1_r"])
+
+# ------------------------------------- 5d. referee program (DESIGN25, R1-R6)
+print("== referee program (robustness.json)")
+RB = load("robustness")
+
+
+def _median(v):
+    s = sorted(v)
+    n = len(s)
+    return s[n // 2] if n % 2 else 0.5 * (s[n // 2 - 1] + s[n // 2])
+
+
+check("R budget held as stated",
+      RB["budget"]["battery_runs"]["total"] == 272
+      and RB["budget"]["non_battery_sims"] == {"R2": 40, "R4_calibration": 24}
+      and re.search(r"272 battery runs and 64 auxiliary\s*simulations", TEX)
+      is not None)
+
+# --- R1: matched strength --------------------------------------------------
+sd = RB["strength_depth"]
+sdt = sd["tests_depth5_vs_depth1"]
+cite("R1 per-layer kA", r"k_A = 1-\(1-0\.25\)\^{1/5} \\approx ([\d.]+)\$",
+     sd["kA_depth5"])
+cite("R1 medians (robustness section)",
+     r"depth five\s*leaks \\emph{less} than depth one: medians \$([\d.]+)\$ "
+     r"versus \$([\d.]+)\$",
+     sd["median_bits"]["depth5"], sd["median_bits"]["depth1"])
+cite("R1 test",
+     r"two-sided Wilcoxon \$p = ([\d.]+)\$, depth five\s*higher on (\d+) of "
+     r"(\d+) seeds",
+     sdt["wilcoxon_p"], sdt["n_pos"], sdt["n"])
+cite("R1 realized strengths",
+     r"\(\$([\d.]+)\$ at depth five, \$([\d.]+)\$ at depth one\)",
+     sd["realized_strength"]["depth5"]["median"],
+     sd["realized_strength"]["depth1"]["median"])
+cite("R1 spearman",
+     r"Spearman\s*correlation of anticipator strength with the raw statistic "
+     r"is \$([\d.]+)\$",
+     sd["strength_axis"]["tuning_grid_spearman_kA_bits"])
+cite("R1 AC1-bits corr (referee setup)",
+     r"raw\s*statistic is \$(-0\.89)\$ across the archived tuning grid",
+     sd["strength_axis"]["tuning_grid_corr_ac1_bits"])
+check("R1 separates, direction depth5 < depth1",
+      sdt["separates_at_0.05"] is True and sdt["median_diff"] < 0)
+cite("§4 matched-strength cite (deca3 body)",
+     r"depth-five stack leaks \\emph{less} than the\s*depth-one layer "
+     r"\(medians \$([\d.]+)\$ versus \$([\d.]+)\$, Wilcoxon\s*\$p = ([\d.]+)\$\)",
+     sd["median_bits"]["depth5"], sd["median_bits"]["depth1"],
+     sdt["wilcoxon_p"])
+_arms1 = {a["arm"]: a for a in sd["strength_axis"]["eval_arms"]}
+cite("§4 frozen-stack effective strength",
+     r"the frozen stack ran at strength \$([\d.]+)\$",
+     _arms1["K5_frozen"]["eff_strength"])
+check("R1 depth1 arm reproduces the stored A2 K1 vector",
+      sd["per_seed_bits"]["depth1"] == D3["k01_extension"]["per_seed"]["K1_DECA2"])
+
+# --- R2: E9 attribution ----------------------------------------------------
+e9 = RB["e9_attribution"]
+_m = {cfg: {k: (_median(v) if isinstance(v, list)
+              and not isinstance(v[0], bool) else v)
+            for k, v in rec.items()}
+      for cfg, rec in e9["per_config"].items()}
+_wsig = {cfg: sum(e9["per_config"][cfg]["whitened_sig"]) for cfg in _m}
+check("R2 whitened significance: 8/8 everywhere except Q0.5's 7/8",
+      _wsig == {"FCVM": 8, "K1": 8, "K5_FROZEN": 8, "Q0.5": 7, "Q1.0": 8})
+check("R2 39-of-40 configuration-seed pairs (intro claim)",
+      sum(_wsig.values()) == 39
+      and re.search(r"39 of 40 configuration--seed pairs", TEX) is not None)
+for _label, _regex, _cfg, _pre in [
+    ("tab:whiten FCVM", r"\\cfg{FCVM} \(control\) +& 0\..*?\\\\", "FCVM", []),
+    ("tab:whiten K1", r"\$K{=}1\$ +& 0\..*?\\\\", "K1", [1]),
+    ("tab:whiten K5", r"\$K{=}5\$ \(frozen\) +& 0\..*?\\\\", "K5_FROZEN", [5]),
+    ("tab:whiten Q0.5", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.5\$\) & 0\..*?\\\\",
+     "Q0.5", [0.5]),
+    ("tab:whiten Q1.0", r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}1\.0\$\) & 0\..*?\\\\",
+     "Q1.0", [1.0]),
+]:
+    check_stat_row(_label, _regex,
+                   _pre + [_m[_cfg]["raw_bits"], _m[_cfg]["whitened_bits"],
+                           _m[_cfg]["mi_sign"], _m[_cfg]["ac1_r"],
+                           _wsig[_cfg], 8])
+cite("R2 control nonlinear",
+     r"\(\$([\d.]+)\$ whitened against \$([\d.]+)\$ raw, significant on "
+     r"(\d+) of (\d+) seeds,\s*\$\\hat\\varphi = \+([\d.]+)\$\)",
+     _m["FCVM"]["whitened_bits"], _m["FCVM"]["raw_bits"], 8, 8,
+     _m["FCVM"]["phi_hat"])
+cite("R2 conversion sequence",
+     r"\$([\d.]+) \\to ([\d.]+)\$ \(\$K{=}1\$\) \$\\to ([\d.]+)\$ "
+     r"\(\$K{=}5\$\) and \$([\d.]+)\$\s*\(\$\\lambda_Q{=}1\$\)",
+     _m["FCVM"]["whitened_bits"], _m["K1"]["whitened_bits"],
+     _m["K5_FROZEN"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+cite("R2 sign-alone rise",
+     r"sign-alone component rises\s*\$([\d.]+) \\to ([\d.]+)\$ and \$([\d.]+)\$",
+     _m["FCVM"]["mi_sign"], _m["K5_FROZEN"]["mi_sign"], _m["Q1.0"]["mi_sign"])
+_tvc = e9["tests_vs_control"]
+check("R2 whitened diffs reverse in all four arms (0/8 positive, p=0.0078)",
+      all(_tvc[a]["whitened"]["n_pos"] == 0
+          and abs(_tvc[a]["whitened"]["wilcoxon_p"] - 0.0078) < 5e-5
+          and _tvc[a]["whitened"]["median_diff"] < 0
+          for a in ("K1", "K5_FROZEN", "Q0.5", "Q1.0"))
+      and re.search(r"positive on 0 of 8 seeds,\s*\$p = 0\.0078\$, in all "
+                    r"four arms", TEX) is not None)
+cite("R2 sign-component shares",
+     r"share ([\d.]+) at \$K{=}5\$, ([\d.]+) at\s*\$\\lambda_Q{=}1\$",
+     e9["verdicts"]["K5_FROZEN"]["sign_component_share_of_raw_rise"],
+     e9["verdicts"]["Q1.0"]["sign_component_share_of_raw_rise"])
+check("R2 conditional MI falls in every arm",
+      all(_tvc[a]["cmi"]["n_pos"] == 0
+          and abs(_tvc[a]["cmi"]["wilcoxon_p"] - 0.0078) < 5e-5
+          for a in ("K1", "K5_FROZEN", "Q0.5", "Q1.0")))
+cite("R2 whitened floor",
+     r"reaching no lower than \$([\d.]+)\$\s*bits \(half skew\) and "
+     r"\$([\d.]+)\$ at exact absorption",
+     min(_m[c]["whitened_bits"] for c in _m), _m["Q1.0"]["whitened_bits"])
+check("R2 floor is the half-skew configuration",
+      min(_m, key=lambda c: _m[c]["whitened_bits"]) == "Q0.5")
+check("R2 withdrawal stated per the registered rule",
+      e9["verdicts"]["K5_FROZEN"]["rise_survives_whitening"] is False
+      and e9["verdicts"]["Q1.0"]["rise_survives_whitening"] is False
+      and re.search(r"re-creates sign\s*information in price space is "
+                    r"\\emph{withdrawn}", TEX) is not None)
+check("R2 raw medians reproduce the published values",
+      abs(_m["FCVM"]["raw_bits"] - med["K0_FCVM"]) < 5e-5
+      and abs(_m["K1"]["raw_bits"] - med["K1_DECA2"]) < 5e-5
+      and abs(_m["K5_FROZEN"]["raw_bits"] - med["K5_FIXEDPOINT"]) < 5e-5
+      and abs(_m["Q0.5"]["raw_bits"] - bits4["FCVM+Q0.5"]) < 5e-5
+      and abs(_m["Q1.0"]["raw_bits"] - bits4["FCVM+Q1.0"]) < 5e-5)
+# the abstract / intro / conclusion restatements of the conversion numbers
+cite("abstract whitened conversion",
+     r"whitened information\s*([\d.]+) to ([\d.]+) bits at exact\s*absorption",
+     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+cite("intro whitened conversion",
+     r"from ([\d.]+)\s*bits in the control to ([\d.]+)\s*under exact absorption",
+     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+cite("conclusion whitened conversion",
+     r"whitened information falls from \$([\d.]+)\$ bits in the control to\s*"
+     r"\$([\d.]+)\$ under exact absorption",
+     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+check("shared conversion pair cited consistently (>= 2 sites)",
+      len(re.findall(r"\$0\.0197 \\to 0\.0036\$", TEX)) >= 2
+      and abs(_m["FCVM"]["whitened_bits"] - 0.0197) < 5e-5
+      and abs(_m["Q1.0"]["whitened_bits"] - 0.0036) < 5e-5)
+cite("§3 K1 absorption share",
+     r"absorbing part of\s*the genuine nonlinear leak \(whitened bits "
+     r"\$([\d.]+) \\to ([\d.]+)\$\)",
+     _m["FCVM"]["whitened_bits"], _m["K1"]["whitened_bits"])
+
+# --- R3: 32-seed extensions ------------------------------------------------
+ext32 = RB["ext32"]
+cite("R3 K5 at 32 seeds",
+     r"frozen \$K{=}5\$ stack at\s*\$([\d.]+)\$ against the control's "
+     r"\$([\d.]+)\$, higher on (\d+) of (\d+) seeds",
+     ext32["arms"]["K5_FROZEN"]["median"], ext32["control_median"],
+     ext32["arms"]["K5_FROZEN"]["tests_vs_control"]["n_pos"], 32)
+cite("R3 Q1.0 at 32 seeds",
+     r"full skew at \$([\d.]+)\$, higher on (\d+) of (\d+)",
+     ext32["arms"]["Q1.0"]["median"],
+     ext32["arms"]["Q1.0"]["tests_vs_control"]["n_pos"], 32)
+check("R3 both rises stand at p < 1e-4 (stated as such)",
+      ext32["arms"]["K5_FROZEN"]["tests_vs_control"]["wilcoxon_p"] < 1e-4
+      and ext32["arms"]["Q1.0"]["tests_vs_control"]["wilcoxon_p"] < 1e-4
+      and len(re.findall(r"p < 10\^{-4}", TEX)) >= 2)
+check("§4 28-of-32 cited in the deca3 body",
+      re.search(r"7 of 8 paired seeds and on 28\s*of 32", TEX) is not None
+      and ext32["arms"]["K5_FROZEN"]["tests_vs_control"]["n_pos"] == 28)
+check("§5 26-of-32 cited in the deca4 body",
+      re.search(r"7 of 8 seeds,\s*and on 26 of 32", TEX) is not None
+      and ext32["arms"]["Q1.0"]["tests_vs_control"]["n_pos"] == 26)
+
+# --- R4: t(3) fundamentals -------------------------------------------------
+t3 = RB["t3_absorption"]
+_lad = {c["mult"]: c for c in t3["calibration"]["ladder"]}
+check("R4 variance-matching scale selected", t3["calibration"]["selected_mult"] == 1.0)
+cite("R4 calibration",
+     r"variance-matching scale won, median kurtosis \$([\d.]+)\$ against "
+     r"the\s*control's \$([\d.]+)\$",
+     _lad[1.0]["median_kurt"], t3["calibration"]["target_kurt"])
+check("R4 ladder non-monotone (larger scales lower kurtosis)",
+      _lad[3.0]["median_kurt"] < _lad[1.0]["median_kurt"]
+      and re.search(r"larger \$t\$-scales\s*\\emph{lower} total kurtosis",
+                    TEX) is not None)
+check("R4 control 5/10 failing exactly FCVM's events",
+      t3["configs"]["FCVM_T3"]["score"] == 5
+      and failed_set(t3["configs"]["FCVM_T3"]["events"]) == {3, 4, 7, 8, 9}
+      and re.search(r"\\cfg{FCVM-T3} scores 5/10, failing exactly "
+                    r"\\cfg{FCVM}'s five events", TEX) is not None)
+cite("R4 absorption outcome",
+     r"\\cfg{FCVM-T3\+Q1\.0} scores 1/10 with kurtosis\s*\$([\d.]+)\$ and "
+     r"the raw statistic at \$([\d.]+)\$ bits",
+     t3["configs"]["FCVM_T3_Q1.0"]["median_stats"]["kurt"],
+     t3["configs"]["FCVM_T3_Q1.0"]["median_stats"]["dir_bits"])
+check("R4 T3+Q1.0 scores 1, tails do not survive",
+      t3["configs"]["FCVM_T3_Q1.0"]["score"] == 1
+      and t3["tails_survive_absorption"] is False
+      and t3["leak_persists"] is True)
+check("R4 kF cited == code constant",
+      re.search(r"kF=0\.15", code_ws) is not None
+      and "($k_F = 0.15$)" in TEX)
+check("R4 scoping stated (flow-generated)",
+      re.search(r"joint\s*production is structural to "
+                r"\\emph{flow-generated} amplitude structure", TEX) is not None)
+
+# --- R5: kM re-equilibration -----------------------------------------------
+rq = RB["requilibration"]
+_a, _q = rq["arms"]["A_K1"], rq["arms"]["Q1.0"]
+check("R5 anticipator arm keeps kM=0.30, 5/10, FCVM's failure set",
+      _a["winner_kM"] == 0.3 and _a["eval"]["score"] == 5
+      and failed_set(_a["eval"]["events"]) == {3, 4, 7, 8, 9}
+      and re.search(r"keeps\s*the frozen \$k_M = 0\.30\$ and scores 5/10",
+                    TEX) is not None)
+check("R5 Q arm picks kM=0.10, 2/10 passing exactly E1 and E6",
+      _q["winner_kM"] == 0.1 and _q["eval"]["score"] == 2
+      and failed_set(_q["eval"]["events"]) == {2, 3, 4, 5, 7, 8, 9, 10}
+      and re.search(r"selects \$k_M = 0\.10\$ and\s*scores 2/10", TEX)
+      is not None)
+cite("R5 collapsed bits",
+     r"median of \$([\d.]+)\$ bits\s*\(\$([\d.]+)\$--\$([\d.]+)\$ per seed",
+     _q["eval"]["median_dir_bits"], min(_q["eval"]["dir_bits_per_seed"]),
+     max(_q["eval"]["dir_bits_per_seed"]))
+check("R5 ceiling survives", rq["ceiling_survives_requilibration"] is True
+      and _a["exceeds_ceiling"] is False and _q["exceeds_ceiling"] is False)
+
+# --- R6: threshold robustness ----------------------------------------------
+tr = RB["threshold_robustness"]
+check("R6 48 perturbations, baseline reproduced",
+      len(tr["per_perturbation"]) == 48 and tr["baseline_reproduced"] is True
+      and "48 perturbed scorings" in TEX)
+check("R6 ceiling invariant holds in 48/48",
+      tr["ceiling_invariant_holds"] is True
+      and all(p["fcvm_is_max"] for p in tr["per_perturbation"])
+      and tr["fcvm_failset_changes"] == [])
+check("R6 GBM anchor stable", tr["score_bands"]["G"]["band_10pct"] == [3, 3]
+      and tr["score_bands"]["G"]["band_20pct"] == [3, 3])
+check("R6 SPY anchor: 10/10 at ±10%, 9 only at e8_ratio -20%",
+      tr["spy_band"]["band_10pct"] == [10, 10]
+      and tr["spy_band"]["band_20pct"] == [9, 10]
+      and [(p["threshold"], p["delta"]) for p in tr["per_perturbation"]
+           if p["spy"] != 10] == [("e8_ratio", -0.2)]
+      and re.search(r"SPY\s*stays 10/10 at \$\\pm 10\\%\$ and drops to 9/10 "
+                    r"only for the E8 ratio at\s*\$-20\\%\$", TEX) is not None)
+check("R6 headline rows frozen at ±10%",
+      all(tr["score_bands"][c]["band_10pct"] == [5, 5]
+          for c in ("FCVM", "FCVM+A", "K5_TUNED", "Q_TUNED", "FV", "FCV")))
+check("R6 knife edges are exactly the named configs",
+      {e.split(":")[1] for e in tr["knife_edge_moves_at_10pct"]}
+      == {"Q0.5", "FCVMH", "K5_FROZEN"})
+check("appendix K5-frozen 20% band spans 2--4",
+      tr["score_bands"]["K5_FROZEN"]["band_20pct"] == [2, 4]
+      and re.search(r"frozen \$K{=}5\$ stack spans 2--4 events", TEX)
+      is not None)
+check("appendix headline rows stay 5 at ±20%",
+      all(tr["score_bands"][c]["band_20pct"] == [5, 5]
+          for c in ("FCVM", "FCVM+A", "K5_TUNED", "Q_TUNED", "FV", "FCV"))
+      and re.search(r"every headline row stays at exactly 5", TEX) is not None)
 
 # ---------------------------------------------- 5b. score SEs (DESIGN24 A3)
 print("== battery-score SEs (score_se.json)")

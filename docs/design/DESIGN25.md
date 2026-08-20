@@ -407,7 +407,8 @@ actually survives.
   conditional MI given sign_t falls in every arm (p = 0.0078). Per the
   decision rule: the "re-created in price space" reading is **WITHDRAWN**;
   the licensed claims are (i) the leak never closes — whitened bits stay
-  significant 8/8 in every configuration, floor ≈ 0.0033 — and (ii) the
+  significant in every configuration (8/8 seeds everywhere except Q0.5's
+  7/8; 39/40 config-seed pairs), floor ≈ 0.0033 — and (ii) the
   interventions actually absorb MOST of the genuine nonlinear leak while
   manufacturing one-lag reversal that the E9 statistic scores higher.
 - **R3 — the raw rises are real and well-powered, and R2 says what they
@@ -460,7 +461,8 @@ information by a statistic that conditions on sign_t (R2), robustly so at
 32 seeds (R3). What SURVIVES is stronger than what was lost: bolt-on
 rationality CONVERTS a genuine multi-day sign leak into microstructure
 reversal — absorbing most of it, never closing it (whitened floor
-≈ 0.0033 bits, significant 8/8 everywhere, down from control's 0.0197) —
+≈ 0.0033 bits, significant in every configuration — 8/8 seeds everywhere
+except Q0.5's 7/8 — down from control's 0.0197) —
 and pays for the conversion with the wild facts, which are flow-generated
 (R4) and cannot be rescued by re-equilibrating liquidity provision (R5);
 the 5/10 ceiling and both calibration anchors are threshold-robust (R6).

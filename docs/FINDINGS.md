@@ -563,7 +563,8 @@ statistic robustly rises. Composed with R2, what it robustly measures is
 E1-breakage: intervention-induced reversal, not information.
 
 **What survives is sharper than what died.** The leak never closes:
-whitened bits remain significant on 8/8 seeds in *every* configuration,
+whitened bits remain significant in *every* configuration (8/8 seeds
+everywhere except the half-skew maker's 7/8; 39/40 config-seed pairs),
 floor ≈ 0.0033 — even for the exact-absorption maker. The correct
 mechanism statement, replacing the inversion: **bolt-on rationality
 converts a genuine multi-day sign leak into one-lag microstructure

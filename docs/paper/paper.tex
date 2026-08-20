@@ -2,8 +2,9 @@
 % ^ arXiv: process with pdflatex (must appear in the first five lines).
 % Preprint — builds with any standard TeX Live (all packages below are TeX
 % Live core; no shell-escape); figures are prebuilt PDFs from make_figures.py.
-% Sources of truth: research/decathlon{,2,3,4}.json, research/fx.json,
-% research/crypto.json, docs/FINDINGS.md, docs/METHODS.md, docs/design/DESIGN{8,18,20,22,24}.md.
+% Sources of truth: research/decathlon{,2,3,4}.json, research/robustness.json,
+% research/fx.json, research/crypto.json, docs/FINDINGS.md, docs/METHODS.md,
+% docs/design/DESIGN{8,18,20,22,24,25}.md.
 % Repo convention: no author block in-repo; a byline is added only at submission time.
 \documentclass[11pt]{article}
 \usepackage[margin=1.15in]{geometry}
@@ -39,7 +40,7 @@
 
 \title{The Joint Production of Price Efficiency and Heavy-Tailed
 Volatility in Minimal Agent-Based Markets:\\
-Evidence from Three Pre-Registered Refutations}
+Added Rationality Converts the Sign Leak but Cannot Close It}
 \author{}
 \date{}
 
@@ -48,34 +49,34 @@ Evidence from Three Pre-Registered Refutations}
 
 \begin{abstract}
 \noindent
-Agent-based models of financial markets typically reproduce the stylized
-facts of asset returns piecemeal: models are exhibited that match subsets
-of the facts, and failed attempts on the remainder are rarely reported.
-This paper scores minimal flow-based markets against a fixed
-ten-event battery calibrated so that real equity data passes all ten events
-and geometric Brownian motion exactly three. A market of fundamentalists,
-chartists, volatility-targeting investors, and market makers attains five of
-ten events, and its failures are diagnostic: the missing events concern long
-memory, time-irreversibility, and the information content of price signs.
-Three pre-registered experiments with pre-specified refutation
-criteria then test whether added rationality can close the gap: (i) an anticipatory
-agent that front-runs the forecastable flow; (ii) the fixed point of mutual
-anticipation, iterated to depth five; (iii) a price-setting market maker
-that provably absorbs the forecastable component into the price level. All
-three attempts are refuted. Deeper anticipation increases the residual
-sign predictability of returns (median 0.0184 to 0.0257 bits) while
-contracting the flow it targets, and exact absorption removes the heavy
-tails (kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$),
-and volatility clustering together with the predictability. We conclude
-that, in this model class, sign efficiency and the heavy-tailed,
-asymmetric volatility regularities are jointly produced by the same
-state-dependent flows and cannot be obtained separately. Cross-venue
-evidence --- the leverage effect ordered by market structure across
-equities ($-0.04$), foreign exchange ($\approx 0$), and cryptocurrencies
-($+0.03$) --- is consistent with the proposed mechanism. All results are
-pre-registered, validated against synthetic ground truth, and regenerable
-from the repository.
-% src: abstract, docs/paper/OUTLINE.md; leverage values research/fx.json leverage_contrast
+Agent-based models of financial markets reproduce the stylized facts of
+asset returns piecemeal: successes are exhibited and failed attempts
+rarely reported. We score minimal flow-based markets on a fixed
+ten-event battery calibrated so that real equity data passes all ten and
+geometric Brownian motion exactly three. A market of fundamentalists,
+chartists, volatility-targeting investors, and market makers attains five
+of ten; the missing events concern long memory, time-irreversibility, and
+the information content of price signs. Three pre-registered experiments
+test whether added rationality closes the gap: a trading anticipator of
+the forecastable flow, the fixed point of mutual anticipation iterated to
+depth five, and a price-setting maker that provably absorbs that flow
+into the price level. All three are refuted, and a registered attribution program
+establishes what the interventions do instead: each converts a genuine
+nonlinear multi-day sign leak into one-lag microstructure reversal ---
+absorbing most of it (whitened information 0.0197 to 0.0036 bits at exact
+absorption), never closing it (significant in every configuration) ---
+and pays with the amplitude facts: heavy tails (kurtosis $8.8 \to
+3.0$), the leverage effect ($-0.125 \to -0.008$), and volatility
+clustering are deleted together. In this model class, sign efficiency and
+the heavy-tailed, asymmetric volatility regularities are jointly produced
+by the same state-dependent flows --- scoped by measurement to
+flow-generated amplitude structure and robust to liquidity
+re-equilibration and threshold perturbation. Cross-venue evidence --- the
+leverage effect ordered across equities ($-0.04$), foreign exchange
+($\approx 0$), and cryptocurrencies ($+0.03$) --- is consistent with the
+mechanism. All results are pre-registered, validated on synthetic ground
+truth, and regenerable from the repository.
+% src: abstract, docs/paper/OUTLINE.md; whitened bits research/robustness.json e9_attribution; leverage values research/fx.json leverage_contrast
 \par\medskip
 \noindent\textit{Keywords:} stylized facts; agent-based models; market
 efficiency; price impact; leverage effect; pre-registered research.
@@ -130,7 +131,7 @@ almost never pre-registered, and therefore carries no evidential weight. We
 address both gaps with a fixed measurement instrument and a pre-registered
 refutation chain.
 
-The paper makes four contributions. \emph{First}, it introduces a
+The paper makes five contributions. \emph{First}, it introduces a
 ten-event battery of binary stylized-fact tests, computed identically on
 real and simulated series, calibrated at both ends of its range: real S\&P
 500 index data (SPY) passes 10/10 events while geometric Brownian motion
@@ -148,29 +149,54 @@ makes such negative results evidential: every estimator and every tested
 mechanism must pass a size and power validation against synthetic
 data-generating processes with known properties before any evaluation data
 is read, so a refutation is a measurement rather than an absence of result
-(Section~\ref{sec:methods}). \emph{Fourth}, it reports a cross-venue
-measurement of the leverage effect with a single estimator battery ---
-equities $-0.04$, foreign exchange statistically zero, cryptocurrencies
-$+0.03$ in point estimate --- whose ordering is consistent with the
-flow-structure mechanism, together with an explicit power analysis of what
-the cross-venue data can and cannot yet certify
+(Section~\ref{sec:methods}). \emph{Fourth}, it subjects its own central
+experimental reading to a registered attribution and robustness program
+--- six experiments answering three independent referee reports, with
+budgets and decision rules fixed before any run: a matched-strength
+design shows the anticipation-depth axis was an effective-strength axis;
+an AR(1)-whitened decomposition of the sign-information statistic,
+licensed by a size and power gate on an analytic AR(1) world, shows the
+raw rises are induced reversal while the genuine nonlinear leak is
+monotonically absorbed but never closed; and the composed claim is
+stress-tested against an exogenous amplitude source, liquidity
+re-equilibration, and threshold perturbation
+(Section~\ref{sec:robustness}). The program overturns one natural
+reading of the raw evidence and sharpens the surviving mechanism
+statement to conversion without closure. \emph{Fifth}, it reports a
+cross-venue measurement of the leverage effect with a single estimator
+battery --- equities $-0.04$, foreign exchange statistically zero,
+cryptocurrencies $+0.03$ in point estimate --- whose ordering is
+consistent with the flow-structure mechanism, together with an explicit
+power analysis of what the cross-venue data can and cannot yet certify
 (Section~\ref{sec:triangle}).
 
-The headline mechanism result can be stated compactly. Adding one layer of
-anticipation to the minimal market leaves its battery score unchanged and
-moves the sign leak --- the residual forecastability of next-day return
-signs, defined precisely in Section~\ref{sec:results} --- one derivative
-earlier; iterating anticipation five layers deep contracts the model-space
-forecastable flow by a factor of four while the leaked sign information in
-realized prices moves the opposite way (median direction bits 0.0184 $\to$
-0.0200 $\to$ 0.0257; the depth-five rise holds on 7 of 8
-paired seeds); and a maker that removes the
-forecastable component's price impact exactly --- verified to the identity
-on a synthetic world --- does not close the leak either, but instead
-deletes the fat tails (kurtosis $8.8 \to 3.0$), the leverage effect
-($-0.125 \to -0.008$), and volatility clustering together with the
-amplitude structure the flows were generating.
+The headline mechanism result was reached in two stages, and both are
+reported. The minimal market's central failure is a \emph{sign leak} ---
+residual forecastability of next-day return signs, defined precisely in
+Section~\ref{sec:results}, that real index data does not show. The three
+experiments refute the hypothesis that added rationality removes it:
+one layer of anticipation leaves the battery score unchanged; iterating
+anticipation five layers deep contracts the model-space forecastable flow
+by a factor of four while the raw E9 statistic moves the opposite way
+(median direction bits 0.0184 $\to$ 0.0200 $\to$ 0.0257); and a maker
+that removes the forecastable component's price impact exactly ---
+verified to the identity on a synthetic world --- deletes the fat tails
+(kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$), and
+volatility clustering, with the raw statistic again higher.
 % src: research/decathlon3.json dir_bits_vs_K medians; research/decathlon4.json configs FCVM/FCVM+Q1.0 median_stats
+A registered attribution program (Section~\ref{sec:robustness}) then
+establishes what the raw statistic was measuring. The rises are
+intervention-induced one-lag reversal, scored as sign information by a
+statistic whose feature set conditions on the return sign: under AR(1)
+whitening every rise reverses (positive on 0 of 8 seeds in all four
+arms), while the genuine nonlinear sign leak falls monotonically with
+intervention strength --- from 0.0197 bits in the control to 0.0036
+under exact absorption --- and remains statistically significant in
+every configuration (on 39 of 40 configuration--seed pairs). Added
+rationality converts the sign leak
+into microstructure reversal; it absorbs most of the leak, closes none
+of it, and pays for the conversion with the amplitude facts.
+% src: research/robustness.json e9_attribution (per_config medians, tests_vs_control)
 Sign efficiency and the amplitude facts are not separate dials in this
 model class.
 
@@ -181,7 +207,8 @@ Section~\ref{sec:methods} presents the measurement methodology: the event
 battery, the size/power validation protocol, and the pre-registration
 design. Section~\ref{sec:model} specifies the base market model and the
 three rationality mechanisms. Section~\ref{sec:results} reports the
-results of the ablation study and the three experiments.
+results of the ablation study, the three experiments, and the registered
+attribution and robustness program.
 Section~\ref{sec:triangle} presents the cross-venue evidence.
 Section~\ref{sec:discussion} states the scope of the claims and the
 limitations, and Section~\ref{sec:conclusion} concludes. Appendices
@@ -243,9 +270,12 @@ instruments. In the heterogeneous-beliefs models of
 the sophistication of agents' expectations is a bifurcation parameter of a
 deterministic pricing map: making agents more forward-looking changes the
 dynamics qualitatively rather than monotonically improving them. Our
-$K$-ladder is a stochastic, capital-bounded analogue of that exercise, and it
-finds the same non-monotonicity in a measured quantity --- the sign leak
-grows as anticipation deepens. The minority-game literature
+$K$-ladder is a stochastic, capital-bounded analogue of that exercise,
+with a cautionary coda: its apparent depth effect dissolves under a
+matched-strength attribution --- away from the capital caps the ladder
+telescopes to a single anticipator whose effective strength, not its
+depth, drives the measured statistic (Section~\ref{sec:robustness}). The
+minority-game literature
 \citep{challet1997, challet2004} and the intermittent agent-based markets of
 \citet{giardina2003} derive stylized facts from the statistical mechanics of
 adaptive agents competing over a scarce resource, with realistic regimes
@@ -529,8 +559,8 @@ quote-skewing maker to absorb impact while leaving the flow untouched
 evidential:
 when a licensed mechanism fails to move the battery, the failure is a property
 of the market, not of a broken implementation. At the time of writing the
-continuous-integration suite runs all 39 verification gates (the numbered gates X1--X35 plus four unnumbered platform gates) on every commit. % src: len(GATES) in tests/run_all.py, asserted by check_numbers.py
-% src: tests/*.py (gate identifiers X1..X35, verified by grep); docs/METHODS.md sections 0 and 8
+continuous-integration suite runs all 40 verification gates (the numbered gates X1--X36 plus four unnumbered platform gates) on every commit. % src: len(GATES) in tests/run_all.py, asserted by check_numbers.py
+% src: tests/*.py (gate identifiers X1..X36, verified by grep); docs/METHODS.md sections 0 and 8
 
 \subsection{Pre-registration, budgets, and tie-breaks}
 \label{sec:prereg}
@@ -887,9 +917,11 @@ adds reversal: AC$_1$ falls from $-0.09$ at the frozen setting toward $-0.35$
 at $k_A = 1$), the
 tails erode (it damps the very spiral that generates them, kurtosis
 $8.8 \to 4.6$ from the control to the grid's most capitalized settings), and
-the sign leak \emph{grows} (up to 0.039 bits at full
-strength $k_A = 1$). The full grid --- per-setting scores and statistics ---
-is exported with the archived results.
+the raw E9 statistic rises (up to 0.039 bits at full
+strength $k_A = 1$) --- a rise the attribution program of
+Section~\ref{sec:robustness} identifies as the induced reversal itself,
+scored as sign information. The full grid --- per-setting scores and
+statistics --- is exported with the archived results.
 
 \begin{figure}[t]
 \centering
@@ -908,14 +940,17 @@ pre-registered first-shot setting.}
 The mechanism is structural, not parametric: the anticipator's inventory is a
 function of the same slow public volatility state as the flow it front-runs,
 so its own future unwind is exactly as forecastable as what it absorbs. One
-layer of expectation does not remove the predictable flow; it reproduces the
-leak one derivative earlier, while eroding the amplitude facts. The
+layer of expectation does not silence the sign channel; the whitened
+decomposition of Section~\ref{sec:robustness} shows it absorbing part of
+the genuine nonlinear leak (whitened bits $0.0197 \to 0.0112$) while
+introducing the one-lag reversal that keeps the raw statistic level ---
+and eroding the amplitude facts wherever it trades harder. The
 refutation names
 its own successor: if one anticipator re-leaks because its inventory is
 public-state-driven, perhaps information-free prices require anticipators who
 anticipate \emph{each other} --- the fixed point of mutual anticipation.
 
-\subsection{Experiment II: the inversion}
+\subsection{Experiment II: the fixed point of mutual anticipation}
 \label{sec:deca3}
 
 \begin{table}[t]
@@ -930,14 +965,15 @@ $K{=}5$ (frozen carry-over)     & 3/10 $\pm$ 0.49 & E1 E3 E4 E5 E7 E8 E9 & 0.025
 $K{=}5$ (tuned, contingent pass) & 5/10 $\pm$ 0.00 & E3 E4 E7 E8 E9 & 0.0168 \\
 \bottomrule
 \end{tabular}
-\caption{Experiment II: the $K$-ladder. The median sign leak grows in $K$
---- the depth-five rise holds on 7 of 8 paired seeds, while the one-layer
-step ($K{=}0 \to 1$) is statistically flat in a registered 32-seed extension
-(Wilcoxon $p = 0.57$): the licensed reading is the depth trend, not the
-single-layer increment --- and the
+\caption{Experiment II: the $K$-ladder. The raw E9 statistic rises in $K$
+--- the depth-five rise holds on 7 of 8 paired seeds and stands in a
+registered 32-seed extension, while the one-layer step ($K{=}0 \to 1$) is
+statistically flat at 32 seeds (Wilcoxon $p = 0.57$) --- and the
 model-space forecastable flow contracts toward zero; the frozen $K{=}5$ stack
 is a two-event regression (it breaks efficiency and removes the leverage
-effect).}
+effect). Section~\ref{sec:robustness} attributes the rise: at matched
+effective strength, depth five leaks \emph{less} than depth one, and the
+raw rise is induced one-lag reversal, not sign information.}
 % src: research/decathlon3.json configs, dir_bits_vs_K, tuned_eval
 \label{tab:deca3}
 \end{table}
@@ -945,19 +981,22 @@ effect).}
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{deca3_inversion}
-\caption{The inversion. Solid curve and filled circles (left axis): the
-forecastable-flow fraction $\beta_K$ measured on the deterministic synthetic
-world,
-falling exactly as $(1-k_A)^K$ --- $1.000 \to 0.750 \to 0.237$. Dashed line and
-open squares (right axis): the E9 direction bits measured in the simulated
+\caption{Experiment II in both spaces. Solid curve and filled circles
+(left axis): the forecastable-flow fraction $\beta_K$ measured on the
+deterministic synthetic world, falling exactly as $(1-k_A)^K$ ---
+$1.000 \to 0.750 \to 0.237$. Dashed line and
+open squares (right axis): the raw E9 statistic measured in the simulated
 market at the same $K$ (open circles: per-seed values --- 32 seeds at
 $K \in \{0, 1\}$ from the registered extension, the 8 evaluation seeds at
 $K{=}5$), medians
 rising $0.0184 \to 0.0200 \to 0.0257$; the $K{=}5$ rise holds on 7 of 8
 paired seeds, while the one-layer step is flat at 32 seeds.
-The operator removes forecastable
-flow in model space; the market re-creates sign information in price space.
-Open-loop contraction does not survive closed-loop equilibrium.}
+The operator removes forecastable flow in model space, and open-loop
+contraction does not survive closed-loop equilibrium --- but the rise on
+the right axis is not re-created sign information: the whitened
+decomposition of Section~\ref{sec:robustness} attributes it to
+intervention-induced one-lag reversal, and at matched effective strength
+depth five leaks less than depth one.}
 % src: research/decathlon3.json forecastable_flow_fraction_vs_K, dir_bits_vs_K
 \label{fig:inversion}
 \end{figure}
@@ -967,12 +1006,12 @@ is the paper's central experiment. The refutation criterion is met again,
 and this time the two
 diagnostics move in \emph{opposite directions}: as $K$ goes $0 \to 1 \to 5$,
 the model-space forecastable flow falls $1.000 \to 0.750 \to 0.237$ while the
-market-space sign leak rises $0.0184 \to 0.0200 \to 0.0257$ bits in the
-medians, with $K{=}5$ above the control on 7 of 8 paired seeds. (The
+raw E9 statistic rises $0.0184 \to 0.0200 \to 0.0257$ bits in the
+medians, with $K{=}5$ above the control on 7 of 8 paired seeds and on 28
+of 32 in the registered extension of Section~\ref{sec:robustness}. (The
 one-layer step inside that rise is a point estimate within seed noise ---
 the registered 32-seed extension is statistically flat, medians $0.0195$ versus
-$0.0194$, Wilcoxon $p = 0.57$ --- so the ladder licenses the depth trend,
-not the single-layer increment.) The frozen
+$0.0194$, Wilcoxon $p = 0.57$.) The frozen
 $K{=}5$ stack is moreover a two-event regression: its aggregate unwind adds
 reversal (AC$_1$: $-0.075 \to -0.247$, breaking E1) and it absorbs the very
 spiral that generates the leverage effect (E5 fails, $-0.095 \to -0.030$),
@@ -993,20 +1032,28 @@ level up: the tuning criterion rewards weaker anticipation at every
 opportunity, never stronger.
 % src: research/decathlon3.json tuning (grid, note), tuned_eval; docs/design/DESIGN20.md amendment
 
-The algebra explains the failure sharply. Away from the caps, the $K$-layer
+The algebra explains the failure sharply, and the attribution program of
+Section~\ref{sec:robustness} completes it. Away from the caps, the $K$-layer
 stack is equivalent to \emph{one} anticipator of strength $1-(1-k_A)^K$
 (the telescoped sum in Eq.~\eqref{eq:stack}):
 mutual anticipation of this operator class deepens into a stronger single
 anticipator, and Experiment~I already measured that stronger is worse. The
+equivalence is not only algebraic but measured: holding effective
+strength at $0.25$ exactly, a depth-five stack leaks \emph{less} than the
+depth-one layer (medians $0.0176$ versus $0.0194$, Wilcoxon
+$p = 0.0028$), so the $K$-axis of Figure~\ref{fig:inversion} is an
+effective-strength axis --- the frozen stack ran at strength $0.763$
+against the single layer's $0.25$ --- and what strength buys is not sign
+information but induced reversal (Section~\ref{sec:robustness}). The
 contraction that defines the fixed point is an open-loop property, licensed by
 the gate against an exogenous tape; it does not survive closed-loop
 equilibrium, because every layer's inventory is a function of the same slow
-public volatility state, so the stack's own price impact regenerates exactly
-the forecastable structure the model says it removes. Model-space forecastable
-flow down, market-space sign leak up: this is, to our knowledge, the
-sharpest available statement of why the rational-expectations limit cannot be reached by stacking
-boundedly-capitalized flow traders.
-% src: docs/FINDINGS.md DECATHLON-3 (mechanism paragraph)
+public volatility state, so the stack's own price impact regenerates
+forecastable structure in proportion to its strength. Model-space
+forecastable flow down, market-space conversion up: stacking
+boundedly-capitalized flow traders cannot reach the rational-expectations
+limit --- it only strengthens the single trader the stack telescopes to.
+% src: docs/FINDINGS.md DECATHLON-3 (mechanism paragraph); research/robustness.json strength_depth (median_bits, tests, strength_axis)
 
 \subsection{Experiment III: absorption removes the amplitude facts, not the leak}
 \label{sec:deca4}
@@ -1025,8 +1072,9 @@ Config & Score & Failed events & E9 bits (median) \\
 \bottomrule
 \end{tabular}
 \caption{Experiment III. Full skew removes the vol-targeters' forecastable
-impact exactly, and the sign leak does not close --- it grows (0.0237,
-higher than the control on 7 of 8 seeds) --- while the amplitude facts
+impact exactly, and the sign channel does not close --- the raw E9
+statistic rises (0.0237, higher than the control on 7 of 8 seeds; induced
+reversal per Section~\ref{sec:robustness}) --- while the amplitude facts
 disappear.}
 % src: research/decathlon4.json configs, dir_bits_vs_lambda, contingent_pass
 \label{tab:deca4}
@@ -1039,27 +1087,31 @@ disappear.}
 seeds).
 Full absorption of the forecastable flow's price impact removes the fat tails
 (kurtosis $8.8 \to 3.0$), the leverage effect ($-0.125 \to -0.008$) and
-volatility clustering (AC$_1(|r|)$ $0.38 \to 0.06$) --- while the E9 direction
-bits (panel~d; open circles are seeds) do not close: flat at half skew,
-higher at full skew.}
+volatility clustering (AC$_1(|r|)$ $0.38 \to 0.06$) --- while the raw E9
+statistic (panel~d; open circles are seeds) does not close: flat at half
+skew, higher at full skew, the rise being induced reversal
+(Section~\ref{sec:robustness}).}
 % src: research/decathlon4.json configs FCVM/FCVM+Q0.5/FCVM+Q1.0 median_stats, dir_bits_vs_lambda
 \label{fig:wildfacts}
 \end{figure}
 
 Table~\ref{tab:deca4} and Figure~\ref{fig:wildfacts} give the sharpest
 refutation of the three. The full-skew maker removes the vol-targeters'
-forecastable impact exactly --- and the sign leak does not close. Bits stay
-flat at half skew (0.0180 versus 0.0184) and \emph{grow} at full skew (0.0237,
-higher than the control on 7 of 8 seeds). The leak was never the
-vol-targeters' drift alone: Experiment~I's original attribution is overturned.
-It lives distributed across \emph{all} the state-dependent flows --- chartist
-momentum, fundamentalist reversion, the one-lag maker's partial absorption ---
-and deleting the spiral's impact strips away the amplitude structure that was
-masking
-them: efficiency breaks (AC$_1$: $+0.04 \to -0.26$; with the spiral gone the
-liquidity provider's reversion dominates), and the newly-Gaussian returns make
-the remaining structure easier to detect.
-% src: research/decathlon4.json configs FCVM+Q1.0 median_stats; dir_bits per_seed comparison
+forecastable impact exactly --- and the sign channel still does not
+close. The raw statistic stays flat at half skew (0.0180 versus 0.0184)
+and rises at full skew (0.0237, higher than the control on 7 of 8 seeds,
+and on 26 of 32 in the registered extension). The whitened decomposition
+of Section~\ref{sec:robustness} states what each number means: exact
+absorption removes most of the genuine nonlinear leak --- whitened bits
+fall $0.0197 \to 0.0036$ --- without ever silencing it, while the
+absorption leaves the one-lag maker's reversion dominating the return
+(efficiency breaks, AC$_1$: $+0.04 \to -0.26$) and the E9 statistic,
+whose feature set conditions on the return sign, scores that induced
+reversal as sign information. The leak was never the vol-targeters'
+drift alone --- Experiment~I's original attribution is overturned: a
+significant nonlinear residual survives exact removal of the spiral's
+impact, so it lives in the remaining state-dependent flows.
+% src: research/decathlon4.json configs FCVM+Q1.0 median_stats; research/robustness.json e9_attribution per_config FCVM/Q1.0, ext32 arms Q1.0
 
 The second pre-registered hypothesis --- that the maker would neutralize only
 the forecastable \emph{mean} of the flow, leaving the volatility dynamics
@@ -1082,47 +1134,238 @@ weakest rational intervention available.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{e9_bits_configs}
-\caption{E9 direction bits across every rationality configuration (open
+\caption{The raw E9 statistic across every rationality configuration (open
 circles: evaluation seeds; bars: medians). No configuration approaches the
 information-free regime; real SPY (dotted, 0.0029) sits far below all of
 them. Trading against the flow, iterating that trade to depth five, and
-absorbing the flow's impact into the price level all leave the sign channel
-open or wider.}
+absorbing the flow's impact into the price level all leave the sign
+channel open; what varies across configurations is the split between
+genuine nonlinear leak and induced reversal
+(Section~\ref{sec:robustness}), not the distance to silence.}
 % src: research/decathlon3.json dir_bits_vs_K; research/decathlon4.json dir_bits_vs_lambda; research/decathlon.json spy.stats.dir_bits
 \label{fig:bits}
 \end{figure}
 
 Figure~\ref{fig:bits} collects the E9 evidence across all three experiments.
 
+\subsection{Attribution and robustness: the registered referee program}
+\label{sec:robustness}
+
+The results above report the battery's raw statistics. Three independent
+referee reports on a draft of this paper accepted the refutations but
+challenged their reading, identifying six specific threats: a
+depth/strength confound in the $K$-ladder (away from the caps the stack
+telescopes to one anticipator of strength $1-(1-k_A)^K$, so
+Figure~\ref{fig:inversion} varies strength, not only depth); an
+autocorrelation confound in E9 itself (its feature set conditions on
+$\mathrm{sign}(r_t)$, and the correlation between AC$_1(r)$ and the raw
+statistic is $-0.89$ across the archived tuning grid, so induced one-lag
+reversal is mechanically scored as sign information); eight-seed power
+behind the two raw rises; the identification of amplitude structure with
+forecastable flow by construction; a market never re-equilibrated around
+the added rationality; and integer scores on marginal thresholds. All
+six were answered under a single registration --- six experiments,
+R1--R6, with budgets (272 battery runs and 64 auxiliary simulations,
+held exactly) and decision rules fixed before any run --- and the
+estimator the program needed was licensed first: gate X36 verifies that
+the whitened-MI estimator reproduces the battery's E9 block exactly,
+matches the closed-form sign information of an analytic AR(1) world,
+removes exactly the linear channel there, and preserves a planted
+nonlinear sign channel. The registration's reporting standard is applied
+below: each experiment ends in a verdict about which claim survives.
+% src: docs/design/DESIGN25.md; research/robustness.json budget (272 battery, 40+24 non-battery); strength_axis.tuning_grid_corr_ac1_bits; tests/test_robustness.py (X36)
+
+\paragraph{Matched strength (R1).}
+Holding effective strength at $0.25$ exactly --- $K{=}1$ with
+$k_A = 0.25$ against $K{=}5$ with per-layer
+$k_A = 1-(1-0.25)^{1/5} \approx 0.0559$ --- on 32 seeds, depth five
+leaks \emph{less} than depth one: medians $0.0176$ versus $0.0194$,
+two-sided Wilcoxon $p = 0.0028$, depth five higher on 6 of 32 seeds.
+The caps bind only for the single strong layer, and the realized
+effective strengths ($0.2500$ at depth five, $0.2237$ at depth one) make
+the comparison conservative: the depth-five arm ran slightly stronger
+and still leaked less. Across the archived tuning grid, the Spearman
+correlation of anticipator strength with the raw statistic is $0.892$.
+The verdict: the published $K$-axis was a strength axis, ``deeper
+anticipation grows the sign leak'' is dead as a depth attribution, and
+what strength grows is identified by R2.
+% src: research/robustness.json strength_depth (kA_depth5, median_bits, tests_depth5_vs_depth1, realized_strength, strength_axis)
+
+\paragraph{Attribution of the E9 statistic (R2).}
+Table~\ref{tab:whiten} gives the decomposition. The control's leak is
+genuinely nonlinear: AR(1) whitening leaves it essentially unchanged
+($0.0197$ whitened against $0.0184$ raw, significant on 8 of 8 seeds,
+$\hat\varphi = +0.036$). Every rationality layer \emph{converts} it:
+whitened bits fall monotonically with intervention strength,
+$0.0197 \to 0.0112$ ($K{=}1$) $\to 0.0038$ ($K{=}5$) and $0.0036$
+($\lambda_Q{=}1$), while the sign-alone component rises
+$0.0101 \to 0.0220$ and $0.0206$ and AC$_1(r)$ is driven to $-0.25$.
+Under whitening the raw rises of Tables~\ref{tab:deca3} and
+\ref{tab:deca4} do not merely vanish --- they reverse (the whitened
+difference against the control is positive on 0 of 8 seeds,
+$p = 0.0078$, in all four arms), the sign-alone component carries more
+than the whole raw rise (share 2.21 at $K{=}5$, 1.84 at
+$\lambda_Q{=}1$), and the conditional information given
+$\mathrm{sign}(r_t)$ falls in every arm ($p = 0.0078$). Per the
+registered decision rule, the reading that the market re-creates sign
+information in price space is \emph{withdrawn}. Two claims are licensed
+in its place: the leak never closes --- whitened bits remain significant
+in every configuration, on 8 of 8 seeds everywhere except the half-skew
+maker's 7 of 8, reaching no lower than $0.0033$
+bits (half skew) and $0.0036$ at exact absorption --- and the
+interventions absorb most of the
+genuine nonlinear leak while manufacturing the one-lag reversal that the
+raw statistic scores.
+% src: research/robustness.json e9_attribution (per_config medians, tests_vs_control, verdicts, control_leak)
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrrc}
+\toprule
+Config & raw bits & whitened bits & sign-alone MI & AC$_1(r)$ & whitened sig. \\
+\midrule
+\cfg{FCVM} (control)            & 0.0184 & 0.0197 & 0.0101 & $+0.036$ & 8/8 \\
+$K{=}1$                         & 0.0200 & 0.0112 & 0.0147 & $-0.075$ & 8/8 \\
+$K{=}5$ (frozen)                & 0.0257 & 0.0038 & 0.0220 & $-0.247$ & 8/8 \\
+\cfg{FCVM+Q}($\lambda_Q{=}0.5$) & 0.0180 & 0.0033 & 0.0157 & $-0.160$ & 7/8 \\
+\cfg{FCVM+Q}($\lambda_Q{=}1.0$) & 0.0237 & 0.0036 & 0.0206 & $-0.256$ & 8/8 \\
+\bottomrule
+\end{tabular}
+\caption{The E9 attribution (medians over the 8 evaluation seeds; worlds
+regenerated and asserted against the stored per-seed values before any
+new estimator was read). Raw bits: the published E9 statistic. Whitened
+bits: the same statistic recomputed on AR(1)-whitened returns --- the
+genuine nonlinear sign leak. Sign-alone MI: the information carried by
+the $\mathrm{sign}(r_t)$ feature alone --- the linear-reversal channel.
+Every intervention moves information from the whitened column into the
+sign-alone column while driving AC$_1(r)$ negative: conversion, not
+creation. The whitened leak stays significant on 8 of 8 seeds in every
+row except half skew (7 of 8).}
+% src: research/robustness.json e9_attribution.per_config (raw_bits, whitened_bits, mi_sign, ac1_r, whitened_sig medians)
+\label{tab:whiten}
+\end{table}
+
+\paragraph{Power (R3).}
+The two raw rises stand at 32 seeds: the frozen $K{=}5$ stack at
+$0.0258$ against the control's $0.0195$, higher on 28 of 32 seeds,
+Wilcoxon $p < 10^{-4}$; full skew at $0.0239$, higher on 26 of 32,
+$p < 10^{-4}$. The power concern is answered in the direction of the
+published point estimates: the raw statistic robustly rises. Composed
+with R2, the rises are retained as well-powered measurements of induced
+efficiency breakage --- reversal scored by a sign-conditioned statistic
+--- not of sign-information creation.
+% src: research/robustness.json ext32 (control_median, arms K5_FROZEN/Q1.0)
+
+\paragraph{A second amplitude source (R4).}
+In the model as published, the only amplitude generator is the
+vol-targeting spiral, which is also the only forecastable flow, so
+``absorption deletes the amplitude facts'' risks being true by
+construction. A registered probe adds an exogenous source:
+Student-$t(3)$ fundamental innovations, entering through the
+fundamentalist flow and hence outside the span of the maker's forecast.
+The scale was fixed by one registered calibration shot (the
+variance-matching scale won, median kurtosis $8.82$ against the
+control's $8.79$; the ladder is non-monotone --- larger $t$-scales
+\emph{lower} total kurtosis by drowning the spiral). The control
+\cfg{FCVM-T3} scores 5/10, failing exactly \cfg{FCVM}'s five events;
+under full absorption, \cfg{FCVM-T3+Q1.0} scores 1/10 with kurtosis
+$3.06$ and the raw statistic at $0.0229$ bits. The $t(3)$ tails do not
+survive absorption because the fundamentalist channel ($k_F = 0.15$)
+spreads a fundamental jump over roughly seven trading days --- it is a
+structural tail filter. The verdict scopes the composed claim: joint
+production is structural to \emph{flow-generated} amplitude structure.
+Whether sign efficiency and the amplitude facts are separately
+obtainable given a genuinely absorption-proof exogenous amplitude source
+is untested by this design and would require a different injection point
+(heavy-tailed noise-trader flow, for example).
+% src: research/robustness.json t3_absorption (calibration, configs, verdict); kronos/decathlon.py kF=0.15
+
+\paragraph{Liquidity re-equilibration (R5).}
+Every published regression is proximately the frozen one-lag maker's
+reversion dominating once the spiral is damped, so the ceiling could in
+part reflect hand-set balance. Re-tuning the maker strength $k_M$
+jointly with each rationality layer (six candidates, tuning seeds
+900--903, least-re-equilibration tie-break): the anticipator arm keeps
+the frozen $k_M = 0.30$ and scores 5/10 on evaluation with the
+control's failure set; the full-absorption arm selects $k_M = 0.10$ and
+scores 2/10, passing only efficiency and the one-clock event, while its
+raw statistic collapses to a median of $0.0016$ bits
+($0.0007$--$0.0032$ per seed, still E9-significant). That world is the
+program's cleanest joint-production exhibit: adapted liquidity plus
+exact absorption comes within a hair of sign efficiency, and the price
+is every amplitude fact at once. The ceiling survives re-equilibration
+of the liquidity parameter; the claim is scoped to the one parameter
+tested.
+% src: research/robustness.json requilibration (arms A_K1/Q1.0 grids, winners, eval)
+
+\paragraph{Threshold robustness (R6).}
+The battery's 12 numeric thresholds were perturbed one at a time by
+$\pm 10\%$ and $\pm 20\%$ of their magnitude (48 perturbed scorings; E9
+is a permutation test and has no numeric threshold to perturb), with
+every score recomputed from per-seed statistics: the rescorer reproduces
+all fifteen published configuration scores and SPY's before any
+perturbed score is read, with the eight configurations lacking archived
+per-seed statistics reproduced by one asserted deterministic rerun each.
+Under all 48 perturbations, \cfg{FCVM} remains the maximum simulated
+score and its failure set never changes; GBM stays 3/10 everywhere; SPY
+stays 10/10 at $\pm 10\%$ and drops to 9/10 only for the E8 ratio at
+$-20\%$. The headline rows are frozen at $\pm 10\%$; the knife edges are
+confined to non-headline configurations
+(\cfg{FCVM+Q}($\lambda_Q{=}0.5$), \cfg{FCVMH}, and the frozen $K{=}5$
+stack) and are enumerated, with the full $\pm 20\%$ bands, in the
+archived results (Appendix~\ref{app:robust}). The integer comparative
+structure --- the 5/10 ceiling and both calibration anchors --- is not a
+threshold artifact.
+% src: research/robustness.json threshold_robustness (baseline_reproduced, ceiling_invariant_holds, fcvm_failset_changes, score_bands, spy_band, knife_edge_moves_at_10pct)
+
+Composed, R1--R6 replace the natural reading of Experiments II and III
+with a sharper one. What died: ``deeper anticipation grows the sign
+leak'' (a strength axis, R1) and ``the market re-creates the information
+in price space'' (induced reversal, R2 --- well-powered as a raw effect
+at 32 seeds, R3). What survives is stronger than what was lost: added
+rationality \emph{converts} a genuine nonlinear multi-day sign leak into
+one-lag microstructure reversal --- absorbing most of it, never closing
+it --- and pays for the conversion with the amplitude facts, which are
+flow-generated (R4) and cannot be rescued by re-equilibrating liquidity
+provision (R5); the ceiling and both calibration anchors are
+threshold-robust (R6).
+
 \subsection{Composition: the structural claim}
 \label{sec:structural}
 
-The three refutations compose. In this model class, the forecastable flow
-component and the asymmetric amplitude facts are the same object:
+The three refutations and their attribution compose. In this model
+class, the forecastable flow component and the asymmetric amplitude
+facts are the same object:
 %
 \begin{enumerate}
 \item an agent who \emph{trades} against the forecastable flow adds its own
-  forecastable flow, because its inventory is driven by the same slow public
-  state
-  --- the leak moves one derivative earlier (Experiment~I);
+  state-driven flow: it absorbs part of the genuine leak and manufactures
+  one-lag reversal in its place, leaving the raw statistic unchanged
+  (Experiment~I with Section~\ref{sec:robustness});
 \item stacking such agents to the fixed point of mutual anticipation is
-  algebraically one stronger such agent, and re-leaks harder while the
-  model-space forecastable flow contracts to 0.237 (Experiment~II);
+  algebraically --- and, at matched strength, measurably --- one stronger
+  such agent: depth adds nothing, and the added strength converts more of
+  the leak while the model-space forecastable flow contracts to 0.237
+  (Experiment~II);
 \item a price-setter who absorbs the flow's impact exactly --- the
   rational-expectations limit for this channel, verified to the identity ---
-  can close the leak only by deleting the de-leveraging dynamics that generate
+  absorbs most of the genuine leak (whitened bits $0.0197 \to 0.0036$) but
+  silences none of it, and deletes the de-leveraging dynamics that generate
   the tails, the leverage effect, and the crash asymmetry, scoring 1/10
   (Experiment~III).
 \end{enumerate}
 %
 Sign efficiency and the amplitude facts are not separate dials: in a market
-moved by
-state-dependent flows they are jointly produced, and no added layer of
+moved by state-dependent flows they are jointly produced --- a statement
+measured three independent ways, including the re-equilibrated 2/10 world
+in which near-closure of the sign channel costs every amplitude fact at
+once, and scoped by the $t(3)$ probe to flow-generated amplitude
+structure --- and no added layer of
 rationality --- trading, iterated, or price-setting --- supplies the five missing
 events (E3, E4, E7, E8, E9). What the minimal market lacks is not a smarter
 agent but a different kind of memory: the long-memory clock and the coupling
 arrow live upstream of the flows, in whatever generates them.
-% src: docs/FINDINGS.md DECATHLON-4 (closure paragraph)
+% src: docs/FINDINGS.md DECATHLON-4 (closure paragraph); docs/FINDINGS.md DECATHLON-R (composed verdict)
 
 \section{External validity: the leverage effect across market structures}
 \label{sec:triangle}
@@ -1288,8 +1531,13 @@ claimed: (i) anything about real markets' generating process; (ii) anything
 beyond this model class --- no learning agents, no heterogeneous
 information, no strategic equilibrium or rational-expectations solution
 concept; (iii) optimality of the agent designs --- each is gate-verified to
-\emph{function}, not to be optimal.
-% src: docs/paper/OUTLINE.md (NOT-claimed list, near-verbatim)
+\emph{function}, not to be optimal; (iv) any creation of sign information
+by the interventions --- the raw E9 rises of Experiments II and III are
+measured efficiency breakage (induced one-lag reversal), and the contrary
+reading is withdrawn in Section~\ref{sec:robustness}; (v) joint
+production beyond flow-generated amplitude structure --- the $t(3)$ probe
+leaves the absorption-proof exogenous-amplitude case untested.
+% src: docs/paper/OUTLINE.md (NOT-claimed list); docs/design/DESIGN25.md results (R2 withdrawal, R4 scoping)
 
 ``Structural'' here means: invariant over the searched class under the
 pre-registered budgets, with each searched member licensed by a mechanism gate
@@ -1314,13 +1562,17 @@ results into one positive claim. An open-ended sequence of failed attempts
 supports only ``we have not yet found the right agent.'' A pre-committed final
 attempt, refuted, supports a stronger statement about the class that was
 searched --- precisely because the search was budgeted, the budget was spent,
-and the stopping rule was declared before the last result was known.
-% src: docs/design/DESIGN22.md closure clause; docs/FINDINGS.md DECATHLON-4
+and the stopping rule was declared before the last result was known. The
+referee program of Section~\ref{sec:robustness} was registered and run
+after the clause fired, and stayed within it: R1--R6 are attribution and
+robustness measurements of existing results, not a fourth attempt on the
+ceiling, and the clause remains in force.
+% src: docs/design/DESIGN22.md closure clause; docs/FINDINGS.md DECATHLON-4; docs/design/DESIGN25.md (closure-clause paragraph)
 
 \subsection{Limitations}
 \label{sec:limitations}
 
-Three limitations are measured rather than merely acknowledged. First, the
+Four limitations are measured rather than merely acknowledged. First, the
 battery's absolute anchor is a US-equity statement: the registered
 multi-index audit (Appendix~\ref{app:audit}) shows the joint 10/10
 calibration extends across the large-cap US complex but not to non-US single
@@ -1330,8 +1582,15 @@ recurring among the misses; every conclusion in this paper is comparative
 claims for non-US venues are not licensed. Second, the battery scores rest
 on eight evaluation seeds; the seed-bootstrap standard errors reported in
 every experiment table bound the resulting score uncertainty at half an
-event, and the three refutations additionally rest on pre-registered
-criteria and paired seeds rather than on score margins. Third, the
+event, the two comparisons that carry the mechanism reading were extended
+to 32 seeds under a registered budget (Section~\ref{sec:robustness}), and
+the three refutations additionally rest on pre-registered criteria and
+paired seeds rather than on score margins. Third, the joint-production
+claim is scoped to flow-generated amplitude structure: the registered
+$t(3)$ probe shows the fundamentalist channel filters exogenous tails
+(kurtosis $3.06$ under full absorption even with $t(3)$ fundamentals), so
+this design cannot test whether an absorption-proof exogenous amplitude
+source would decouple the two properties. Fourth, the
 FX--crypto edge of the leverage triangle is underpowered, and
 Section~\ref{sec:triangle} derives the bound: certification requires a
 history that will not exist for roughly another decade, and widening the
@@ -1345,11 +1604,21 @@ pre-registered program can offer.
 A minimal flow-based market reproduces half of the stylized-fact battery ---
 efficiency, fat tails, volatility clustering amplitude, the leverage effect,
 crash asymmetry --- and no rationality mechanism of three pre-registered
-kinds moves it past 5/10. The refutations identify the reason: the
+kinds moves it past 5/10. A registered attribution program establishes
+what the failed mechanisms do instead: each converts a genuine nonlinear
+multi-day sign leak into one-lag microstructure reversal, absorbing most
+of it --- whitened information falls from $0.0197$ bits in the control to
+$0.0036$ under exact absorption --- and closing none of it, while the
+amplitude structure is deleted alongside the absorption. The refutations
+identify the reason: the
 forecastable component of flow that keeps the sign channel open is the same
 object that generates the heavy-tailed, asymmetric amplitude structure, so
 removing one removes the other. In this model class, sign efficiency and
-the amplitude facts are jointly produced. The missing events --- long
+the amplitude facts are jointly produced --- a claim structural to
+flow-generated amplitude structure, robust to liquidity re-equilibration
+(where near-closure of the sign channel costs every amplitude fact at
+once), and not an artifact of the battery's thresholds. The missing
+events --- long
 memory, the coupling arrow, information-free signs --- appear to live
 upstream of the flows, in whatever generates them, and breaking the ceiling
 within the protocol would require an agent class outside the three tested
@@ -1365,7 +1634,8 @@ certified separation.
 Every number in this paper is regenerable from the public repository. The
 research JSONs consumed by the figures and tables --- under
 \texttt{research/}: \texttt{decathlon.json}, \texttt{decathlon2.json},
-\texttt{decathlon3.json}, \texttt{decathlon4.json}, \texttt{fx.json},
+\texttt{decathlon3.json}, \texttt{decathlon4.json},
+\texttt{robustness.json}, \texttt{fx.json},
 \texttt{crypto.json}, \texttt{crypto\_wide.json},
 \texttt{battery\_audit.json}, and \texttt{score\_se.json} --- are versioned
 in the repository and rebuilt by
@@ -1570,6 +1840,18 @@ flow-only ceiling. No SE exceeds half an event.}
 % src: research/score_se.json scores, se
 \label{fig:scorese}
 \end{figure}
+
+\paragraph{Threshold perturbation bands.}
+The full $\pm 20\%$ single-threshold score bands for all fifteen
+published configurations, SPY's band, and the named knife-edge
+(configuration, threshold) pairs of Section~\ref{sec:robustness} are
+archived in \texttt{research/robustness.json}
+(\texttt{threshold\_robustness}); the per-perturbation records include
+every configuration's score and \cfg{FCVM}'s failure set under each of
+the 48 perturbations. At $\pm 20\%$ the widest bands belong to the
+knife-edge configurations (the frozen $K{=}5$ stack spans 2--4 events);
+every headline row stays at exactly 5.
+% src: research/robustness.json threshold_robustness.score_bands (band_20pct), per_perturbation
 
 \paragraph{The widened cryptocurrency universe.}
 The registered widening of the crypto panel from 10 to 17 majors
