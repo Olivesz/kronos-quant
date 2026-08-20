@@ -299,7 +299,7 @@ check_row("tab:deca3 K5 tuned", r"\$K{=}5\$ \(tuned, contingent pass\).*?\\\\",
 m1, m5 = c3["K1_DECA2"]["median_stats"], c3["K5_FIXEDPOINT"]["median_stats"]
 cite("§4 regression ac1", r"AC\$_1\$: \$(-[\d.]+) \\to (-[\d.]+)\$, breaking E1",
      m1["ac1_r"], m5["ac1_r"])
-cite("§4 regression leverage", r"E5 dies, \$(-[\d.]+) \\to (-[\d.]+)\$",
+cite("§4 regression leverage", r"E5 fails, \$(-[\d.]+) \\to (-[\d.]+)\$",
      m1["leverage"], m5["leverage"])
 cite("§4 regression kurt", r"kurtosis \$([\d.]+) \\to ([\d.]+)\$\) and crash",
      m1["kurt"], m5["kurt"])
@@ -467,7 +467,7 @@ cite("§7 z equity edge", r"\$z = ([\d.]+)\$ against FX, \$z = ([\d.]+)\$ agains
      lc["z_fx_vs_equities"], cc["z_vs_equities"])
 cite("§7 z fx-crypto", r"FX--crypto edge is \$z = ([\d.]+)\$", lc["z_crypto_vs_fx"])
 cite("abstract equities", r"equities \(\$(-0\.04)\$\)", lc["equity_mean"])
-cite("abstract crypto", r"crypto \(\$\+(0\.03)\$\)", cc["crypto_leverage"])
+cite("abstract crypto", r"cryptocurrencies\s*\(\$\+(0\.03)\$\)", cc["crypto_leverage"])
 
 # ------------------------------- 6b. widened crypto universe (DESIGN24 A4)
 print("== widened crypto universe (crypto_wide.json)")
