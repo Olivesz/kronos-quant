@@ -499,6 +499,40 @@ def f10_score_se():
     plt.close(fig)
 
 
+def f11_conversion():
+    """Raw vs AR(1)-whitened direction bits across configurations: the raw
+    statistic rises with intervention strength while the whitened (genuine
+    nonlinear) component falls -- conversion, not creation (DESIGN25 R2)."""
+    import statistics
+    R = json.load(open(ROOT / "research" / "robustness.json"))
+    pc = R["e9_attribution"]["per_config"]
+    order = ["FCVM", "K1", "K5_FROZEN", "Q0.5", "Q1.0"]
+    pretty = ["FCVM\n(control)", "K=1", "K=5\n(frozen)",
+              r"Q ($\lambda_Q{=}0.5$)", r"Q ($\lambda_Q{=}1$)"]
+    raw = [pc[k]["raw_bits"] for k in order]
+    whi = [pc[k]["whitened_bits"] for k in order]
+    xs = list(range(len(order)))
+
+    fig, ax = plt.subplots(figsize=(3.4, 2.5))
+    for series, color, marker, label in (
+            (raw, "0.15", "o", "raw direction bits"),
+            (whi, "#b2182b", "s", "AR(1)-whitened bits")):
+        med = [statistics.median(v) for v in series]
+        for x, vals in zip(xs, series):
+            ax.plot([x] * len(vals), vals, marker, color=color, ms=2.0,
+                    alpha=0.35, mew=0, zorder=2)
+        ax.plot(xs, med, marker + "-", color=color, ms=4.0, lw=1.2,
+                label=label, zorder=3)
+    ax.axhline(0, color="0.7", lw=0.6, zorder=1)
+    ax.set_xticks(xs)
+    ax.set_xticklabels(pretty, fontsize=6.5)
+    ax.set_ylabel("direction bits (E9 statistic)", fontsize=7)
+    ax.legend(fontsize=6.5, frameon=False, loc="upper left")
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.savefig(OUT / "conversion.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     f1_scorecard()
     f2_bits()
@@ -510,4 +544,5 @@ if __name__ == "__main__":
     f8_audit_matrix()
     f9_tuning_grid()
     f10_score_se()
-    print("wrote 10 figures to", OUT)
+    f11_conversion()
+    print("wrote 11 figures to", OUT)

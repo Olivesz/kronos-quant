@@ -85,3 +85,14 @@ the claims citing them. Composed-claim falsity is invisible to both by
 construction. Defenses: the adversarial referee passes and the human read.
 Reader rule: trust any single number; verify any sentence joining two numbers
 into a comparison, trend, or causal claim against the named JSON fields.
+
+## Reconciled state (2026-08-20, final)
+
+Claims wave (reconcile 1) + figure wave (reconcile 2): the paper states only
+what DESIGN25 left standing — conversion not creation, non-closure floor,
+flow-generated joint production, structural ceiling. Figure 11 (conversion)
+is the centerpiece; Fig 3's caption carries the attribution. 32pp, checkers
+492 numeric + 235 reference assertions green, zero overfull/undefined.
+Verdict: FINAL DRAFT — ready for the owner's read. Submission blocked on:
+owner review, byline, endorsement. Publication note: the repo is public, so
+pushing these commits publishes the draft; that call is the owner's.

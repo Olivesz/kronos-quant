@@ -1192,7 +1192,7 @@ what strength grows is identified by R2.
 % src: research/robustness.json strength_depth (kA_depth5, median_bits, tests_depth5_vs_depth1, realized_strength, strength_axis)
 
 \paragraph{Attribution of the E9 statistic (R2).}
-Table~\ref{tab:whiten} gives the decomposition. The control's leak is
+Table~\ref{tab:whiten} gives the decomposition and Figure~\ref{fig:conversion} shows it. The control's leak is
 genuinely nonlinear: AR(1) whitening leaves it essentially unchanged
 ($0.0197$ whitened against $0.0184$ raw, significant on 8 of 8 seeds,
 $\hat\varphi = +0.036$). Every rationality layer \emph{converts} it:
@@ -1244,6 +1244,22 @@ row except half skew (7 of 8).}
 % src: research/robustness.json e9_attribution.per_config (raw_bits, whitened_bits, mi_sign, ac1_r, whitened_sig medians)
 \label{tab:whiten}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{conversion}
+\caption{Conversion, not creation. Raw direction bits (black circles; the
+E9 statistic) rise from the control to the strong-intervention
+configurations, while the AR(1)-whitened bits (red squares) --- the genuinely
+nonlinear component of the leak --- fall monotonically and remain
+significantly positive in every configuration. Small markers show the eight
+evaluation seeds; large markers connect the medians. The divergence of the
+two series is the attribution result of Section~6.5: added rationality
+converts the leak into first-order reversal rather than removing it.
+% src: research/robustness.json e9_attribution per_config raw_bits/whitened_bits
+}
+\label{fig:conversion}
+\end{figure}
 
 \paragraph{Power (R3).}
 The two raw rises stand at 32 seeds: the frozen $K{=}5$ stack at
