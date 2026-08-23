@@ -58,6 +58,12 @@ GATES = [
     "test_momtilt.py",
 ]
 
+# anti-drift: the README badge must state the true gate count (len(GATES)).
+_readme = open(os.path.join(os.path.dirname(HERE), "README.md")).read()
+if f"gates-{len(GATES)}%20passing" not in _readme:
+    print(f"FATAL: README gate badge disagrees with len(GATES)={len(GATES)} — fix README.md")
+    sys.exit(1)
+
 print("=" * 60)
 print("KRONOS verification gates")
 print("=" * 60)
