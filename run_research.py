@@ -2869,6 +2869,44 @@ def exp_harvest(force: bool = False) -> dict:
     return out
 
 
+def exp_momtilt(force: bool = False) -> dict:
+    """DESIGN21: canonical artifact for the shipped momentum-tilt headline.
+    Reproduces the registered comparison (tilted shipped system vs untilted
+    control, identical pipeline) so the flagship Sharpe/MaxDD is derivable
+    from a research JSON rather than living only in README/FINDINGS text."""
+    if not force and (c := load_cached("momtilt")):
+        print("[momtilt] cached")
+        return c
+    from dataclasses import replace
+
+    from kronos.backtest import run_backtest
+    from kronos.pairs import run_pairs_sleeve
+    from kronos.regime import walkforward_regimes
+
+    px, src = load_prices(CFG)
+    mkt = px[CFG.market].pct_change().dropna()
+    t0 = time.time()
+    rg = walkforward_regimes(mkt, CFG)
+    pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
+
+    rows = {}
+    for label, cfg in (("shipped_tilted", CFG),
+                       ("untilted_control", replace(CFG, mom_tilt=0.0))):
+        bt = run_backtest(px, rg["regime"], cfg)
+        net = (bt["net"] + pairs).loc[bt["warmup_end"]:]
+        rows[label] = M.summary(net, label)
+        rows[label]["max_exposure_realized"] = float(
+            bt["exposure_applied"].max())
+        print(f"[momtilt] {label:18s} CAGR {rows[label]['cagr']:+.1%} "
+              f"Sharpe {rows[label]['sharpe']:.3f} "
+              f"MaxDD {rows[label]['max_dd']:.1%}")
+    out = {"source": src, "mom_tilt": CFG.mom_tilt, "rows": rows,
+           "note": "PBO 0.45 / DSR 0.75 at N=185 apply (see forensics.json)"}
+    print(f"[momtilt] done in {time.time()-t0:.0f}s")
+    save("momtilt", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -2885,6 +2923,7 @@ EXPERIMENTS = {
     "battery_audit": exp_battery_audit,
     "score_se": exp_score_se,
     "robustness": exp_robustness,
+    "momtilt": exp_momtilt,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,

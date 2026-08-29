@@ -1,0 +1,41 @@
+{
+ "source": "yahoo",
+ "mom_tilt": 0.15,
+ "rows": {
+  "shipped_tilted": {
+   "name": "shipped_tilted",
+   "cagr": 0.1180384501640177,
+   "vol": 0.11004051755514022,
+   "sharpe": 1.0692859352450634,
+   "sortino": 1.444282235029722,
+   "calmar": 0.6600448651510267,
+   "max_dd": -0.1788339799249995,
+   "underwater_days": 554,
+   "hit_rate": 0.5478028503562945,
+   "skew": -0.4932671456587014,
+   "kurtosis": 2.245722600259887,
+   "var95": 0.0113041142154705,
+   "cvar95": 0.01648579930068221,
+   "total_return": 3.4425074969679423,
+   "max_exposure_realized": 1.5
+  },
+  "untilted_control": {
+   "name": "untilted_control",
+   "cagr": 0.11952284366335952,
+   "vol": 0.11348791244190504,
+   "sharpe": 1.0519077064725468,
+   "sortino": 1.4091782680710223,
+   "calmar": 0.6353867468776834,
+   "max_dd": -0.18811038198498742,
+   "underwater_days": 592,
+   "hit_rate": 0.5475059382422803,
+   "skew": -0.5005749181126206,
+   "kurtosis": 2.4629388044416176,
+   "var95": 0.011707550614115882,
+   "cvar95": 0.01701123202278745,
+   "total_return": 3.521987921500891,
+   "max_exposure_realized": 1.4999999999999993
+  }
+ },
+ "note": "PBO 0.45 / DSR 0.75 at N=185 apply (see forensics.json)"
+}
