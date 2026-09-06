@@ -30,7 +30,7 @@ KRONOS is two things at once:
    volatility, gated by a fat-tail-aware Student-t regime engine, and tilted
    by the measured monthly-momentum information budget.
 
-2. **A research program that treats markets like physics.** 28 pre-registered
+2. **A research program that treats markets like physics.** 33
    experiments ask what quant finance genuinely does not know — *is volatility
    rough? how many bits/day does the past leak about the future? are crashes
    critical transitions or shocks? is the market's near-criticality real?* —
@@ -66,7 +66,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[data]"          # or: pip install -r requirements.txt
 
 python run_kronos.py              # full pipeline -> output/dashboard.html  (~25s)
-python run_research.py all        # 28 research experiments, cached to research/*.json
+python run_research.py all        # 33 research experiments, cached to research/*.json
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
@@ -131,7 +131,7 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 
 | Strategy | CAGR | Vol | Sharpe | Max DD | CVaR95 |
 |---|---|---|---|---|---|
-| **KRONOS (+ momentum tilt, shipped)** | +11.8% | 11.2% | **1.07** | **−17.9%** | 1.65% |
+| **KRONOS (+ momentum tilt, shipped)** | +11.8% | 11.0% | **1.07** | **−17.9%** | 1.65% |
 | KRONOS (HAR lever + t-HMM regimes) | +12.0% | 11.3% | 1.05 | −18.8% | 1.70% |
 | KRONOS (HAR lever, Gaussian regimes) | +11.7% | 11.4% | 1.03 | −19.4% | 1.70% |
 | KRONOS (EDGE baseline: EWMA + Gaussian) | +10.9% | 11.6% | 0.95 | −21.3% | 1.76% |
@@ -145,7 +145,7 @@ rather than hidden.*
 
 ## The research program
 
-28 experiments, each pre-registered in [`docs/design/`](docs/design) and gated
+33 experiments, pre-registered in [`docs/design/`](docs/design) and gated
 before real data. The one-line answers — **full write-ups, tables, and methods
 in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 

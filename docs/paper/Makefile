@@ -16,12 +16,15 @@ FIGS = figures/battery_scorecard.pdf figures/e9_bits_configs.pdf \
 
 all: paper.pdf
 
-# Two verification stages, both hard gates:
-#   1. check_numbers.py     -- every derivable number vs research/*.json
+# Three verification stages, all hard gates:
+#   1. check_numbers.py     -- every derivable number vs research/*.json (derivation)
 #   2. check_references.py  -- every bib entry vs its registered identifier
+#   3. check_surfaces.py    -- every surface echoing a claim vs its source (propagation);
+#                              also reads the GitHub description read-only unless hermetic
 check:
 	$(PYTHON) check_numbers.py
 	$(PYTHON) check_references.py
+	$(PYTHON) check_surfaces.py
 
 # Clean arXiv submission tarball under dist/. Contents: paper.tex, the
 # prebuilt figure PDFs, and paper.bbl (arXiv runs pdflatex, not bibtex, and
