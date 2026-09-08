@@ -244,8 +244,8 @@ cite("§3 grid AC1 endpoints",
      r"\$(-0\.35)\$\s*at \$k_A = 1\$",
      cells[(0.25, 0.01, 0.001)]["ac1_r"], cells[(1.0, 0.05, 0.001)]["ac1_r"])
 cite("§3 grid kurt erosion",
-     r"kurtosis\s*\$([\d.]+) \\to ([\d.]+)\$ from the control to the grid's "
-     r"most capitalized",
+     r"kurtosis\s*\$([\d.]+) \\to ([\d.]+)\$ --- the control's median on the\s*"
+     r"evaluation seeds against\s*the most capitalized grid cells",
      D2["configs"]["FCVM"]["median_stats"]["kurt"],
      cells[(0.5, 0.05, 0.001)]["kurt"])
 cite("§3 grid max bits",
@@ -461,9 +461,15 @@ cite("R2 control nonlinear",
      _m["FCVM"]["phi_hat"])
 cite("R2 conversion sequence",
      r"\$([\d.]+) \\to ([\d.]+)\$ \(\$K{=}1\$\) \$\\to ([\d.]+)\$ "
-     r"\(\$K{=}5\$\) and \$([\d.]+)\$\s*\(\$\\lambda_Q{=}1\$\)",
+     r"\(\$K{=}5\$\) and \$([\d.]+)\$\s*\(\$\\lambda_Q{=}1\$;",
      _m["FCVM"]["whitened_bits"], _m["K1"]["whitened_bits"],
      _m["K5_FROZEN"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+cite("R2 maker-family near-tie (half skew marginally lower)",
+     r"half skew's \$([\d.]+)\$ sitting marginally lower",
+     _m["Q0.5"]["whitened_bits"])
+check("R2 maker-family tie direction (Q0.5 below Q1.0, sub-noise gap)",
+      _m["Q0.5"]["whitened_bits"] < _m["Q1.0"]["whitened_bits"]
+      and _m["Q1.0"]["whitened_bits"] - _m["Q0.5"]["whitened_bits"] < 0.001)
 cite("R2 sign-alone rise",
      r"sign-alone component rises\s*\$([\d.]+) \\to ([\d.]+)\$ and \$([\d.]+)\$",
      _m["FCVM"]["mi_sign"], _m["K5_FROZEN"]["mi_sign"], _m["Q1.0"]["mi_sign"])
@@ -476,7 +482,7 @@ check("R2 whitened diffs reverse in all four arms (0/8 positive, p=0.0078)",
       and re.search(r"positive on 0 of 8 seeds,\s*\$p = 0\.0078\$, in all "
                     r"four arms", TEX) is not None)
 cite("R2 sign-component shares",
-     r"share ([\d.]+) at \$K{=}5\$, ([\d.]+) at\s*\$\\lambda_Q{=}1\$",
+     r"difference: ([\d.]+) at \$K{=}5\$, ([\d.]+) at\s*\$\\lambda_Q{=}1\$",
      e9["verdicts"]["K5_FROZEN"]["sign_component_share_of_raw_rise"],
      e9["verdicts"]["Q1.0"]["sign_component_share_of_raw_rise"])
 check("R2 conditional MI falls in every arm",
@@ -502,11 +508,15 @@ check("R2 raw medians reproduce the published values",
       and abs(_m["Q1.0"]["raw_bits"] - bits4["FCVM+Q1.0"]) < 5e-5)
 # the abstract / intro / conclusion restatements of the conversion numbers
 cite("abstract whitened conversion",
-     r"whitened information\s*([\d.]+) to ([\d.]+) bits at exact\s*absorption",
-     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+     r"whitened\s*information ([\d.]+) to ([\d.]+) bits at exact\s*"
+     r"absorption; ([\d.]+) at one\s*layer",
+     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"],
+     _m["K1"]["whitened_bits"])
 cite("intro whitened conversion",
-     r"from ([\d.]+)\s*bits in the control to ([\d.]+)\s*under exact absorption",
-     _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
+     r"from ([\d.]+) bits in the control to\s*([\d.]+)--([\d.]+) under the "
+     r"maker\s*interventions",
+     _m["FCVM"]["whitened_bits"], _m["Q0.5"]["whitened_bits"],
+     _m["Q1.0"]["whitened_bits"])
 cite("conclusion whitened conversion",
      r"whitened information falls from \$([\d.]+)\$ bits in the control to\s*"
      r"\$([\d.]+)\$ under exact absorption",
@@ -516,9 +526,32 @@ check("shared conversion pair cited consistently (>= 2 sites)",
       and abs(_m["FCVM"]["whitened_bits"] - 0.0197) < 5e-5
       and abs(_m["Q1.0"]["whitened_bits"] - 0.0036) < 5e-5)
 cite("§3 K1 absorption share",
-     r"absorbing part of\s*the genuine nonlinear leak \(whitened bits "
+     r"absorbing part of\s*the whitening-resistant leak \(whitened bits "
      r"\$([\d.]+) \\to ([\d.]+)\$\)",
      _m["FCVM"]["whitened_bits"], _m["K1"]["whitened_bits"])
+check("R2 single-layer absorption percentage (43%)",
+      re.search(r"the single layer 43\\%", TEX) is not None
+      and round(100 * (1 - _m["K1"]["whitened_bits"]
+                       / _m["FCVM"]["whitened_bits"])) == 43)
+check("fig:inversion dashed line = medians of the DISPLAYED seeds",
+      re.search(r"medians of the seeds displayed:\s*\$0\.0195 \\to 0\.0194 "
+                r"\\to 0\.0257\$", TEX) is not None
+      and abs(sorted(ext["per_seed"]["K0_FCVM"])[15]
+              + sorted(ext["per_seed"]["K0_FCVM"])[16]
+              - 2 * 0.0195) < 2e-4
+      and abs(sorted(ext["per_seed"]["K1_DECA2"])[15]
+              + sorted(ext["per_seed"]["K1_DECA2"])[16]
+              - 2 * 0.0194) < 2e-4
+      and abs(med["K5_FIXEDPOINT"] - 0.0257) < 5e-5)
+check("limitation 6: R5 world below SPY's raw bits (0.0016 < 0.0029)",
+      re.search(r"E9-significant at \$0\.0016\$ bits", TEX) is not None
+      and re.search(r"real SPY's raw\s*\$0\.0029\$", TEX) is not None
+      and abs(RB["requilibration"]["arms"]["Q1.0"]["eval"]["median_dir_bits"]
+              - 0.0016) < 5e-5
+      and abs(D1["spy"]["stats"]["dir_bits"] - 0.0029) < 5e-5)
+check("fig:bits caption carries the R5 exception at the same value",
+      re.search(r"collapses to 0\.0016 bits --- below the\s*SPY line", TEX)
+      is not None)
 
 # --- R3: 32-seed extensions ------------------------------------------------
 ext32 = RB["ext32"]
@@ -928,8 +961,48 @@ check("§7 spurious-leverage bound == gate X26's constant",
       _m26 is not None and float(_m26.group(1)) == 0.04
       and "$|0.04|$" in TEX)
 
-# (no remaining narrative skips: the GJR clock reference is asserted against
-# battery_audit.json gjr_clock in section 8b)
+# --- tab:params: the base-market parameter table vs kronos/decathlon.py -----
+_deca_src = (ROOT / "kronos" / "decathlon.py").read_text()
+_dblk = re.search(r"DEFAULTS = dict\((.*?)\n\)", _deca_src, re.S)
+_defaults = {}
+if _dblk:
+    for _mm in re.finditer(r"^\s*(\w+)\s*=\s*([\d.]+(?:\s*/\s*[\d.]+)?)\s*,",
+                           _dblk.group(1), re.M):
+        _v = _mm.group(2)
+        _defaults[_mm.group(1)] = (float(_v.split("/")[0]) / float(_v.split("/")[1])
+                                   if "/" in _v else float(_v))
+check("tab:params source (DEFAULTS parsed from kronos/decathlon.py)",
+      len(_defaults) >= 13, "DEFAULTS dict not parsed — teach check_numbers.py")
+for _label, _pat, _key in [
+    ("tab:params lambda", r"\$\\lambda\$ \(price impact\)\s*& ([\d.]+)", "lam"),
+    ("tab:params kF", r"\$k_F\$ \(fundamentalist\)\s*& ([\d.]+)", "kF"),
+    ("tab:params kC", r"\$k_C\$ \(chartist\)\s*& ([\d.]+)", "kC"),
+    ("tab:params s", r"\$s\$ \(chartist saturation\)\s*& ([\d.]+)", "s_c"),
+    ("tab:params kV", r"\$k_V\$ \(vol-targeter\)\s*& ([\d.]+)", "kV"),
+    ("tab:params sigma*", r"\$\\sigma\^{\*}\$ \(daily vol target\) & ([\d.]+)",
+     "sig_target"),
+    ("tab:params Lmax", r"\$L_{\\max}\$ \(leverage cap\)\s*& ([\d.]+)", "Lmax"),
+    ("tab:params kM", r"\$k_M\$ \(market maker\)\s*& ([\d.]+)", "kM"),
+    ("tab:params sN", r"\$s_N\$ \(noise-trader flow\)\s*& ([\d.]+)", "sN"),
+    ("tab:params sV", r"\$s_V\$ \(fundamental vol\)\s*& ([\d.]+)", "sV"),
+    ("tab:params kA", r"\$k_A\$ \(forecast-flow fraction\) & ([\d.]+)", "kA"),
+    ("tab:params capA", r"\$\\mathrm{cap}_A\$ \(inventory cap\) & ([\d.]+)",
+     "capA"),
+    ("tab:params sA", r"\$s_A\$ \(execution noise\) & ([\d.]+)", "sA"),
+]:
+    cite(_label, _pat, _defaults.get(_key))
+check("tab:params EWMA speeds (1/10 chartist, 1/8 vol-estimate)",
+      abs(_defaults.get("a_m", 0) - 1 / 10) < 1e-12
+      and abs(_defaults.get("a_s", 0) - 1 / 8) < 1e-12
+      and re.search(r"chartist EWMA speed & \$1/10\$", TEX) is not None
+      and re.search(r"vol-estimate EWMA speed & \$1/8\$", TEX) is not None)
+check("tab:params FCVMH cohort speeds match the code's hetero branch",
+      re.search(r"cohort speeds & \$1/5,\\,1/20,\\,1/80\$", TEX) is not None
+      and "1 / 5, 1 / 20, 1 / 80" in _deca_src)
+
+# (narrative skips: one remaining — limitation 6's "$T \approx 4100$" for the
+# SPY sample length is not exported by any research JSON; it is the battery's
+# 2010-2026 daily window, ~16.4y x 252. Export it if a research rerun happens.)
 # --- anti-drift: gate counts stated in the paper must equal len(GATES) -------
 _runner = (ROOT / "tests" / "run_all.py").read_text()
 _n_true = len(re.findall(r'"(test_\w+\.py)"', _runner))

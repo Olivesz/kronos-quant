@@ -1,7 +1,8 @@
 """Generate every figure for the preprint from research/*.json.
 
 Reads ONLY the research JSONs (research/decathlon.json, decathlon2.json,
-decathlon3.json, decathlon4.json, fx.json, crypto.json, battery_audit.json,
+decathlon3.json, decathlon4.json, robustness.json, fx.json, crypto.json,
+battery_audit.json,
 score_se.json) — no hand-entered numbers.  Outputs LaTeX-sized PDF figures
 (single-column, ~3.4 in wide, monochrome-friendly) into docs/paper/figures/.
 
@@ -17,6 +18,7 @@ F7  leverage_perasset.pdf   per-instrument leverage across the three venue class
 F8  audit_matrix.pdf        multi-index battery audit: events x indices
 F9  tuning_grid.pdf         Experiment I tuning grid: score by (kA, capA, sA)
 F10 score_se.pdf            battery scores with seed-bootstrap SEs, all configs
+F11 conversion.pdf          raw vs AR(1)-whitened bits across configurations
 
 Build note: matplotlib is a PAPER-BUILD-ONLY dependency.  It is deliberately
 NOT in requirements.txt / project dependencies; install it into the venv ad
@@ -153,12 +155,18 @@ def f3_inversion():
             for k in ks]
     kA = D3["frozen_params"]["kA"]
     bit_keys = ["K0_FCVM", "K1_DECA2", "K5_FIXEDPOINT"]
-    med = [D3["dir_bits_vs_K"][k]["median"] for k in bit_keys]
     # per-seed scatter: the DESIGN24 A2 32-seed extension at K=0/1, the 8
-    # evaluation seeds at K=5 (medians stay the published 8-seed protocol
-    # values; the caption states both seed counts)
+    # evaluation seeds at K=5
     ext = D3["k01_extension"]["per_seed"]
     seeds = [ext.get(k, D3["dir_bits_vs_K"][k]["per_seed"]) for k in bit_keys]
+    # medians OF THE DISPLAYED SEEDS: the dashed line must summarize the
+    # scatter it overlays (32-seed medians are flat over K=0->1, which is
+    # the registered verdict); the 8-seed protocol medians live in Table 3
+    def _median(s):
+        t = sorted(s)
+        n = len(t)
+        return t[n // 2] if n % 2 else (t[n // 2 - 1] + t[n // 2]) / 2
+    med = [_median(s) for s in seeds]
 
     fig, ax = plt.subplots(figsize=(3.4, 2.55))
     axr = ax.twinx()
@@ -191,9 +199,9 @@ def f3_inversion():
     axr.text(3.52, 0.0220, "market space: leaked\n"
              r"sign bits (E9) $\nearrow$",
              fontsize=7, ha="left", va="top", color="0.25")
-    axr.annotate(f"{med[0]:.4f}", xy=(0, med[0]), xytext=(0.30, 0.01745),
+    axr.annotate(f"{med[0]:.4f}", xy=(0, med[0]), xytext=(0.30, 0.0206),
                  fontsize=6.5, color="0.25", ha="left")
-    axr.annotate(f"{med[1]:.4f}", xy=(1, med[1]), xytext=(1.28, 0.0186),
+    axr.annotate(f"{med[1]:.4f}", xy=(1, med[1]), xytext=(1.28, 0.0178),
                  fontsize=6.5, color="0.25", ha="left")
     axr.annotate(f"{med[2]:.4f}", xy=(5, med[2]), xytext=(4.70, 0.0253),
                  fontsize=6.5, color="0.25", ha="right")

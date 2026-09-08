@@ -88,6 +88,43 @@ construction. Defenses: the adversarial referee passes and the human read.
 Reader rule: trust any single number; verify any sentence joining two numbers
 into a comparison, trend, or causal claim against the named JSON fields.
 
+## Referee-panel wave (2026-09-08)
+
+Six-lens adversarial panel on the reconciled 32pp draft (ABM specialist /
+econometrician / hostile referee / presentation / composed-claims auditor /
+claims scope), every finding then attacked by an independent skeptic:
+34 findings confirmed (21 + 13 overflow), 23 refuted for the record.
+All confirmed textual findings are fixed in this wave, among them: the
+"three independent referee reports" provenance now states the reviews
+were commissioned adversarial audits; the abstract/intro/conclusion
+distributive weld ("each … absorbing most") scoped to the strong
+interventions (K=1 absorbs 43%); "monotonically" retired (Q0.5 0.0033 <
+Q1.0 0.0036 breaks it within the maker family); "genuine nonlinear" →
+"whitening-resistant" with the lag-1 license stated (limitation 5);
+fig:inversion's dashed line now draws the medians of the displayed
+32-seed scatter (flat over K=0→1) instead of the 8-seed step; fig:bits
+caption scoped to the frozen-liquidity configs with the R5 exception
+stated; the closure criterion's T-dependence measured as limitation 6;
+a multiplicity paragraph added to Sec 6.5; the full parameter table
+(tab:params, tethered to DEFAULTS by check_numbers); Table 9's three
+uncertainty constructions named; Table 12's E10 25× overshoot stated;
+the FX vertex rescoped to orientation-averaging; title's first noun
+corrected to "Sign Efficiency" (E1 is separable — the flow-only control
+passes it); 8 new fetched-DOI references (Franke-Westerhoff, Winker et
+al., Gode-Sunder, Daniels et al., Farmer-Patelli-Zovko, Kyle,
+Glosten-Milgrom, Christoffersen-Diebold) and a named-in-prose
+Grossman-Stiglitz attribution (no DOI exists; footnoted).
+Checkers grew in lockstep: check_numbers 492 → 516, check_references
+235 → 283 (47 entries).
+
+**Four experimental findings pre-registered as DESIGN26 (DECATHLON-R2,
+W1–W4): AR(p) whitening ladder, 32-seed whitened extension, real-data
+whitened benchmark + matched-T closure verdicts, FX
+orientation-normalized leverage.** Until W1–W3 run, the paper says
+"whitening-resistant" (not "nonlinear") and carries limitations 2/5/6;
+kill criteria name what dies if the measurements go the other way,
+including re-examining the title's "Cannot Close It" clause.
+
 ## Reconciled state (2026-08-20, final)
 
 Claims wave (reconcile 1) + figure wave (reconcile 2): the paper states only
