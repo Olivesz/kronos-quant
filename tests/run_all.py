@@ -33,6 +33,8 @@ GATES = [
     "test_decathlon4.py",
     # DESIGN25 referee-program gate (whitened-MI estimator, t3 flag, rescorer identity)
     "test_robustness.py",
+    # DESIGN26 follow-up gate (AR(p) whitening ladder: identity, calibration, size/power)
+    "test_robustness2.py",
     # KRONOS-CRITICAL gate
     "test_critical.py",
     # KRONOS-REFLEX gate

@@ -42,6 +42,7 @@ arc, or jump to a finding.
 | 21 | [DESIGN21.md](design/DESIGN21.md) | The momentum tilt | HARVEST's bits, harvested: a frozen ±15% exposure tilt on 21d momentum — Sharpe 1.05 → **1.07**, both eras improve, cap verified, **DSR 0.73 → 0.75 after charging** (PBO 0.45 restated). |
 | 22 | [DESIGN22.md](design/DESIGN22.md) | Price-setting rationality — the line closes | A maker that QUOTES against the forecastable flow (exact impact absorption, gate-verified to the identity) scores **1/10** — the leak doesn't close, the wildness dies, and per the pre-registered closure clause **the 5/10 ceiling is declared structural and the DESIGN8 line closes**. |
 | 25 | [DESIGN25.md](design/DESIGN25.md) | Referee attribution & robustness | The published inversion **dies on attribution**: at matched effective strength depth adds nothing (p = 0.0028), and the bits-rise is induced one-lag reversal scored as sign information — under AR(1) whitening the rises reverse. What survives is sharper: rationality **converts** a genuine nonlinear leak into reversal (0.0197 → 0.0036 whitened, never to zero), wildness is flow-generated (t(3) fundamentals don't save it), the ceiling survives kM re-equilibration (best re-tuned Q world: bits 0.0016, score **2/10**) and ±20% threshold perturbation. |
+| 26 | [DESIGN26.md](design/DESIGN26.md) | Follow-up: whitening order, power, real benchmarks, orientation | The control's leak is nonlinear **through lag 21** (AR(21)-whitened 0.0183, 8/8) and the whitened falls stand at 32 seeds (0/32) — but the **"cannot close" clause dies**: exact absorption's AR(21) residue is 0.0001 bits (2/8) and the re-equilibrated world is indistinguishable from closure at the real market's T (3/8 at T=4100). Bonus: orientation-normalizing FX flips its "zero" to **−0.022 (z=−3.3)** — one signed flight-to-quality flow, averaged away by quote convention. |
 
 ## How the research maps to code
 
@@ -60,6 +61,7 @@ before real data ever touches the estimator:
 | Decathlon-3 (20) | `kronos/decathlon.py` | `tests/test_decathlon3.py` (X32) |
 | Decathlon-4 (22) | `kronos/decathlon.py` | `tests/test_decathlon4.py` (X34) |
 | Decathlon-R (25) | `kronos/robustness.py` | `tests/test_robustness.py` (X36) |
+| Decathlon-R2 (26) | `kronos/robustness2.py` | `tests/test_robustness2.py` (X37) |
 | Critical (9) | `kronos/critical.py` | `tests/test_critical.py` (X20) |
 | Reflex (10) | `kronos/hawkes.py` | `tests/test_reflex.py` (X21) |
 | Constants (11) | `kronos/constants.py` | `tests/test_constants.py` (X22) |

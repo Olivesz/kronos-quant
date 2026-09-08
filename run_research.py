@@ -2067,6 +2067,284 @@ def exp_robustness(force: bool = False) -> dict:
     return out
 
 
+def _r2_w1(d3: dict, d4: dict, rb: dict) -> dict:
+    """W1: the AR(p) whitening ladder over the five attribution configs."""
+    from kronos.decathlon import simulate_abm
+    from kronos.robustness import ar1_whiten, e9_bits
+    from kronos.robustness2 import arp_whiten
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    configs = {
+        "FCVM": dict(base),
+        "K1": dict(base, anticipators=True, fixed_point_iters=1),
+        "K5_FROZEN": dict(base, anticipators=True, fixed_point_iters=5),
+        "Q0.5": dict(base, quote_skew=0.5),
+        "Q1.0": dict(base, quote_skew=1.0),
+    }
+    stored_raw = {
+        "FCVM": d3["dir_bits_vs_K"]["K0_FCVM"]["per_seed"],
+        "K1": d3["dir_bits_vs_K"]["K1_DECA2"]["per_seed"],
+        "K5_FROZEN": d3["dir_bits_vs_K"]["K5_FIXEDPOINT"]["per_seed"],
+        "Q0.5": d4["dir_bits_vs_lambda"]["FCVM+Q0.5"]["per_seed"],
+        "Q1.0": d4["dir_bits_vs_lambda"]["FCVM+Q1.0"]["per_seed"],
+    }
+    stored_w1 = rb["e9_attribution"]["per_config"]
+    per = {}
+    for name, cfg in configs.items():
+        rows = {"ar5_bits": [], "ar5_sig": [], "ar21_bits": [], "ar21_sig": []}
+        for i, sd in enumerate(range(100, 108)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            raw = e9_bits(r, seed=i)
+            if round(raw["bits"], 6) != stored_raw[name][i]:
+                raise RuntimeError(f"W1 regeneration broken: {name} seed {sd}")
+            _, w1 = ar1_whiten(r)
+            if round(e9_bits(w1, seed=i)["bits"], 6) != \
+                    stored_w1[name]["whitened_bits"][i]:
+                raise RuntimeError(f"W1 AR(1) leg drifted: {name} seed {sd}")
+            for p, tag in ((5, "ar5"), (21, "ar21")):
+                _, wp = arp_whiten(r, p)
+                b = e9_bits(wp, seed=i)
+                rows[f"{tag}_bits"].append(round(b["bits"], 6))
+                rows[f"{tag}_sig"].append(int(b["significant"]))
+        per[name] = rows
+        print(f"[robustness2] W1 {name:9s}: AR5 "
+              f"{np.median(rows['ar5_bits']):.4f} ({sum(rows['ar5_sig'])}/8) | "
+              f"AR21 {np.median(rows['ar21_bits']):.4f} "
+              f"({sum(rows['ar21_sig'])}/8)")
+    c21 = sum(per["FCVM"]["ar21_sig"])
+    verdict = ("the control's leak SURVIVES AR(21) whitening — resistant to "
+               "linear whitening through lag 21; the conversion reading "
+               "strengthens" if c21 > 4 else
+               "the control's leak is linearly explainable at horizons "
+               "<= 21 days: AR(21) whitening drives it to insignificance on "
+               "a majority of seeds — 'conversion of a leak beyond linear "
+               "structure' is DEAD; the licensed claim is conversion of "
+               "multi-lag linear structure into one-lag reversal")
+    return {"protocol": "seeds 100-107; worlds and the AR(1) leg asserted "
+                        "against robustness.json before either AR(p) "
+                        "estimator was read; criterion per DESIGN26 "
+                        "amendment 2 (significance survival, not magnitude)",
+            "per_config": per,
+            "control_ar21_sig_seeds": c21, "verdict": verdict}
+
+
+def _r2_w2(d3: dict, rb: dict) -> dict:
+    """W2: the whitened comparisons at 32 seeds (asserted regenerations)."""
+    from kronos.decathlon import simulate_abm
+    from kronos.robustness import ar1_whiten, e9_bits
+
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    jobs = {
+        "FCVM": (dict(base), d3["k01_extension"]["per_seed"]["K0_FCVM"]),
+        "K5_FROZEN": (dict(base, anticipators=True, fixed_point_iters=5),
+                      rb["ext32"]["arms"]["K5_FROZEN"]["per_seed"]),
+        "Q1.0": (dict(base, quote_skew=1.0),
+                 rb["ext32"]["arms"]["Q1.0"]["per_seed"]),
+    }
+    whit = {}
+    for name, (cfg, stored) in jobs.items():
+        ws = []
+        for i, sd in enumerate(range(100, 132)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            if round(e9_bits(r, seed=i)["bits"], 6) != stored[i]:
+                raise RuntimeError(f"W2 regeneration broken: {name} seed {sd}")
+            _, w = ar1_whiten(r)
+            ws.append(round(e9_bits(w, seed=i)["bits"], 6))
+        whit[name] = ws
+        print(f"[robustness2] W2 {name:9s}: whitened 32-seed median "
+              f"{np.median(ws):.4f}")
+    out = {"protocol": "seeds 100-131; every simulation asserted against the "
+                       "stored per-seed raw bits (k01_extension / ext32) "
+                       "before the whitened estimator was read",
+           "whitened_per_seed": whit, "arms": {}}
+    ctrl = np.array(whit["FCVM"])
+    for arm in ("K5_FROZEN", "Q1.0"):
+        t = _paired_tests(ctrl, np.array(whit[arm]))
+        falls = bool(t["separates_at_0.05"] and t["median_diff"] < 0)
+        out["arms"][arm] = {
+            "median": round(float(np.median(whit[arm])), 6),
+            "tests_vs_control": t,
+            "verdict": ("the whitened fall STANDS at 32 seeds" if falls else
+                        "the whitened fall LOSES significance at 32 seeds — "
+                        "the conversion claim for this arm is DEAD as stated")}
+        print(f"[robustness2] W2 {arm}: fall vs control median_diff "
+              f"{t['median_diff']:+.4f}, p={t['wilcoxon_p']:.2e}, "
+              f">ctrl on {t['n_pos']}/{t['n']} -> "
+              f"{'STANDS' if falls else 'DEAD'}")
+    return out
+
+
+def _r2_w3(d1: dict, d3: dict, d4: dict, rb: dict) -> dict:
+    """W3: real-data whitened benchmark + matched-T closure verdicts."""
+    from kronos.decathlon import simulate_abm
+    from kronos.robustness import ar1_whiten, e9_bits
+    from kronos.robustness2 import arp_whiten
+
+    px, _ohlc, _gk, src = get_data()
+    real = {}
+    for name in ("SPY", "DIA"):
+        r = px[name].pct_change().dropna()
+        raw = e9_bits(r)
+        if name == "SPY" and round(raw["bits"], 4) != \
+                d1["spy"]["stats"]["dir_bits"]:
+            raise RuntimeError("W3: SPY raw bits drifted from decathlon.json "
+                               f"({raw['bits']:.6f} vs stored 4dp "
+                               f"{d1['spy']['stats']['dir_bits']})")
+        row = {"T": int(len(r)), "raw_bits": round(raw["bits"], 6),
+               "raw_sig": bool(raw["significant"])}
+        _, w1 = ar1_whiten(r)
+        b1 = e9_bits(w1)
+        row["ar1_bits"], row["ar1_sig"] = round(b1["bits"], 6), bool(b1["significant"])
+        for p, tag in ((5, "ar5"), (21, "ar21")):
+            _, wp = arp_whiten(r, p)
+            b = e9_bits(wp)
+            row[f"{tag}_bits"], row[f"{tag}_sig"] = round(b["bits"], 6), \
+                bool(b["significant"])
+        real[name] = row
+        print(f"[robustness2] W3 {name}: T={row['T']}, raw "
+              f"{row['raw_bits']:.4f} (sig={row['raw_sig']}), AR21 "
+              f"{row['ar21_bits']:.4f} (sig={row['ar21_sig']})")
+
+    T_MATCH = 4100
+    base = dict(fundamentalists=True, chartists=True, voltargeters=True,
+                marketmakers=True)
+    jobs = {
+        "Q0.5": (dict(base, quote_skew=0.5),
+                 d4["dir_bits_vs_lambda"]["FCVM+Q0.5"]["per_seed"]),
+        "Q1.0": (dict(base, quote_skew=1.0),
+                 d4["dir_bits_vs_lambda"]["FCVM+Q1.0"]["per_seed"]),
+        "R5_kM0.1+Q1.0": (dict(base, quote_skew=1.0, params={"kM": 0.1}),
+                          rb["requilibration"]["arms"]["Q1.0"]["eval"]
+                          ["dir_bits_per_seed"]),
+    }
+    matched = {}
+    for name, (cfg, stored) in jobs.items():
+        sigs, bits = [], []
+        for i, sd in enumerate(range(100, 108)):
+            r = simulate_abm(T=6000, seed=sd, **cfg)
+            full = e9_bits(r, seed=i)
+            if round(full["bits"], 6) != round(stored[i], 6):
+                raise RuntimeError(f"W3 regeneration broken: {name} seed {sd}")
+            sub = e9_bits(r.iloc[-T_MATCH:], seed=i)
+            sigs.append(int(sub["significant"]))
+            bits.append(round(sub["bits"], 6))
+        matched[name] = {"per_seed_bits": bits, "sig_seeds": sum(sigs),
+                         "closed_at_matched_T": bool(sum(sigs) <= 4)}
+        print(f"[robustness2] W3 {name} @T={T_MATCH}: median "
+              f"{np.median(bits):.4f}, significant {sum(sigs)}/8 -> "
+              f"{'INDISTINGUISHABLE FROM CLOSURE' if sum(sigs) <= 4 else 'still open'}")
+    r5_closed = matched["R5_kM0.1+Q1.0"]["closed_at_matched_T"]
+    verdict = ("at the real market's observation length (T=4100) the "
+               "re-equilibrated full-absorption world is INDISTINGUISHABLE "
+               "FROM CLOSURE — 'cannot close it' is a T=6000 statement, and "
+               "the title clause must be re-examined per the registered rule"
+               if r5_closed else
+               "every tested configuration remains E9-significant at the "
+               "matched length — 'never closes' survives the T-dependence "
+               "challenge at the real market's observation length")
+    return {"protocol": f"real series from {src}; SPY raw asserted against "
+                        "decathlon.json before any whitened estimator was "
+                        "read; matched-T = last 4100 observations per "
+                        "DESIGN26 amendment; matched-T configs asserted at "
+                        "full length against stored per-seed bits",
+            "real": real, "matched_T": {"T": T_MATCH, "configs": matched},
+            "verdict": verdict}
+
+
+def _r2_w4(fj: dict) -> dict:
+    """W4: orientation-normalized FX leverage (registered class map)."""
+    from kronos.fx import load_fx, per_pair_leverage
+    from kronos.transfer import battery as pooled_battery
+
+    CLS = {"AUD": "risk", "NZD": "risk", "CAD": "risk", "NOK": "risk",
+           "SEK": "risk", "GBP": "risk", "EUR": "risk", "MXN": "risk",
+           "JPY": "fund", "CHF": "fund", "USD": "fund"}
+
+    def legs(ticker: str) -> tuple[str, str]:
+        code = ticker.replace("=X", "")
+        return ("USD", code) if len(code) == 3 else (code[:3], code[3:])
+
+    fu = load_fx()
+    conv = pooled_battery(fu["close"], fu["gk"], curve=None)
+    if round(conv["leverage"][0], 4) != fj["leverage_contrast"]["fx_leverage"] \
+            or round(conv["leverage"][1], 4) != fj["leverage_contrast"]["fx_sd"]:
+        raise RuntimeError("W4: market-convention pooled leverage failed to "
+                           "reproduce fx.json before normalization was read")
+    keep, flip, excl = [], [], []
+    for c in fu["close"].columns:
+        b, q = legs(c)
+        if CLS[b] == CLS[q]:
+            excl.append(c)
+        elif CLS[b] == "risk":
+            keep.append(c)
+        else:
+            flip.append(c)
+    cols = keep + flip
+    close_n = fu["close"][cols].copy()
+    for c in flip:
+        close_n[c] = 1.0 / close_n[c]
+    norm = pooled_battery(close_n, fu["gk"][cols], curve=None)
+    nl, nsd = norm["leverage"]
+    z = nl / max(nsd, 1e-12)
+    pp = per_pair_leverage(close_n, fu["gk"][cols])
+    verdict = ("the orientation-normalized FX cohort is materially nonzero: "
+               "FX hosts one signed flight-to-quality flow and the "
+               "market-convention zero is an orientation average"
+               if abs(z) >= 2 else
+               "the orientation-normalized cohort is also statistically "
+               "zero: the venue-level reading survives unqualified and the "
+               "rescope sentence simplifies back")
+    print(f"[robustness2] W4: normalized leverage {nl:+.4f} ± {nsd:.4f} "
+          f"(z={z:+.2f}) over {len(cols)} pairs "
+          f"({len(flip)} re-signed, {len(excl)} excluded: {excl})")
+    return {"protocol": "registered class map applied per leg; same-class "
+                        "pairs excluded; flip = price inversion (GK variance "
+                        "is orientation-invariant); market-convention pooled "
+                        "estimate asserted against fx.json first",
+            "n_pairs": len(cols), "re_signed": flip, "excluded": excl,
+            "normalized_leverage": round(float(nl), 4),
+            "normalized_sd": round(float(nsd), 4),
+            "z_vs_zero": round(float(z), 2),
+            "per_pair_normalized": {k: round(v, 4) for k, v in pp.items()},
+            "verdict": verdict}
+
+
+def exp_robustness2(force: bool = False) -> dict:
+    """DESIGN26 (DECATHLON-R2): the referee-panel follow-up — W1 AR(p)
+    whitening ladder, W2 32-seed whitened extension, W3 real-data whitened
+    benchmark + matched-T closure verdicts, W4 orientation-normalized FX
+    leverage. Gate X37 licenses the AR(p) estimator before any response
+    variable is read."""
+    if not force and (c := load_cached("robustness2")):
+        print("[robustness2] cached")
+        return c
+    t0 = time.time()
+    d1 = load_cached("decathlon")
+    d3 = load_cached("decathlon3")
+    d4 = load_cached("decathlon4")
+    rb = load_cached("robustness")
+    fj = load_cached("fx")
+    if not all((d1, d3, d4, rb, fj)):
+        raise RuntimeError("robustness2 needs the published decathlon, "
+                           "robustness and fx caches")
+    out = {"design": "DESIGN26",
+           "budget": {"asserted_regenerations": {"W1": 40, "W2": 96,
+                                                 "W3": 24},
+                      "new_simulations": 0,
+                      "note": "every simulation asserted against stored "
+                              "per-seed values before any new estimator "
+                              "was read"},
+           "w1_arp_ladder": _r2_w1(d3, d4, rb),
+           "w2_whitened_ext32": _r2_w2(d3, rb),
+           "w3_real_benchmark": _r2_w3(d1, d3, d4, rb),
+           "w4_fx_orientation": _r2_w4(fj)}
+    print(f"[robustness2] done ({time.time()-t0:.0f}s)")
+    save("robustness2", out)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Experiment 18 (CRITICAL): are crashes critical transitions or shocks?
 # ---------------------------------------------------------------------------
@@ -2923,6 +3201,7 @@ EXPERIMENTS = {
     "battery_audit": exp_battery_audit,
     "score_se": exp_score_se,
     "robustness": exp_robustness,
+    "robustness2": exp_robustness2,
     "momtilt": exp_momtilt,
     "critical": exp_critical,
     "reflex": exp_reflex,

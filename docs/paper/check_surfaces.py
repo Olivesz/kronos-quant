@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 25
+EXPECTED_LOCAL_ASSERTIONS = 26
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -113,6 +113,9 @@ def main():
 
     hits = count_and_values(readme, r"all (\d+) verification gates")
     check("README", "quickstart gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
+
+    hits = count_and_values(readme, r"(\d+) such gates run in")
+    check("README", "discipline-paragraph gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
 
     hits = count_and_values(readme, r"\*\*(\d+) verification gates\*\* — (\d+) proving")
     check("README", "highlights gate count", [h[0] for h in hits] == [str(n_gates)], f"expected [{n_gates}], saw {hits}")

@@ -23,6 +23,7 @@ studies extend the battery to Japan, Europe, Asia-EM, crypto (2017–2026), and
 - [KRONOS-DECATHLON-3 — the fixed point of mutual anticipation](#kronos-decathlon-3--the-fixed-point-of-mutual-anticipation)
 - [KRONOS-DECATHLON-4 — the ceiling is structural; the line closes](#kronos-decathlon-4--the-ceiling-is-structural-the-line-closes)
 - [KRONOS-DECATHLON-R — referee-driven robustness and attribution](#kronos-decathlon-r--referee-driven-robustness-and-attribution)
+- [KRONOS-DECATHLON-R2 — the follow-up program](#kronos-decathlon-r2--the-follow-up-program-whitening-order-power-real-benchmarks-orientation)
 - [KRONOS-TRADE — the deployable system](#kronos-trade--the-deployable-system)
 - [KRONOS-TRANSFER — does market structure cross borders?](#kronos-transfer--does-market-structure-cross-borders)
 - [KRONOS-CRYPTO — do the laws survive outside equities?](#kronos-crypto--do-the-laws-survive-outside-equities)
@@ -620,6 +621,79 @@ independent ways, including the near-closure 2/10 world), and a ceiling
 that is robust to thresholds and to liquidity re-equilibration. That is a
 different — and better-supported — headline than the one the referees
 struck down.
+
+## KRONOS-DECATHLON-R2 — the follow-up program (whitening order, power, real benchmarks, orientation)
+
+*Pre-registered as [DESIGN26](design/DESIGN26.md) (W1–W4) in response to the
+four-finding experimental residue of the 2026-09-08 adversarial referee panel;
+estimator licensed by gate X37 before any response variable was read; every
+simulation an asserted regeneration (assert-then-measure), zero unasserted
+new runs. Results in `research/robustness2.json`.*
+
+**W1 — the AR(p) whitening ladder.** The lag-1 license question is settled
+in both directions at once:
+
+| config | AR(1) whitened | AR(5) | AR(21) |
+|---|---|---|---|
+| FCVM (control) | 0.0197 (8/8) | 0.0187 (8/8) | **0.0183 (8/8)** |
+| K=1 | 0.0112 (8/8) | 0.0104 (8/8) | 0.0098 (8/8) |
+| K=5 (frozen) | 0.0038 (8/8) | 0.0021 (8/8) | 0.0026 (7/8) |
+| Q0.5 | 0.0033 (7/8) | 0.0033 (7/8) | 0.0032 (8/8) |
+| Q1.0 (exact absorption) | 0.0036 (8/8) | **0.0005 (3/8)** | **0.0001 (2/8)** |
+
+The **control's leak survives AR(21) whitening essentially undiminished**
+(0.0197 → 0.0183, 8/8) — it is genuinely not linear at any horizon ≤ 21
+days, and the conversion reading strengthens. But the registered kill
+criterion **fires for the exact-absorption floor**: under AR(21), Q1.0's
+residue is 0.0001 bits, significant on 2/8 seeds. The published "never
+closes" floor at exact absorption was substantially **longer-lag linear
+structure** that the lag-1 filter could not see. Licensed composite: added
+rationality converts a genuinely nonlinear leak into *linear* structure
+(one-lag reversal plus longer-lag components), and under exact absorption
+the beyond-linear residue is statistically indistinguishable from zero.
+(Gate X37d bounds the filter's own appetite: on a ground-truth nonlinear
+drift channel AR(21) retains 0.31–0.47 of the bits while preserving
+significance — Q1.0's retention of 0.03 is far below that boundary, so
+this is structure removed, not filter over-absorption.)
+
+**W2 — whitened power at 32 seeds.** Both whitened falls stand: K5-frozen
+0.0031 and Q1.0 0.0028 against the control's 0.0210, above control on
+**0 of 32 seeds** in each arm (Wilcoxon p at the 4-dp display floor,
+0.0000). The eight-seed-floor limitation on the conversion reading is
+retired.
+
+**W3 — real-data benchmark and matched-T closure.** SPY (T = 4129): raw
+0.0029, insignificant; AR(21)-whitened 0.0006, insignificant. DIA: 0.0014 /
+0.0010, both insignificant — the real market carries no leak at either
+filter, so the fig:bits benchmark line survives as drawn. At the real
+market's observation length (last 4100 observations per seed): Q0.5 and
+Q1.0 stay raw-significant 8/8 (the reversal carries the raw statistic),
+but the **re-equilibrated R5 world is E9-significant on only 3/8 seeds —
+indistinguishable from closure at the length at which SPY is certified
+information-free**. "Never closes" was a T = 6000 statement; at matched T
+it does not hold for the model's best world.
+
+**W4 — orientation-normalized FX leverage.** Re-signing every pair so the
+risk-class currency is the base (registered map; CAD=X and MXN=X flipped;
+USDCHF, USDJPY, EURGBP excluded as same-class), the pooled cohort moves
+from +0.005 ± 0.009 (z = 0.56, the published zero) to **−0.0219 ± 0.0066
+(z = −3.30)** over 10 pairs. The FX vertex hosts **one signed
+flight-to-quality flow**; the market-convention zero is an orientation
+average of a real directional flow, not the absence of one. The
+market-convention statement ("no venue-wide de-risking flow in
+market-convention returns") survives; the "no directional volatility
+flows" reading is dead.
+
+**Composed verdict (per the registered rules):** the title's "cannot close
+it" clause is dead as an unqualified claim — two registered triggers fired
+(the AR(21) floor at exact absorption; the matched-T verdict on the R5
+world). What survives is sharper and matches the joint-production spine of
+the programme: **added rationality converts the nonlinear sign leak into
+linear microstructure structure, and closing the leak — which exact
+absorption and re-equilibrated liquidity approach to within statistical
+zero — costs every amplitude fact.** The conversion claim itself is
+strengthened (the control's leak is nonlinear through lag 21; the falls
+hold at 32 seeds).
 
 ## KRONOS-TRADE — the deployable system
 

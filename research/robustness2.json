@@ -1,0 +1,466 @@
+{
+ "design": "DESIGN26",
+ "budget": {
+  "asserted_regenerations": {
+   "W1": 40,
+   "W2": 96,
+   "W3": 24
+  },
+  "new_simulations": 0,
+  "note": "every simulation asserted against stored per-seed values before any new estimator was read"
+ },
+ "w1_arp_ladder": {
+  "protocol": "seeds 100-107; worlds and the AR(1) leg asserted against robustness.json before either AR(p) estimator was read; criterion per DESIGN26 amendment 2 (significance survival, not magnitude)",
+  "per_config": {
+   "FCVM": {
+    "ar5_bits": [
+     0.018788,
+     0.018597,
+     0.01413,
+     0.026939,
+     0.014631,
+     0.023135,
+     0.024626,
+     0.014936
+    ],
+    "ar5_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "ar21_bits": [
+     0.019287,
+     0.017398,
+     0.011453,
+     0.027396,
+     0.014832,
+     0.019227,
+     0.023046,
+     0.013392
+    ],
+    "ar21_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "K1": {
+    "ar5_bits": [
+     0.011843,
+     0.013228,
+     0.00759,
+     0.018579,
+     0.01083,
+     0.009992,
+     0.008916,
+     0.008095
+    ],
+    "ar5_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "ar21_bits": [
+     0.011228,
+     0.012944,
+     0.006786,
+     0.017419,
+     0.011559,
+     0.008319,
+     0.00779,
+     0.007694
+    ],
+    "ar21_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "K5_FROZEN": {
+    "ar5_bits": [
+     0.004625,
+     0.001422,
+     0.001994,
+     0.004411,
+     0.00207,
+     0.002351,
+     0.001353,
+     0.002126
+    ],
+    "ar5_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "ar21_bits": [
+     0.003196,
+     0.001206,
+     0.00197,
+     0.00425,
+     0.002711,
+     0.002768,
+     0.002187,
+     0.00249
+    ],
+    "ar21_sig": [
+     1,
+     0,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "Q0.5": {
+    "ar5_bits": [
+     0.002603,
+     0.002882,
+     0.000114,
+     0.004143,
+     0.002113,
+     0.003786,
+     0.006222,
+     0.004194
+    ],
+    "ar5_sig": [
+     1,
+     1,
+     0,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "ar21_bits": [
+     0.002504,
+     0.002458,
+     0.001144,
+     0.003986,
+     0.002232,
+     0.004451,
+     0.006165,
+     0.004798
+    ],
+    "ar21_sig": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "Q1.0": {
+    "ar5_bits": [
+     -0.000397,
+     0.000535,
+     0.002723,
+     0.00044,
+     -9.3e-05,
+     0.000117,
+     0.001085,
+     0.002936
+    ],
+    "ar5_sig": [
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     1,
+     1
+    ],
+    "ar21_bits": [
+     -0.000629,
+     -0.000572,
+     0.001241,
+     0.000952,
+     -0.000768,
+     -7e-05,
+     0.000182,
+     0.001942
+    ],
+    "ar21_sig": [
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     1
+    ]
+   }
+  },
+  "control_ar21_sig_seeds": 8,
+  "verdict": "the control's leak SURVIVES AR(21) whitening \u2014 resistant to linear whitening through lag 21; the conversion reading strengthens"
+ },
+ "w2_whitened_ext32": {
+  "protocol": "seeds 100-131; every simulation asserted against the stored per-seed raw bits (k01_extension / ext32) before the whitened estimator was read",
+  "whitened_per_seed": {
+   "FCVM": [
+    0.020496,
+    0.018882,
+    0.016122,
+    0.027325,
+    0.017446,
+    0.025633,
+    0.025623,
+    0.017402,
+    0.022153,
+    0.019165,
+    0.022556,
+    0.017159,
+    0.017781,
+    0.021861,
+    0.021131,
+    0.020546,
+    0.018412,
+    0.029445,
+    0.020836,
+    0.020224,
+    0.019045,
+    0.025982,
+    0.019047,
+    0.025929,
+    0.018805,
+    0.026985,
+    0.021394,
+    0.026325,
+    0.025557,
+    0.025451,
+    0.024311,
+    0.020093
+   ],
+   "K5_FROZEN": [
+    0.00408,
+    0.001872,
+    0.003036,
+    0.004927,
+    0.004176,
+    0.003487,
+    0.003005,
+    0.00502,
+    0.002266,
+    0.002212,
+    0.003,
+    0.00356,
+    0.002515,
+    0.001781,
+    0.004086,
+    0.001551,
+    0.00397,
+    0.004365,
+    0.002804,
+    0.0009,
+    0.00144,
+    0.00428,
+    0.003046,
+    0.003104,
+    0.002817,
+    0.003142,
+    0.006166,
+    0.005413,
+    0.003006,
+    0.003724,
+    0.00319,
+    0.002089
+   ],
+   "Q1.0": [
+    0.002239,
+    0.004435,
+    0.00327,
+    0.002779,
+    0.00383,
+    0.002208,
+    0.004081,
+    0.007318,
+    0.004507,
+    0.001481,
+    0.00339,
+    0.004899,
+    0.00343,
+    0.002929,
+    -0.00024,
+    0.002959,
+    0.003222,
+    0.00131,
+    0.000872,
+    0.00091,
+    0.000786,
+    -7.7e-05,
+    0.00292,
+    0.002961,
+    0.002858,
+    0.000399,
+    0.002552,
+    0.001966,
+    0.003345,
+    0.001431,
+    0.001327,
+    0.001614
+   ]
+  },
+  "arms": {
+   "K5_FROZEN": {
+    "median": 0.003075,
+    "tests_vs_control": {
+     "median_diff": -0.018513,
+     "n_pos": 0,
+     "n": 32,
+     "wilcoxon_p": 0.0,
+     "sign_test_p": 0.0,
+     "separates_at_0.05": true
+    },
+    "verdict": "the whitened fall STANDS at 32 seeds"
+   },
+   "Q1.0": {
+    "median": 0.002818,
+    "tests_vs_control": {
+     "median_diff": -0.018887,
+     "n_pos": 0,
+     "n": 32,
+     "wilcoxon_p": 0.0,
+     "sign_test_p": 0.0,
+     "separates_at_0.05": true
+    },
+    "verdict": "the whitened fall STANDS at 32 seeds"
+   }
+  }
+ },
+ "w3_real_benchmark": {
+  "protocol": "real series from yahoo; SPY raw asserted against decathlon.json before any whitened estimator was read; matched-T = last 4100 observations per DESIGN26 amendment; matched-T configs asserted at full length against stored per-seed bits",
+  "real": {
+   "SPY": {
+    "T": 4129,
+    "raw_bits": 0.002878,
+    "raw_sig": false,
+    "ar1_bits": 0.004148,
+    "ar1_sig": true,
+    "ar5_bits": 0.003802,
+    "ar5_sig": true,
+    "ar21_bits": 0.000636,
+    "ar21_sig": false
+   },
+   "DIA": {
+    "T": 4129,
+    "raw_bits": 0.001379,
+    "raw_sig": false,
+    "ar1_bits": 0.003003,
+    "ar1_sig": true,
+    "ar5_bits": 0.003215,
+    "ar5_sig": true,
+    "ar21_bits": 0.001028,
+    "ar21_sig": false
+   }
+  },
+  "matched_T": {
+   "T": 4100,
+   "configs": {
+    "Q0.5": {
+     "per_seed_bits": [
+      0.016163,
+      0.018397,
+      0.011756,
+      0.016671,
+      0.01459,
+      0.01945,
+      0.026352,
+      0.014829
+     ],
+     "sig_seeds": 8,
+     "closed_at_matched_T": false
+    },
+    "Q1.0": {
+     "per_seed_bits": [
+      0.0183,
+      0.02486,
+      0.020626,
+      0.022665,
+      0.025128,
+      0.025967,
+      0.029702,
+      0.02179
+     ],
+     "sig_seeds": 8,
+     "closed_at_matched_T": false
+    },
+    "R5_kM0.1+Q1.0": {
+     "per_seed_bits": [
+      0.000722,
+      0.000803,
+      0.002562,
+      0.000284,
+      0.000475,
+      0.004898,
+      0.001271,
+      0.001662
+     ],
+     "sig_seeds": 3,
+     "closed_at_matched_T": true
+    }
+   }
+  },
+  "verdict": "at the real market's observation length (T=4100) the re-equilibrated full-absorption world is INDISTINGUISHABLE FROM CLOSURE \u2014 'cannot close it' is a T=6000 statement, and the title clause must be re-examined per the registered rule"
+ },
+ "w4_fx_orientation": {
+  "protocol": "registered class map applied per leg; same-class pairs excluded; flip = price inversion (GK variance is orientation-invariant); market-convention pooled estimate asserted against fx.json first",
+  "n_pairs": 10,
+  "re_signed": [
+   "CAD=X",
+   "MXN=X"
+  ],
+  "excluded": [
+   "CHF=X",
+   "EURGBP=X",
+   "JPY=X"
+  ],
+  "normalized_leverage": -0.0219,
+  "normalized_sd": 0.0066,
+  "z_vs_zero": -3.3,
+  "per_pair_normalized": {
+   "AUDJPY=X": -0.0462,
+   "AUDUSD=X": -0.0216,
+   "EURCHF=X": -0.0098,
+   "EURJPY=X": -0.0223,
+   "EURUSD=X": 0.0083,
+   "GBPJPY=X": -0.0238,
+   "GBPUSD=X": 0.0054,
+   "NZDUSD=X": 0.0104,
+   "CAD=X": -0.0255,
+   "MXN=X": -0.0748
+  },
+  "verdict": "the orientation-normalized FX cohort is materially nonzero: FX hosts one signed flight-to-quality flow and the market-convention zero is an orientation average"
+ }
+}
