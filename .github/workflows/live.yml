@@ -41,8 +41,8 @@ jobs:
 
       - name: Commit the row
         run: |
-          git config user.name "oliverz"
-          git config user.email "fatpotaato@gmail.com"
+          git config user.name "Oliver Zhang"
+          git config user.email "oliver.zhang0712@gmail.com"
           git add live/
           if git diff --cached --quiet; then
             echo "nothing to commit"
