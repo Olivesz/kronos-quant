@@ -125,6 +125,37 @@ orientation-normalized leverage.** Until W1–W3 run, the paper says
 kill criteria name what dies if the measurements go the other way,
 including re-examining the title's "Cannot Close It" clause.
 
+## DECATHLON-R2 wave (2026-09-08): the follow-up program ran, and the title moved
+
+DESIGN26 (W1–W4) executed same-day under gate X37 (AR(p) whitening ladder,
+licensed with its own boundary measurement: on ground-truth nonlinear drift
+AR(21) retains 0.31–0.47 of the bits while preserving significance).
+Verdicts, per the registered rules:
+
+- **W1**: the control's leak survives AR(21) whitening (0.0197 → 0.0183,
+  8/8) — genuinely nonlinear, conversion strengthened. The registered
+  KILL fired at the other end: exact absorption's floor is 0.0001 bits
+  (2/8) under AR(21) — the one-lag "never closes" floor was longer-lag
+  LINEAR structure.
+- **W2**: both whitened falls stand at 32 seeds (0/32 above control).
+  Limitation 2 retired.
+- **W3**: SPY (T=4129) carries no leak at any filter (raw 0.0029, AR21
+  0.0006, both insignificant; DIA same). At matched length the R5 world
+  is E9-significant on 3/8 seeds — indistinguishable from closure.
+  "Never closes" is now claimed at T=6000 only.
+- **W4**: orientation-normalized FX leverage −0.0219 ± 0.0066 (z=−3.30)
+  — the FX zero resolves into one signed flight-to-quality flow.
+
+**Title changed per the registered retitle rule** (two triggers fired):
+"...Cannot Close It" → "...and Closing It Costs Every Amplitude Fact".
+Abstract, intro, Sec 6.5 (new W1–W4 block + tab:arp), composition,
+Sec 7 (normalized FX value), limitations 2/5/6 (now measured outcomes),
+scope list (+1: closure impossibility is NOT claimed — its price is), and
+conclusion all reconciled. 36pp; checkers 527 numeric (W-block added
+cell-by-cell) + 283 reference + 26 surface assertions, all green; full
+41-gate suite passed. The owner has not yet read this draft; submission
+remains blocked on his read, byline, endorsement.
+
 ## Reconciled state (2026-08-20, final)
 
 Claims wave (reconcile 1) + figure wave (reconcile 2): the paper states only

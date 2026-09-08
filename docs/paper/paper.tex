@@ -40,7 +40,8 @@
 
 \title{The Joint Production of Sign Efficiency and Heavy-Tailed
 Volatility in Minimal Agent-Based Markets:\\
-Added Rationality Converts the Sign Leak but Cannot Close It}
+Added Rationality Converts the Sign Leak, and Closing It Costs Every
+Amplitude Fact}
 \author{}
 \date{}
 
@@ -61,14 +62,16 @@ signs. Three pre-registered experiments
 test whether added rationality closes the gap: a trading anticipator of
 the forecastable flow, the fixed point of mutual anticipation iterated to
 depth five, and a price-setting maker that provably absorbs that flow
-into the price level. All three are refuted, and a registered attribution program
-establishes what the interventions do instead: they convert a multi-day
-sign leak that survives one-lag linear whitening into microstructure
-reversal --- the strong interventions absorbing most of it (whitened
-information 0.0197 to 0.0036 bits at exact absorption; 0.0112 at one
-layer), never closing it (significant in all five attribution
-configurations, 39 of 40 configuration--seed pairs) --- and pay with the
-amplitude facts: heavy tails (kurtosis $8.8 \to
+into the price level. All three are refuted, and two registered attribution programs
+establish what the interventions do instead. The control's leak is
+genuinely nonlinear --- it survives linear whitening through lag 21
+(0.0197 to 0.0183 bits, every seed) --- and added rationality converts
+it into \emph{linear} microstructure structure: one-lag whitened
+information falls 0.0197 to 0.0036 bits at exact absorption (0.0112 at
+one layer; both falls hold on 32 of 32 seeds), while the residue beyond
+lag-21 linear structure at exact absorption is statistically
+indistinguishable from zero (0.0001 bits). Closure is approachable ---
+and its price is the amplitude facts: heavy tails (kurtosis $8.8 \to
 3.0$), the leverage effect ($-0.125 \to -0.008$), and volatility
 clustering are deleted together. In this model class, sign efficiency and
 the heavy-tailed, asymmetric volatility regularities are jointly produced
@@ -77,7 +80,9 @@ flow-generated amplitude structure and robust to liquidity
 re-equilibration and threshold perturbation. Cross-venue evidence --- the
 leverage effect ordered across equities ($-0.04$), foreign exchange
 ($\approx 0$), and cryptocurrencies ($+0.03$) --- is consistent with the
-mechanism. All results are pre-registered, validated on synthetic ground
+mechanism; orientation-normalizing the currency cohort resolves its zero
+into one signed flight-to-quality flow ($-0.022$, $z = -3.3$). All
+results are pre-registered, validated on synthetic ground
 truth, and regenerable from the repository.
 % src: abstract, docs/paper/OUTLINE.md; whitened bits research/robustness.json e9_attribution; leverage values research/fx.json leverage_contrast
 \par\medskip
@@ -168,13 +173,17 @@ budgets and decision rules fixed before any run: a matched-strength
 design shows the anticipation-depth axis was an effective-strength axis;
 an AR(1)-whitened decomposition of the sign-information statistic,
 licensed by a size and power gate on an analytic AR(1) world, shows the
-raw rises are induced reversal while the leak that survives the
-whitening is steeply absorbed but never closed; and the composed claim is
+raw rises are induced reversal; a registered follow-up ladder of AR($p$)
+filters shows the control's leak is nonlinear through lag 21 while the
+exact-absorption residue beyond linear structure is indistinguishable
+from zero; and the composed claim is
 stress-tested against an exogenous amplitude source, liquidity
-re-equilibration, and threshold perturbation
-(Section~\ref{sec:robustness}). The program overturns one natural
-reading of the raw evidence and sharpens the surviving mechanism
-statement to conversion without closure. \emph{Fifth}, it reports a
+re-equilibration, threshold perturbation, seed power at 32 seeds, and a
+matched-length real-data benchmark
+(Section~\ref{sec:robustness}). The programs overturn two natural
+readings of the raw evidence and sharpen the surviving mechanism
+statement: conversion of a nonlinear leak into linear structure, with
+closure approachable only at the price of the amplitude facts. \emph{Fifth}, it reports a
 cross-venue measurement of the leverage effect with a single estimator
 battery --- equities $-0.04$, foreign exchange statistically zero,
 cryptocurrencies $+0.03$ in point estimate --- whose ordering is
@@ -206,10 +215,15 @@ intervention strength --- from 0.0197 bits in the control to
 0.0033--0.0036 under the maker interventions --- and remains
 statistically significant in
 each of the five attribution configurations (on 39 of 40
-configuration--seed pairs). Added
-rationality converts the sign leak
-into microstructure reversal; the strong interventions absorb most of
-the leak, none closes it, and the conversion is paid for with the
+configuration--seed pairs) \emph{at the one-lag filter}. A registered
+follow-up program sharpens both halves: the control's leak survives
+linear whitening through lag 21 (0.0183 bits, every seed) --- it is
+genuinely nonlinear --- while at exact absorption the residue beyond
+lag-21 linear structure is 0.0001 bits, significant on 2 of 8 seeds.
+Added rationality converts the nonlinear sign leak into linear
+microstructure structure; the strong interventions absorb most of
+the leak, exact absorption comes within statistical zero of closing it,
+and the conversion is paid for with the
 amplitude facts.
 % src: research/robustness.json e9_attribution (per_config medians, tests_vs_control)
 Sign efficiency and the amplitude facts are not separate dials in this
@@ -1226,7 +1240,9 @@ information-free regime; real SPY (dotted, 0.0029) sits far below all of
 them. The one exception in the paper lies outside this figure: the
 re-equilibrated full-absorption world of R5
 (Section~\ref{sec:robustness}) collapses to 0.0016 bits --- below the
-SPY line, still E9-significant --- at the cost of every amplitude fact.
+SPY line, still E9-significant at $T = 6000$ though indistinguishable
+from closure at SPY's own observation length --- at the cost of every
+amplitude fact.
 Trading against the flow, iterating that trade to depth five, and
 absorbing the flow's impact into the price level all leave the sign
 channel open; what varies across the configurations shown is the split
@@ -1308,7 +1324,8 @@ $\lambda_Q{=}1$), and the conditional information given
 $\mathrm{sign}(r_t)$ falls in every arm ($p = 0.0078$). Per the
 registered decision rule, the reading that the market re-creates sign
 information in price space is \emph{withdrawn}. Two claims are licensed
-in its place: the leak never closes --- whitened bits remain significant
+in its place: at the one-lag filter the leak never closes --- whitened
+bits remain significant
 in each of the five attribution configurations, on 8 of 8 seeds
 everywhere except the half-skew
 maker's 7 of 8, reaching no lower than $0.0033$
@@ -1316,7 +1333,8 @@ bits (half skew) and $0.0036$ at exact absorption --- and the strong
 interventions absorb most of the
 whitening-resistant leak (the single layer 43\%) while manufacturing the
 one-lag reversal that the
-raw statistic scores.
+raw statistic scores. The follow-up program below determines how much of
+that floor is itself linear structure at longer lags.
 % src: research/robustness.json e9_attribution (per_config medians, tests_vs_control, verdicts, control_leak)
 
 \begin{table}[t]
@@ -1456,11 +1474,68 @@ in price space'' (induced reversal, R2 --- well-powered as a raw effect
 at 32 seeds, R3). What survives is stronger than what was lost: added
 rationality \emph{converts} a whitening-resistant multi-day sign leak into
 one-lag microstructure reversal --- the strong interventions absorbing
-most of it, none closing
-it --- and pays for the conversion with the amplitude facts, which are
+most of it, none closing it at the one-lag filter --- and pays for the
+conversion with the amplitude facts, which are
 flow-generated (R4) and cannot be rescued by re-equilibrating liquidity
 provision (R5); the ceiling and both calibration anchors are
 threshold-robust (R6).
+
+\paragraph{The follow-up program (W1--W4).}
+A second registration, answering the four experimental findings of a
+further adversarial review of this draft, sharpens the composed claim
+with the same protocol (estimator licensed first by gate X37; every
+simulation an asserted regeneration of an archived world; decision rules
+fixed before any run). \emph{W1, the whitening ladder}
+(Table~\ref{tab:arp}): under AR(5) and AR(21) linear whitening the
+control's leak is essentially undiminished ($0.0197 \to 0.0183$ bits,
+significant on 8 of 8 seeds at lag 21) --- it is genuinely nonlinear,
+not multi-lag linear structure --- but the registered kill criterion
+fires at the other end of the ladder: exact absorption's floor thins to
+$0.0001$ bits, significant on 2 of 8 seeds. The one-lag floor was
+substantially longer-lag linear structure, and the licensed composite
+becomes: added rationality converts a nonlinear leak into \emph{linear}
+structure --- one-lag reversal plus longer-lag components --- and at
+exact absorption the residue beyond lag-21 linear structure is
+indistinguishable from zero. (The gate bounds the filter's own appetite:
+on a ground-truth nonlinear drift channel AR(21) retains 0.31--0.47 of
+the bits while preserving significance on every seed; exact absorption's
+retention of 0.03 is far below that boundary --- structure removed, not
+filter over-absorption.) \emph{W2, whitened power}: extended to 32 seeds
+under the R3 protocol, both one-lag whitened falls stand --- $0.0210$
+(control) against $0.0031$ (frozen $K{=}5$) and $0.0028$ (exact
+absorption), above the control on 0 of 32 seeds in each arm. \emph{W3,
+the real-data benchmark}: SPY over the battery window ($T = 4129$)
+carries no leak at either filter (raw $0.0029$, AR(21)-whitened
+$0.0006$, both insignificant; DIA the same), and at the real market's
+observation length the re-equilibrated world of R5 is E9-significant on
+only 3 of 8 seeds --- indistinguishable from closure at the length at
+which SPY is certified information-free. ``Never closes'' was a
+$T = 6000$ statement and is not claimed beyond it. \emph{W4} is the
+orientation-normalized currency measurement reported in
+Section~\ref{sec:triangle}.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lccc}
+\toprule
+Config & AR(1) whitened & AR(5) whitened & AR(21) whitened \\
+\midrule
+\cfg{FCVM} (control)            & 0.0197 (8/8) & 0.0187 (8/8) & 0.0183 (8/8) \\
+$K{=}1$                         & 0.0112 (8/8) & 0.0104 (8/8) & 0.0098 (8/8) \\
+$K{=}5$ (frozen)                & 0.0038 (8/8) & 0.0021 (8/8) & 0.0026 (7/8) \\
+\cfg{FCVM+Q}($\lambda_Q{=}0.5$) & 0.0033 (7/8) & 0.0033 (7/8) & 0.0032 (8/8) \\
+\cfg{FCVM+Q}($\lambda_Q{=}1.0$) & 0.0036 (8/8) & 0.0005 (3/8) & 0.0001 (2/8) \\
+\bottomrule
+\end{tabular}
+\caption{The W1 whitening ladder: median whitened E9 bits (significant
+seeds of 8) under AR($p$) linear whitening, $p \in \{1, 5, 21\}$; the
+AR(1) column is Table~\ref{tab:whiten}'s. The control's leak survives
+every filter --- genuinely nonlinear --- while exact absorption's
+one-lag floor dissolves under longer-lag whitening: what the strongest
+intervention leaves behind is almost entirely linear structure.}
+% src: research/robustness2.json w1_arp_ladder.per_config; research/robustness.json e9_attribution.per_config
+\label{tab:arp}
+\end{table}
 
 \subsection{Composition: the structural claim}
 \label{sec:structural}
@@ -1482,9 +1557,10 @@ facts are the same object:
   (Experiment~II);
 \item a price-setter who absorbs the flow's impact exactly --- the
   rational-expectations limit for this channel, verified to the identity ---
-  absorbs most of the whitening-resistant leak (whitened bits
-  $0.0197 \to 0.0036$) but
-  silences none of it, and deletes the de-leveraging dynamics that generate
+  absorbs most of the leak (one-lag whitened bits
+  $0.0197 \to 0.0036$; the residue beyond lag-21 linear structure
+  $0.0001$, indistinguishable from zero), and deletes the de-leveraging
+  dynamics that generate
   the tails, the leverage effect, and the crash asymmetry, scoring 1/10
   (Experiment~III).
 \end{enumerate}
@@ -1573,7 +1649,13 @@ quote orientation, and the scatter's extremes are one flight-to-quality
 flow appearing with both orientations (the yen crosses negative, USDMXN
 positive; Figure~\ref{fig:perasset}), so the cohort zero is in part an
 average over orientations of a real directional flow rather than the
-absence of one. The licensed reading is that no venue-wide
+absence of one. The registered orientation-normalized recomputation
+(every pair re-signed so the risk-class currency is the base; the three
+same-class pairs excluded) resolves the composition: the normalized
+cohort is $-0.0219 \pm 0.0066$ ($z = -3.30$) over ten pairs --- one
+signed flight-to-quality flow, negative in the risk orientation, averaged
+to zero by market quote convention. The licensed reading is that no
+venue-wide
 de-risking flow survives in market-convention returns --- not that FX
 hosts no directional volatility flows at all. Crypto --- no financial leverage,
 no institutional de-risking, a retail dynamic in which rallies rather than
@@ -1681,7 +1763,11 @@ by the interventions --- the raw E9 rises of Experiments II and III are
 measured efficiency breakage (induced one-lag reversal), and the contrary
 reading is withdrawn in Section~\ref{sec:robustness}; (v) joint
 production beyond flow-generated amplitude structure --- the $t(3)$ probe
-leaves the absorption-proof exogenous-amplitude case untested.
+leaves the absorption-proof exogenous-amplitude case untested; (vi)
+impossibility of closing the sign channel --- the follow-up program
+measures near-closure at exact absorption (beyond-lag-21 residue
+indistinguishable from zero) and at the matched observation length; what
+is claimed is closure's \emph{price}, not its impossibility.
 % src: docs/paper/OUTLINE.md (NOT-claimed list); docs/design/DESIGN25.md results (R2 withdrawal, R4 scoping)
 
 ``Structural'' here means: invariant over the searched class under the
@@ -1731,10 +1817,9 @@ event, the two \emph{raw-rise} comparisons were extended
 to 32 seeds under a registered budget (Section~\ref{sec:robustness}), and
 the three refutations additionally rest on pre-registered criteria and
 paired seeds rather than on score margins. The whitened decomposition
-that carries the conversion reading, by contrast, rests on the eight
-paired evaluation seeds --- its reported significances sit at or near
-the eight-pair Wilcoxon floor --- and its own 32-seed extension is the
-registered next measurement, not a result of this paper. Third, the joint-production
+that carries the conversion reading was extended to 32 seeds under the
+registered follow-up (W2): both one-lag whitened falls hold, above the
+control on 0 of 32 seeds in each arm. Third, the joint-production
 claim is scoped to flow-generated amplitude structure: the registered
 $t(3)$ probe shows the fundamentalist channel filters exogenous tails
 (kurtosis $3.06$ under full absorption even with $t(3)$ fundamentals), so
@@ -1743,22 +1828,24 @@ source would decouple the two properties. Fourth, the
 FX--crypto edge of the leverage triangle is underpowered, and
 Section~\ref{sec:triangle} derives the bound: certification requires a
 history that will not exist for roughly another decade, and widening the
-cross-section demonstrably does not substitute. Fifth, the whitening
-filter behind the conversion result removes lag-1 linear structure and
-was licensed on an AR(1) world (gate X36): ``whitening-resistant''
-therefore means \emph{not one-lag linear}, and the program does not
-exclude higher-order linear predictability from the surviving component
---- a distinction that matters because the model's own leak mechanism is
-a multi-day drift; a higher-order whitening pass is the registered next
-measurement. Sixth, non-closure is a permutation-significance statement
-at the simulated series length ($T = 6000$), and the criterion's
-threshold scales with $T$: the re-equilibrated R5 world remains
-E9-significant at $0.0016$ bits --- a level \emph{below} real SPY's raw
-$0.0029$, which the battery certifies as information-free at its shorter
-$T \approx 4100$ --- so ``never closes'' is a within-model statistical
-verdict, not a magnitude comparison against the real market; the
-matched-length real-data benchmark on the whitened statistic is likewise
-registered. Each limitation is stated
+cross-section demonstrably does not substitute. Fifth, the lag-1
+license question was settled by the registered follow-up's whitening
+ladder (W1): the control's leak survives AR(21) linear whitening
+essentially undiminished --- genuinely nonlinear --- while exact
+absorption's one-lag floor dissolves to $0.0001$ bits (2 of 8 seeds)
+under the same filter, so closure statements in this paper are always
+tagged with their filter; the gate-measured boundary of the AR(21)
+filter itself (retention 0.31--0.47 on a ground-truth nonlinear channel)
+bounds how much of that dissolution the filter could contribute. Sixth,
+non-closure is a permutation-significance statement
+at the simulated series length ($T = 6000$), and the follow-up measured
+the criterion's $T$-dependence directly: at the real market's
+observation length (last 4100 observations; SPY's $T = 4129$) the
+re-equilibrated R5 world is E9-significant on only 3 of 8 seeds ---
+indistinguishable from closure at the length at which the battery
+certifies SPY information-free --- so ``never closes'' is claimed at
+$T = 6000$ only, and the matched-length verdict is reported in its
+place. Each limitation is stated
 with the measurement that establishes it, which is the form of limitation a
 pre-registered program can offer.
 
@@ -1769,11 +1856,13 @@ A minimal flow-based market reproduces half of the stylized-fact battery ---
 efficiency, fat tails, volatility clustering amplitude, the leverage effect,
 crash asymmetry --- and no rationality mechanism of three pre-registered
 kinds moves it past 5/10. A registered attribution program establishes
-what the failed mechanisms do instead: they convert a whitening-resistant
-multi-day sign leak into one-lag microstructure reversal, the strong
+what the failed mechanisms do instead: they convert a genuinely nonlinear
+multi-day sign leak --- resistant to linear whitening through lag 21 in
+the control --- into linear microstructure structure, the strong
 interventions absorbing most
-of it --- whitened information falls from $0.0197$ bits in the control to
-$0.0036$ under exact absorption --- and none closing it, while the
+of it (one-lag whitened information falls from $0.0197$ bits in the
+control to $0.0036$ under exact absorption, and the residue beyond
+lag-21 linear structure is indistinguishable from zero), while the
 amplitude structure is deleted alongside the absorption. The refutations
 identify the reason: the
 forecastable component of flow that keeps the sign channel open is the same

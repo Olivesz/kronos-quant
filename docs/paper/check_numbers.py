@@ -377,6 +377,7 @@ cite("§5 efficiency break", r"AC\$_1\$: \$\+([\d.]+) \\to (-[\d.]+)\$",
 # ------------------------------------- 5d. referee program (DESIGN25, R1-R6)
 print("== referee program (robustness.json)")
 RB = load("robustness")
+RB2 = load("robustness2")
 
 
 def _median(v):
@@ -440,7 +441,7 @@ check("R2 whitened significance: 8/8 everywhere except Q0.5's 7/8",
       _wsig == {"FCVM": 8, "K1": 8, "K5_FROZEN": 8, "Q0.5": 7, "Q1.0": 8})
 check("R2 39-of-40 configuration-seed pairs (intro claim)",
       sum(_wsig.values()) == 39
-      and re.search(r"39 of 40 configuration--seed pairs", TEX) is not None)
+      and re.search(r"39 of 40\s+configuration--seed pairs", TEX) is not None)
 for _label, _regex, _cfg, _pre in [
     ("tab:whiten FCVM", r"\\cfg{FCVM} \(control\) +& 0\..*?\\\\", "FCVM", []),
     ("tab:whiten K1", r"\$K{=}1\$ +& 0\..*?\\\\", "K1", [1]),
@@ -508,8 +509,8 @@ check("R2 raw medians reproduce the published values",
       and abs(_m["Q1.0"]["raw_bits"] - bits4["FCVM+Q1.0"]) < 5e-5)
 # the abstract / intro / conclusion restatements of the conversion numbers
 cite("abstract whitened conversion",
-     r"whitened\s*information ([\d.]+) to ([\d.]+) bits at exact\s*"
-     r"absorption; ([\d.]+) at one\s*layer",
+     r"whitened\s*information falls ([\d.]+) to ([\d.]+) bits at exact\s*"
+     r"absorption \(([\d.]+) at\s*one layer",
      _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"],
      _m["K1"]["whitened_bits"])
 cite("intro whitened conversion",
@@ -518,8 +519,8 @@ cite("intro whitened conversion",
      _m["FCVM"]["whitened_bits"], _m["Q0.5"]["whitened_bits"],
      _m["Q1.0"]["whitened_bits"])
 cite("conclusion whitened conversion",
-     r"whitened information falls from \$([\d.]+)\$ bits in the control to\s*"
-     r"\$([\d.]+)\$ under exact absorption",
+     r"whitened information falls from \$([\d.]+)\$ bits in the\s*"
+     r"control to\s*\$([\d.]+)\$ under exact absorption",
      _m["FCVM"]["whitened_bits"], _m["Q1.0"]["whitened_bits"])
 check("shared conversion pair cited consistently (>= 2 sites)",
       len(re.findall(r"\$0\.0197 \\to 0\.0036\$", TEX)) >= 2
@@ -543,15 +544,79 @@ check("fig:inversion dashed line = medians of the DISPLAYED seeds",
               + sorted(ext["per_seed"]["K1_DECA2"])[16]
               - 2 * 0.0194) < 2e-4
       and abs(med["K5_FIXEDPOINT"] - 0.0257) < 5e-5)
-check("limitation 6: R5 world below SPY's raw bits (0.0016 < 0.0029)",
-      re.search(r"E9-significant at \$0\.0016\$ bits", TEX) is not None
-      and re.search(r"real SPY's raw\s*\$0\.0029\$", TEX) is not None
-      and abs(RB["requilibration"]["arms"]["Q1.0"]["eval"]["median_dir_bits"]
-              - 0.0016) < 5e-5
-      and abs(D1["spy"]["stats"]["dir_bits"] - 0.0029) < 5e-5)
+check("limitation 6: matched-T verdict (R5 world 3/8 at SPY's length)",
+      re.search(r"E9-significant on\s*only 3 of 8 seeds", TEX) is not None
+      and RB2["w3_real_benchmark"]["matched_T"]["configs"]
+             ["R5_kM0.1+Q1.0"]["sig_seeds"] == 3
+      and re.search(r"SPY's \$T = 4129\$", TEX) is not None
+      and RB2["w3_real_benchmark"]["real"]["SPY"]["T"] == 4129)
 check("fig:bits caption carries the R5 exception at the same value",
       re.search(r"collapses to 0\.0016 bits --- below the\s*SPY line", TEX)
       is not None)
+
+# --- W1-W4: the DESIGN26 follow-up program (robustness2.json) ---------------
+_w1 = RB2["w1_arp_ladder"]["per_config"]
+_med = lambda xs: float(sorted(xs)[len(xs) // 2]) if len(xs) % 2 else \
+    (sorted(xs)[len(xs) // 2 - 1] + sorted(xs)[len(xs) // 2]) / 2
+for _label, _regex, _cfg in [
+    ("tab:arp FCVM", r"\\cfg{FCVM} \(control\) +& 0\.0197 \(8/8\) & 0\..*?\\\\",
+     "FCVM"),
+    ("tab:arp K1", r"\$K{=}1\$ +& 0\.0112 \(8/8\) & 0\..*?\\\\", "K1"),
+    ("tab:arp K5", r"\$K{=}5\$ \(frozen\) +& 0\.0038 \(8/8\) & 0\..*?\\\\",
+     "K5_FROZEN"),
+    ("tab:arp Q0.5",
+     r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}0\.5\$\) & 0\.0033 \(7/8\) & 0\..*?\\\\",
+     "Q0.5"),
+    ("tab:arp Q1.0",
+     r"\\cfg{FCVM\+Q}\(\$\\lambda_Q{=}1\.0\$\) & 0\.0036 \(8/8\) & 0\..*?\\\\",
+     "Q1.0"),
+]:
+    _row = re.search(_regex, TEX)
+    _nums = re.findall(r"(0\.\d{4}) \((\d)/8\)", _row.group(0)) if _row else []
+    check(_label, _row is not None and len(_nums) == 3
+          and float(_nums[1][0]) == round(_med(_w1[_cfg]["ar5_bits"]), 4)
+          and int(_nums[1][1]) == sum(_w1[_cfg]["ar5_sig"])
+          and float(_nums[2][0]) == round(_med(_w1[_cfg]["ar21_bits"]), 4)
+          and int(_nums[2][1]) == sum(_w1[_cfg]["ar21_sig"]),
+          f"tab:arp row disagrees with robustness2.json for {_cfg}")
+check("W1 control survives AR(21) (0.0197 -> 0.0183, 8/8; stated)",
+      round(_med(_w1["FCVM"]["ar21_bits"]), 4) == 0.0183
+      and sum(_w1["FCVM"]["ar21_sig"]) == 8
+      and len(re.findall(r"0\.0197 \\to 0\.0183", TEX)) >= 1
+      and re.search(r"lag 21\s*\(0\.0197 to 0\.0183 bits", TEX) is not None)
+check("W1 exact-absorption floor dissolves (0.0001 bits, 2/8; stated)",
+      round(_med(_w1["Q1.0"]["ar21_bits"]), 4) == 0.0001
+      and sum(_w1["Q1.0"]["ar21_sig"]) == 2
+      and len(re.findall(r"\$?0\.0001\$? bits", TEX)) >= 2
+      and re.search(r"significant on 2 of 8 seeds", TEX) is not None)
+_w2 = RB2["w2_whitened_ext32"]
+check("W2 32-seed whitened medians and 0-of-32 falls (stated)",
+      round(_med(_w2["whitened_per_seed"]["FCVM"]), 4) == 0.0210
+      and round(_w2["arms"]["K5_FROZEN"]["median"], 4) == 0.0031
+      and round(_w2["arms"]["Q1.0"]["median"], 4) == 0.0028
+      and _w2["arms"]["K5_FROZEN"]["tests_vs_control"]["n_pos"] == 0
+      and _w2["arms"]["Q1.0"]["tests_vs_control"]["n_pos"] == 0
+      and re.search(r"\$0\.0210\$\s*\(control\) against \$0\.0031\$", TEX)
+      is not None
+      and len(re.findall(r"0 of 32 seeds", TEX)) >= 2)
+_w3 = RB2["w3_real_benchmark"]
+check("W3 SPY values stated match the artifact",
+      round(_w3["real"]["SPY"]["raw_bits"], 4) == 0.0029
+      and round(_w3["real"]["SPY"]["ar21_bits"], 4) == 0.0006
+      and not _w3["real"]["SPY"]["raw_sig"]
+      and not _w3["real"]["SPY"]["ar21_sig"]
+      and not _w3["real"]["DIA"]["raw_sig"]
+      and re.search(r"raw \$0\.0029\$, AR\(21\)-whitened\s*\$0\.0006\$", TEX)
+      is not None)
+_w4 = RB2["w4_fx_orientation"]
+check("W4 orientation-normalized FX cohort (stated in Sec 7 and abstract)",
+      _w4["normalized_leverage"] == -0.0219 and _w4["normalized_sd"] == 0.0066
+      and _w4["z_vs_zero"] == -3.3 and _w4["n_pairs"] == 10
+      and len(_w4["excluded"]) == 3
+      and re.search(r"\$-0\.0219 \\pm 0\.0066\$ \(\$z = -3\.30?\$\) over ten "
+                    r"pairs", TEX) is not None
+      and re.search(r"flight-to-quality flow \(\$-0\.022\$, \$z = -3\.3\$\)",
+                    TEX) is not None)
 
 # --- R3: 32-seed extensions ------------------------------------------------
 ext32 = RB["ext32"]
