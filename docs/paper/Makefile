@@ -10,7 +10,7 @@ FIGS = figures/battery_scorecard.pdf figures/e9_bits_configs.pdf \
        figures/deca3_inversion.pdf figures/deca4_wildfacts.pdf \
        figures/leverage_triangle.pdf figures/gate_schematic.pdf \
        figures/leverage_perasset.pdf figures/audit_matrix.pdf \
-       figures/tuning_grid.pdf figures/score_se.pdf
+       figures/tuning_grid.pdf figures/score_se.pdf figures/conversion.pdf
 
 .PHONY: all figures check arxiv clean
 
