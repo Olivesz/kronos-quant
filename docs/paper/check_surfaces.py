@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 26
+EXPECTED_LOCAL_ASSERTIONS = 29
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -164,6 +164,35 @@ def main():
         for i, key in enumerate(["cagr", "vol", "sharpe", "max_dd", "cvar95"]):
             got = cells[i] if i < len(cells) else "<missing>"
             check("README", f"table {label} {key}", got == row[key], f"expected {row[key]}, saw {got}")
+
+    # ---- derived prose: drawdown ratio and selection-risk caveats ----------
+    # Both prose sites restate the shipped-vs-SPY drawdown ratio; the ratio is
+    # derived from the table's own rows (shipped DD already tethered to
+    # momtilt.json above; SPY row is the table's anchor).
+    m_spy = re.search(r"\| SPY \(buy & hold\) \|.+?({0}[\d.]+%)".format(MINUS),
+                      readme)
+    spy_dd = float(m_spy.group(1).strip(MINUS + "%")) if m_spy else 0.0
+    ship_dd = abs(mom["rows"]["shipped_tilted"]["max_dd"]) * 100
+    ratio = ship_dd / spy_dd if spy_dd else 9.9
+    check("README", "drawdown ratio is 'just over half' (derived)",
+          0.50 < ratio <= 0.57, f"17.9/33.7-class ratio, saw {ratio:.3f}")
+    hits = re.findall(r"just over half (?:its|the)\s+drawdown", readme)
+    check("README", "both prose sites state the half-ratio phrasing",
+          len(hits) == 2, f"expected 2 sites, saw {len(hits)}")
+
+    forensics = json.load(open(os.path.join(ROOT, "research", "forensics.json")))
+    m_sel = re.search(r"DSR ([\d.]+) over N=(\d+) logged trials; PBO ([\d.]+) "
+                      r"over\s*(\d+) variants", readme)
+    check("README", "selection-risk caveat numbers vs forensics.json",
+          m_sel is not None
+          and abs(float(m_sel.group(1)) - round(forensics["dsr"]["dsr"], 2)) < 1e-9
+          and int(m_sel.group(2)) == forensics["dsr"]["n_trials"]
+          and abs(float(m_sel.group(3)) - round(forensics["pbo"]["pbo"], 2)) < 1e-9
+          and int(m_sel.group(4)) == forensics["pbo"]["n_variants"],
+          f"expected DSR {round(forensics['dsr']['dsr'], 2)}/N="
+          f"{forensics['dsr']['n_trials']}, PBO {round(forensics['pbo']['pbo'], 2)}"
+          f"/{forensics['pbo']['n_variants']}, saw "
+          f"{m_sel.groups() if m_sel else 'no match'}")
 
     # ---- pinned total (dropout guard) --------------------------------------
     if n_checks != EXPECTED_LOCAL_ASSERTIONS:

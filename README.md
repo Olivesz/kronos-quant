@@ -138,9 +138,10 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 | SPY (buy & hold) | +15.0% | 16.8% | 0.91 | −33.7% | 2.55% |
 
 *The honest read: KRONOS still does **not** beat the S&P on raw return — and
-says so. The edge is risk-adjusted: a better Sharpe at two-thirds of the
+says so. The edge is risk-adjusted: a better Sharpe at just over half the
 drawdown, with financing costs on leverage disclosed (1.26%/yr) and the
-selection-risk caveats (DSR 0.75, PBO 0.45, N=185 logged trials) restated
+selection-risk caveats (DSR 0.75 over N=185 logged trials; PBO 0.45 over
+140 variants) restated
 rather than hidden.*
 
 ## The research program
