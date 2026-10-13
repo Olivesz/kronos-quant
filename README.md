@@ -68,7 +68,7 @@ homework.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[data]"          # or: pip install -r requirements.txt
+pip install -r requirements.lock   # exact versions CI uses (or: pip install -e ".[data]")
 
 python run_kronos.py              # full pipeline -> output/dashboard.html  (~25s)
 python run_research.py all        # 35 research experiments, cached to research/*.json

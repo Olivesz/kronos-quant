@@ -10,7 +10,7 @@ line.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[data]"      # or: pip install -r requirements.txt
+pip install -r requirements.lock   # exact versions CI uses (or: pip install -e ".[data]")
 python tests/run_all.py       # all 46 verification gates (~3min)
 ```
 
