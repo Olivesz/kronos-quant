@@ -209,13 +209,34 @@ with zero re-tuning — on **Japan, Europe, and Asia-EM**.
   <img src="docs/assets/dashboard-transfer.png" alt="KRONOS cross-market transfer panel" width="100%">
 </p>
 
-A clean split verdict: the mechanism laws (fat tails, leverage effect,
-near-critical branching, the one-clock collapse) reappear in every market, and
-the frozen system keeps a positive Sharpe **and a shallower drawdown than the
-local index in all three foreign markets** — but the exact law *values* (H,
-clock commonality, deformed branching) are market-specific. **Universality of
-mechanism; locality of calibration.** The transferable claim is risk control,
-not alpha.
+(The panel above shows the previous system; the figures below are the shipped
+book.) The law battery gives a clean split verdict: the mechanism laws (fat
+tails, leverage effect, near-critical branching, the one-clock collapse)
+reappear in every market, but the exact law *values* (H, clock commonality,
+deformed branching) are market-specific — **universality of mechanism,
+locality of calibration.**
+
+The shipped book, frozen with every US setting and rerun on the committed
+foreign panels ([`research/transfer.json`](research/transfer.json); the US
+leg reproduces the headline exactly):
+
+| Market | KRONOS Sharpe | Equal-weight Sharpe | Index Sharpe | KRONOS MaxDD | Equal-weight MaxDD | Index MaxDD |
+|---|---|---|---|---|---|---|
+| Japan | 0.82 | 0.95 | 0.79 | −17.8% | −29.4% | −32.7% |
+| Europe | 0.43 | 0.71 | 0.59 | −18.2% | −37.4% | −38.5% |
+| Asia-EM | 0.78 | 0.96 | 0.30 | −23.6% | −29.0% | −49.4% |
+
+Out of sample, the book keeps a positive Sharpe and roughly half the local
+index's drawdown everywhere, but equal-weight on the same names beats its
+Sharpe in all three markets, and in Europe the index does too. The transferable
+claim is risk control, not alpha. An earlier run of this study, on the
+unlevered system before the drawdown-throttle fix
+([`research/transfer.json` at 2a732c1](https://github.com/Olivesz/kronos-quant/blob/2a732c1/research/transfer.json)),
+scored 0.83 / 0.67 / 0.93 abroad, so the changes since did not travel. One
+untested explanation: leverage up to 1.5× financed at a US 3.5% rate drags in
+lower-return markets. Sharpe here is
+rf=0 (local cash rates are not in the repo); equal-weight is daily 1/N before
+costs.
 
 ### Frontier: does the leverage law survive crypto?
 

@@ -67,38 +67,47 @@ _MAX_FFILL = 5
 
 
 def load_universe(name: str, start: str, end: str, seed: int = 42) -> dict:
-    """Cached OHLC + GK-variance panels for one foreign universe.
+    """OHLC + GK-variance panels for one foreign universe.
 
-    Returns {"close", "gk", "source"}; falls back to a synthetic market
-    (distinct seed per universe) when Yahoo is unreachable, so the study
-    still runs offline — the JSON records which source was used.
+    Same source rules as kronos.data: the committed panels in data/pinned/
+    (SHA-256-verified) by default; Yahoo only with KRONOS_DATA=yahoo; the
+    synthetic market only with KRONOS_SYNTHETIC=1. A failed load raises.
+    Returns {"close", "gk", "source"}.
     """
+    from kronos.data import (DataUnavailable, _data_mode, _force_synthetic,
+                             load_pinned_panel)
+
     spec = UNIVERSES[name]
     tickers = list(dict.fromkeys(spec["tickers"] + [spec["market"]]))
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    paths = {f: os.path.join(CACHE_DIR, f"transfer_{name}_{f}_{start}_{end}.csv")
-             for f in ("open", "high", "low", "close")}
-
-    if all(os.path.exists(p) for p in paths.values()):
-        ohlc = {f: pd.read_csv(p, index_col=0, parse_dates=True)
-                for f, p in paths.items()}
-        source = "yahoo"
+    fields = ("open", "high", "low", "close")
+    if _force_synthetic():
+        offset = sum(map(ord, name)) % 1000      # deterministic per universe
+        c = generate_synthetic(tickers, start, end, seed + offset)
+        rng = np.random.default_rng(seed + 1)
+        o = c.shift(1) * np.exp(rng.normal(0, 0.003, c.shape))
+        span = np.abs(rng.normal(0, 0.008, c.shape)) + 0.002
+        ohlc = {"open": o, "close": c,
+                "high": np.maximum(o, c) * (1 + span / 2),
+                "low": np.minimum(o, c) * (1 - span / 2)}
+        source = "synthetic"
+    elif _data_mode() == "pinned":
+        ohlc = {f: load_pinned_panel(f"transfer_{name}_{f}.csv.gz").loc[start:end]
+                for f in fields}
+        source = "pinned"
     else:
-        ohlc = fetch_yahoo_ohlc(tickers, start, end)
-        if ohlc is not None:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        paths = {f: os.path.join(CACHE_DIR, f"transfer_{name}_{f}_{start}_{end}.csv")
+                 for f in fields}
+        if all(os.path.exists(p) for p in paths.values()):
+            ohlc = {f: pd.read_csv(p, index_col=0, parse_dates=True)
+                    for f, p in paths.items()}
+        else:
+            ohlc = fetch_yahoo_ohlc(tickers, start, end)
+            if ohlc is None:
+                raise DataUnavailable(f"Yahoo fetch failed for the {name} universe")
             for f, p in paths.items():
                 ohlc[f].to_csv(p)
-            source = "yahoo"
-        else:
-            c = generate_synthetic(tickers, start, end,
-                                   seed + abs(hash(name)) % 1000)
-            rng = np.random.default_rng(seed + 1)
-            o = c.shift(1) * np.exp(rng.normal(0, 0.003, c.shape))
-            span = np.abs(rng.normal(0, 0.008, c.shape)) + 0.002
-            ohlc = {"open": o, "close": c,
-                    "high": np.maximum(o, c) * (1 + span / 2),
-                    "low": np.minimum(o, c) * (1 - span / 2)}
-            source = "synthetic"
+        source = "yahoo"
 
     close = clean_panel(ohlc["close"], _MIN_COVERAGE, _MAX_FFILL)
     cols, idx = close.columns, close.index
@@ -160,18 +169,23 @@ def transfer_tests(batteries: dict[str, dict], ref: str = "US") -> dict:
 # ---------------------------------------------------------------------------
 
 def frozen_system(px: pd.DataFrame, market: str, cfg_base) -> dict:
-    """Run the core book (regimes -> signals -> HRP+BL -> risk overlay) on a
-    universe with every hyperparameter exactly as tuned on the US."""
+    """Run the shipped book (cfg_base.backbone + risk overlay + pairs sleeve)
+    on a universe with every hyperparameter exactly as tuned on the US."""
     from kronos import metrics as M
     from kronos.backtest import run_backtest
     from kronos.regime import walkforward_regimes
+
+    from kronos.pairs import run_pairs_sleeve
 
     cfg = replace(cfg_base, universe=list(px.columns), market=market)
     mkt = px[market].pct_change().dropna()
     rg = walkforward_regimes(mkt, cfg)
     bt = run_backtest(px, rg["regime"], cfg)
     start = bt["warmup_end"]
-    net = bt["net"].loc[start:]
+    # the full shipped book: core + overlay + the pairs sleeve, as in the
+    # README headline (research/momtilt.json), so the US leg reproduces it
+    pairs = run_pairs_sleeve(px, [], cfg)["returns"] * cfg.pairs_gross_sleeve
+    net = (bt["net"] + pairs).loc[start:]
     index = mkt.reindex(net.index).fillna(0.0)
     ew = px.pct_change().fillna(0.0).loc[start:].mean(axis=1)
     return {"net": M.summary(net, "frozen KRONOS"),

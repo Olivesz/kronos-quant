@@ -12,7 +12,9 @@ snapshot and requires a loud DataUnavailable for each attack:
   (d) a dropped trading day (dates shifted) -> refused;
   (e) a ticker outside the snapshot and the exclusion list -> refused; a span
       beyond the snapshot -> refused (never silently truncated);
-  (f) the documented exclusion (META, below min_coverage) is allowed.
+  (f) the documented exclusion (META, below min_coverage) is allowed;
+  (g) the transfer study's foreign panels (data/pinned/) load verified, and a
+      flipped byte in one is refused.
 Runs from committed files only, so it runs identically in the hermetic job.
 """
 import os
@@ -96,6 +98,22 @@ try:
     assert win.shape[1] == len(CFG.universe) - 1
     print(f"X39f documented exclusion only: {win.shape[1]} of {len(CFG.universe)} "
           f"universe tickers served (META excluded per {os.path.basename(MANIFEST_PATH)})")
+    # (g) the transfer study's foreign panels (data/pinned/) under the same rule
+    import json
+    from kronos.data import PINNED_EXTRA_DIR, load_pinned_panel
+    with open(os.path.join(PINNED_EXTRA_DIR, "MANIFEST.json")) as fh:
+        extra = sorted(json.load(fh)["files"])
+    for name in extra:
+        df = load_pinned_panel(name)
+        assert len(df) > 1000 and df.shape[1] >= 10, f"{name} too small: {df.shape}"
+    d = os.path.join(tmp, "extra")
+    shutil.copytree(PINNED_EXTRA_DIR, d)
+    victim = os.path.join(d, extra[0])
+    raw = bytearray(open(victim, "rb").read())
+    raw[len(raw) // 3] ^= 0x01
+    open(victim, "wb").write(bytes(raw))
+    refused(lambda: load_pinned_panel(extra[0], pinned_dir=d), f"byte flip in {extra[0]}")
+    print(f"X39g {len(extra)} foreign transfer panels verified; a flipped byte is refused")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

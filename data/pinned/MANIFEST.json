@@ -1,0 +1,17 @@
+{
+ "note": "Foreign-universe panels for the transfer study (KRONOS-TRANSFER), exactly as fetched from Yahoo into the local cache; sha256 of the gzip bytes, checked before parsing.",
+ "files": {
+  "transfer_japan_open.csv.gz": "ada5ba46ce45ee3c178bcaa4c5925adaf405c6840f19c8b20e4837401de24623",
+  "transfer_japan_high.csv.gz": "85fb1f77be98596a93a1796ce6d70b1c7d81f7a912b1c36a2233cfd6d0c96957",
+  "transfer_japan_low.csv.gz": "4a5ad3ec2c5b69d734183f129d0b08deb67272e09dc7484d2d42b847f09fa834",
+  "transfer_japan_close.csv.gz": "0c8ad011bd83a53ee7f744789108c08005c8e84b360f803264d7ff1c9f77e499",
+  "transfer_europe_open.csv.gz": "b72a8a724db2fc8b1cfa9e885d952ddb63877d069a1401831d1e81b9fb8991c5",
+  "transfer_europe_high.csv.gz": "8d5162effddcbd0281d918566222d131b8a0cbc6ca4ff314b5c8e0a023d2ba0b",
+  "transfer_europe_low.csv.gz": "881a1b890d72b307c469bacfeafa556fce584515c97adab4eac8501c6d427109",
+  "transfer_europe_close.csv.gz": "39677712b42587c7279e362e30f2b898706561f53291f291fb6326406ab408e8",
+  "transfer_asia_em_open.csv.gz": "2145fe312c3ebd317da3f0d40879ee4109204d79de91675da916adb1f2655ec6",
+  "transfer_asia_em_high.csv.gz": "c4d5fdf9858ee80129961f812682edf16ef225aa054f116af5a0b80028d3062a",
+  "transfer_asia_em_low.csv.gz": "bac66fbaf1e2c5fe2f398265b80a2d2da5b348c1af8dedc072dbb61f6e8b725c",
+  "transfer_asia_em_close.csv.gz": "5cb56de41ef83a8ae852913344a28eafd4f0711d51acfff5377448bd8ee8cc39"
+ }
+}

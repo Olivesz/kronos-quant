@@ -229,6 +229,28 @@ def load_pinned_ohlc(fields=OHLC_FIELDS, pinned_dir: str = PINNED_DIR,
     return out
 
 
+PINNED_EXTRA_DIR = os.path.join(ROOT, "data", "pinned")
+
+
+def load_pinned_panel(basename: str, pinned_dir: str = PINNED_EXTRA_DIR) -> pd.DataFrame:
+    """A committed panel under data/pinned/, verified against its MANIFEST.json
+    SHA-256 before parsing. Raises DataUnavailable on any mismatch."""
+    man_path = os.path.join(pinned_dir, "MANIFEST.json")
+    try:
+        with open(man_path) as fh:
+            expected = json.load(fh)["files"][basename]
+        with open(os.path.join(pinned_dir, basename), "rb") as fh:
+            raw = fh.read()
+    except (OSError, KeyError, ValueError) as e:
+        raise DataUnavailable(f"pinned panel unavailable: {basename}: {e}") from e
+    got = hashlib.sha256(raw).hexdigest()
+    if got != expected:
+        raise DataUnavailable(f"pinned panel modified: sha256({basename}) = "
+                              f"{got[:16]}… != manifest {expected[:16]}…")
+    return pd.read_csv(io.BytesIO(raw), compression="gzip", index_col=0,
+                       parse_dates=True)
+
+
 def _pinned_window(df: pd.DataFrame, cfg,
                    manifest_path: str = MANIFEST_PATH) -> pd.DataFrame:
     """Restrict to cfg's universe and span — refusing, never truncating, when

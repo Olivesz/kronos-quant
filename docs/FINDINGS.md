@@ -769,6 +769,29 @@ collapse all reappear); calibration is local (H, commonality, deformed
 branching differ). The honest transferable claim is **risk control, not
 alpha** — and it survives contact with markets it was never tuned on.
 
+**Rerun on the shipped book (2026-10-13).** The figures above were produced by
+the system *before* the drawdown-throttle fix (unlevered, HRP + BL). The study
+was rerun on the shipped book — 1/N backbone, the licensed overlay with
+leverage up to 1.5× financed at 3.5%, and the pairs sleeve, every setting frozen
+from the US — on foreign panels now committed under `data/pinned/` (SHA-256
+verified, gate X39). The US leg reproduces `research/momtilt.json` exactly.
+
+| Market | KRONOS Sharpe | Equal-weight | Index | KRONOS MaxDD | Equal-weight | Index |
+|---|---|---|---|---|---|---|
+| Japan | 0.82 | 0.95 | 0.79 | −17.8% | −29.4% | −32.7% |
+| Europe | 0.43 | 0.71 | 0.59 | −18.2% | −37.4% | −38.5% |
+| Asia-EM | 0.78 | 0.96 | 0.30 | −23.6% | −29.0% | −49.4% |
+
+TR2a (positive Sharpe everywhere) and TR2b (shallower drawdown than the local
+index everywhere) still pass. But out of sample the shipped book loses to
+equal-weight on Sharpe in every foreign market, loses to the index in Europe,
+and is weaker abroad than the pre-fix system was (0.83 / 0.67 / 0.93). The
+in-sample gain from the throttle fix, leverage and the 1/N backbone did not
+transfer; what transfers is drawdown control. A plausible but untested cause is
+leverage financed at a US rate in lower-return markets — an input to the next
+registered program, not a conclusion. This rerun evaluates the already-shipped
+system on new data and charges no trial.
+
 ## KRONOS-CRYPTO — do the laws survive outside equities?
 
 TRANSFER showed the laws reappear across equity markets that all share one

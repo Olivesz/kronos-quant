@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 53
+EXPECTED_LOCAL_ASSERTIONS = 57
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -206,6 +206,24 @@ def main():
     hits = count_and_values(readme, r"financing\s+costs ([\d.]+)%/yr")
     check("README", "leverage financing %/yr vs momtilt.json", hits == [fin],
           f"expected [{fin}], saw {hits}")
+
+    # ---- cross-market transfer table vs research/transfer.json -------------
+    tr = json.load(open(os.path.join(ROOT, "research", "transfer.json")))["frozen"]
+
+    def dd(x):
+        return f"{MINUS}{abs(x) * 100:.1f}%"
+
+    for label, key in (("Japan", "japan"), ("Europe", "europe"), ("Asia-EM", "asia_em")):
+        f = tr[key]
+        want = [f"{f['net']['sharpe']:.2f}", f"{f['ew']['sharpe']:.2f}", f"{f['index']['sharpe']:.2f}",
+                dd(f["net"]["max_dd"]), dd(f["ew"]["max_dd"]), dd(f["index"]["max_dd"])]
+        m_tr = re.search(rf"^\| {re.escape(label)} \|(.+)\|$", readme, re.M)
+        got = [c.strip() for c in m_tr.group(1).split("|")] if m_tr else None
+        check("README", f"transfer row {label} vs transfer.json", got == want, f"expected {want}, saw {got}")
+    us = tr["US"]["net"]
+    check("README", "transfer US leg reproduces the headline (research files agree)",
+          all(abs(us[k] - R["shipped_tilted"][k]) < 1e-9 for k in ("sharpe", "max_dd", "cagr")),
+          "transfer.json US leg != momtilt.json shipped row")
 
     # ---- live forward ledger: README as-of figures vs live/performance.json --
     # The file grows daily; the README states an as-of date, so the check
