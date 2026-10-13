@@ -62,6 +62,8 @@ GATES = [
     "test_ewbar.py",
     # pinned-data integrity gate (file hashes, relabel/shift attacks, fail-closed)
     "test_pinned.py",
+    # headline regression gate (X40): recompute the shipped book vs momtilt.json
+    "test_headline.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).
@@ -70,11 +72,18 @@ if f"gates-{len(GATES)}%20passing" not in _readme:
     print(f"FATAL: README gate badge disagrees with len(GATES)={len(GATES)} — fix README.md")
     sys.exit(1)
 
+# Real-data mode (the default: the committed price snapshot) must run every
+# assertion of every gate; a SKIPPED line there is a failure, so the badge count
+# is the count of gates that actually ran. The hermetic synthetic mode
+# (KRONOS_SYNTHETIC=1) may skip real-market assertions, and lists each one.
+HERMETIC = os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes")
+MODE = "SYNTHETIC market (hermetic)" if HERMETIC else "real prices (committed snapshot)"
+
 print("=" * 60)
-print("KRONOS verification gates")
+print(f"KRONOS verification gates — {MODE}")
 print("=" * 60)
 t0 = time.time()
-failed = []
+failed, skipped = [], []
 for g in GATES:
     print(f"\n>>> {g}")
     r = subprocess.run([PY, os.path.join(HERE, g)], capture_output=True, text=True)
@@ -82,9 +91,20 @@ for g in GATES:
     if r.returncode != 0:
         sys.stdout.write(r.stderr)
         failed.append(g)
+    skips = [ln.strip() for ln in r.stdout.splitlines() if "SKIPPED" in ln]
+    if skips:
+        skipped.append((g, skips))
+        if not HERMETIC:
+            failed.append(f"{g} (skipped on real data)")
 
 print("\n" + "=" * 60)
+if skipped:
+    print(f"skipped real-market assertions ({'allowed: hermetic' if HERMETIC else 'NOT allowed'}):")
+    for g, lines in skipped:
+        for ln in lines:
+            print(f"  {g}: {ln}")
 if failed:
     print(f"FAILED: {failed}")
     sys.exit(1)
-print(f"ALL GATES PASSED in {time.time()-t0:.0f}s")
+print(f"ALL {len(GATES)} GATES PASSED on {MODE} in {time.time()-t0:.0f}s"
+      + (f" ({len(skipped)} with real-market assertions skipped)" if skipped else ""))

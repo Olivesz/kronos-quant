@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-43%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-44%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -40,8 +40,10 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 43 such gates run in
-CI. That is the whole point — the platform grades its own homework.
+passes a gate on data where the answer is already known.** 44 such gates run in
+CI on every commit — on the committed real prices with nothing skipped, and again
+on a synthetic market. That is the whole point — the platform grades its own
+homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
 > PyTorch, no cvxpy. Baum-Welch EM, Student-t HMMs (own ECM), Kalman filters,
@@ -72,7 +74,7 @@ python run_research.py all        # 35 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 43 verification gates (~3min)
+python tests/run_all.py           # all 44 verification gates (~3min)
 ```
 
 Runs fully offline on real prices: every real-data result reads the
@@ -85,10 +87,16 @@ never silently substitutes synthetic data.
 
 ## Highlights
 
-- **43 verification gates** — 41 proving an estimator has correct *size*
-  (doesn't fire on null worlds) and *power* (detects planted effects) on
-  synthetic ground truth, plus 2 calibrating the battery against the real
-  market — all before any real-data claim is made.
+- **44 verification gates**, run in CI on real prices and on a synthetic
+  market. Most prove an estimator has correct *size* (doesn't fire on null
+  worlds) and *power* (detects planted effects) on synthetic ground truth
+  before any real-data claim is made. On the committed real-price snapshot
+  the suite also checks the battery's calibration (SPY scores 10/10, X19),
+  the regime engine on the 2020 crash and the calm of 2017, range-based
+  volatility against close-to-close on SPY (X1), backtest accounting, the
+  snapshot's integrity (X39), and the headline itself (X40: the shipped book
+  is recomputed and must match `research/momtilt.json`). In the real-data
+  job a skipped assertion fails the build.
 - **Strictly causal throughout** — filtered (not smoothed) HMM probabilities,
   frozen betas, walk-forward refits, T+1 execution, full transaction costs
   (commission + spread + square-root impact).
@@ -248,7 +256,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    43 gates (41 synthetic ground truth + 2 real-data calibration)
+tests/                    44 gates — run on real prices and on a synthetic market
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

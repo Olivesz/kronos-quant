@@ -14,8 +14,8 @@ from kronos.decathlon import battery, simulate_abm
 
 # This gate calibrates the battery's DYNAMIC RANGE against the REAL market
 # (SPY must score ~10, GBM ~3), so it is meaningful only on real data. In the
-# hermetic synthetic-data mode used by CI, skip with a clear notice — the 26
-# synthetic-ground-truth gates cover the estimator methodology.
+# hermetic synthetic-data mode, skip with a clear notice; the real-data CI job
+# runs it on the committed snapshot and fails if it skips.
 if os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes"):
     print("GATE X19 SKIPPED (KRONOS_SYNTHETIC: requires real market data)")
     sys.exit(0)

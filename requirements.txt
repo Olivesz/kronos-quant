@@ -3,11 +3,11 @@
 #   python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
 #
 # The kronos package itself imports only numpy / pandas / scipy.
-# yfinance is used lazily by kronos/data.py for the real-data path; if it is
-# absent or the network is unavailable, the pipeline falls back to a synthetic
-# regime-switching market and still runs end to end.
+# Real-data results read the committed snapshot live/genesis/*.csv.gz and need
+# no network. yfinance is used only by the daily live-ledger job and by the
+# explicit refresh path (KRONOS_DATA=yahoo); a failed fetch raises.
 
 numpy>=1.26
 pandas>=2.2          # requires the "ME" resample alias used in run_kronos.py
 scipy>=1.11
-yfinance>=0.2.40     # optional: real Yahoo data path (synthetic fallback otherwise)
+yfinance>=0.2.40     # live ledger + KRONOS_DATA=yahoo refresh only

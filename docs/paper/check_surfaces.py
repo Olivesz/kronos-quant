@@ -119,15 +119,29 @@ def main():
     hits = count_and_values(readme, r"(\d+) such gates run in")
     check("README", "discipline-paragraph gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
 
-    hits = count_and_values(readme, r"\*\*(\d+) verification gates\*\* — (\d+) proving")
-    check("README", "highlights gate count", [h[0] for h in hits] == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
-    check("README", "highlights synthetic split", bool(hits) and hits[0][1] == str(n_gates - 2),
-          f"expected {n_gates - 2} synthetic, saw {hits}")
+    hits = count_and_values(readme, r"\*\*(\d+) verification gates\*\*, run in CI on real prices")
+    check("README", "highlights gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
 
-    hits = count_and_values(readme, r"(\d+) gates \((\d+) synthetic ground truth \+ (\d+) real-data")
-    check("README", "layout gate count", [h[0] for h in hits] == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
-    check("README", "layout synthetic split", bool(hits) and hits[0][1:] == (str(n_gates - 2), "2"),
-          f"expected ({n_gates - 2}, 2), saw {hits}")
+    hits = count_and_values(readme, r"(\d+) gates — run on real prices and on a synthetic market")
+    check("README", "layout gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
+
+    # the named real-price checks must exist as gates, and CI must really run
+    # them on real data with skips forbidden (what the README promises)
+    gate_src = {g: open(os.path.join(ROOT, "tests", g)).read() for g in
+                re.findall(r'"(test_\w+\.py)"', open(os.path.join(ROOT, "tests", "run_all.py")).read())}
+    named = {"X19": None, "X1": None, "X39": None, "X40": None}
+    for tag in named:
+        named[tag] = [g for g, src in gate_src.items() if re.search(rf"GATE {tag}\b", src)]
+    check("README", "named real-price gates (X19, X1, X39, X40) exist in run_all",
+          all(named.values()), f"missing: {[t for t, v in named.items() if not v]}")
+    ci = open(os.path.join(ROOT, ".github", "workflows", "ci.yml")).read()
+    real_job = ci[ci.index("real-data:"):ci.index("hermetic:")] if "real-data:" in ci and "hermetic:" in ci else ""
+    runner = open(os.path.join(ROOT, "tests", "run_all.py")).read()
+    check("CI", "real-data job: no KRONOS_SYNTHETIC, yfinance removed, runs run_all; run_all fails on SKIPPED",
+          bool(real_job) and "KRONOS_SYNTHETIC" not in real_job
+          and "pip uninstall -y yfinance" in real_job and "tests/run_all.py" in real_job
+          and 'failed.append(f"{g} (skipped on real data)")' in runner,
+          "ci.yml real-data job or run_all.py SKIPPED guard does not match the README claim")
 
     hits = count_and_values(contributing, r"all (\d+) verification gates")
     check("CONTRIBUTING", "gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
