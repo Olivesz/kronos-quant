@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 29
+EXPECTED_LOCAL_ASSERTIONS = 52
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -70,6 +70,7 @@ def fmt_row(r):
         "cagr": f"+{r['cagr'] * 100:.1f}%",
         "vol": f"{r['vol'] * 100:.1f}%",
         "sharpe": f"{r['sharpe']:.2f}",
+        "sharpe_excess": f"{r['sharpe_excess']:.2f}",
         "max_dd": f"{MINUS}{abs(r['max_dd']) * 100:.1f}%",
         "cvar95": f"{r['cvar95'] * 100:.2f}%",
     }
@@ -96,8 +97,9 @@ def main():
     n_gates = truth_len_of_list(os.path.join(ROOT, "tests", "run_all.py"), "GATES")
     n_exps = truth_len_of_dict(os.path.join(ROOT, "run_research.py"), "EXPERIMENTS")
     mom = json.load(open(os.path.join(ROOT, "research", "momtilt.json")))
-    shipped = fmt_row(mom["rows"]["shipped_tilted"])
-    untilted = fmt_row(mom["rows"]["untilted_control"])
+    R = mom["rows"]
+    shipped = fmt_row(R["shipped_tilted"])
+    untilted = fmt_row(R["untilted_control"])
 
     print(f"truths: gates={n_gates} (tests/run_all.py), experiments={n_exps} (run_research.py), "
           f"headline={shipped['sharpe']} @ {shipped['max_dd']} (research/momtilt.json)")
@@ -149,40 +151,51 @@ def main():
     check("README", "research-program experiment count", hits == [str(n_exps)], f"expected [{n_exps}], saw {hits}")
 
     # ---- shipped headline --------------------------------------------------
-    hits = count_and_values(readme, rf"net Sharpe of ([\d.]+) at {MINUS}([\d.]+)% max drawdown")
+    hits = count_and_values(readme, rf"net Sharpe of ([\d.]+) at {MINUS}([\d.]+)% max\s+drawdown")
     check("README", "prose headline Sharpe", bool(hits) and hits[0][0] == shipped["sharpe"],
           f"expected {shipped['sharpe']}, saw {hits}")
     check("README", "prose headline MaxDD", bool(hits) and MINUS + hits[0][1] + "%" == shipped["max_dd"],
           f"expected {shipped['max_dd']}, saw {hits}")
 
+    hits = count_and_values(readme, r"drawdown\*\* \(([\d.]+) in excess of cash\)")
+    check("README", "prose headline excess-cash Sharpe", hits == [shipped["sharpe_excess"]],
+          f"expected [{shipped['sharpe_excess']}], saw {hits}")
+
     for anchor, row, label in [
-        (r"KRONOS \(\+ momentum tilt, shipped\)", shipped, "shipped row"),
-        (r"KRONOS \(HAR lever \+ t-HMM regimes\)", untilted, "untilted-control row"),
+        (r"KRONOS \(shipped: 1/N \+ overlay \+ tilt\)", shipped, "shipped row"),
+        (r"KRONOS \(1/N \+ overlay, no tilt\)", untilted, "untilted-control row"),
+        (r"KRONOS \(prior default: regime-gated HRP \+ BL\)", fmt_row(R["hrp_bl_tilted"]), "prior-default row"),
+        (r"Equal-weight \(same 48 names, no overlay\)", fmt_row(R["equal_weight_raw"]), "equal-weight row"),
+        (r"SPY \(buy & hold\)", fmt_row(R["spy"]), "SPY row"),
     ]:
         m = re.search(rf"\| \**{anchor}\** \|(.+)\|", readme)
         cells = [c.strip().strip("*") for c in m.group(1).split("|")] if m else []
-        for i, key in enumerate(["cagr", "vol", "sharpe", "max_dd", "cvar95"]):
+        for i, key in enumerate(["cagr", "vol", "sharpe", "sharpe_excess", "max_dd", "cvar95"]):
             got = cells[i] if i < len(cells) else "<missing>"
             check("README", f"table {label} {key}", got == row[key], f"expected {row[key]}, saw {got}")
 
-    # ---- derived prose: drawdown ratio and selection-risk caveats ----------
-    # Both prose sites restate the shipped-vs-SPY drawdown ratio; the ratio is
-    # derived from the table's own rows (shipped DD already tethered to
-    # momtilt.json above; SPY row is the table's anchor).
-    m_spy = re.search(r"\| SPY \(buy & hold\) \|.+?({0}[\d.]+%)".format(MINUS),
-                      readme)
-    spy_dd = float(m_spy.group(1).strip(MINUS + "%")) if m_spy else 0.0
-    ship_dd = abs(mom["rows"]["shipped_tilted"]["max_dd"]) * 100
-    ratio = ship_dd / spy_dd if spy_dd else 9.9
-    check("README", "drawdown ratio is 'just over half' (derived)",
-          0.50 < ratio <= 0.57, f"17.9/33.7-class ratio, saw {ratio:.3f}")
-    hits = re.findall(r"just over half (?:its|the)\s+drawdown", readme)
-    check("README", "both prose sites state the half-ratio phrasing",
-          len(hits) == 2, f"expected 2 sites, saw {len(hits)}")
+    # ---- derived prose: drawdown ratios, financing, selection-risk caveats --
+    ship_dd = abs(R["shipped_tilted"]["max_dd"])
+    pct_ew = round(100 * ship_dd / abs(R["equal_weight_raw"]["max_dd"]))
+    pct_spy = round(100 * ship_dd / abs(R["spy"]["max_dd"]))
+    hits = count_and_values(readme, r"equal-weight's Sharpe on the same names\s+at (\d+)% of its drawdown")
+    check("README", "drawdown % vs equal-weight (derived)", hits == [str(pct_ew)],
+          f"expected [{pct_ew}], saw {hits}")
+    hits = count_and_values(readme, r"higher Sharpe than the S&P at (\d+)% of its\s+drawdown")
+    check("README", "drawdown % vs SPY (derived)", hits == [str(pct_spy)],
+          f"expected [{pct_spy}], saw {hits}")
+    check("README", "Sharpe ties/beats SPY as claimed",
+          R["shipped_tilted"]["sharpe"] > R["spy"]["sharpe"]
+          and abs(R["shipped_tilted"]["sharpe"] - R["equal_weight_raw"]["sharpe"]) < 0.005,
+          "hero claims EW's Sharpe and higher than SPY's")
+    fin = f"{R['shipped_tilted']['financing_ann'] * 100:.2f}"
+    hits = count_and_values(readme, r"financing\s+costs ([\d.]+)%/yr")
+    check("README", "leverage financing %/yr vs momtilt.json", hits == [fin],
+          f"expected [{fin}], saw {hits}")
 
     forensics = json.load(open(os.path.join(ROOT, "research", "forensics.json")))
-    m_sel = re.search(r"DSR ([\d.]+) over N=(\d+) logged trials; PBO ([\d.]+) "
-                      r"over\s*(\d+) variants", readme)
+    m_sel = re.search(r"DSR ([\d.]+) over N=(\d+) logged trials; PBO ([\d.]+)\s+"
+                      r"over\s+(\d+) variants", readme)
     check("README", "selection-risk caveat numbers vs forensics.json",
           m_sel is not None
           and abs(float(m_sel.group(1)) - round(forensics["dsr"]["dsr"], 2)) < 1e-9

@@ -1171,8 +1171,8 @@ excess-Sharpe fixture, and the shipped row anchored to `momtilt.json`.
 |---|---|---|---|---|---|
 | **EW + shipped overlay (C1)** | **+13.5%** | **1.102** | 1.001 | **−19.2%** | 12.1% |
 | EW + overlay, no tilt (C2) | +13.1% | 1.083 | 0.981 | −18.5% | 12.0% |
-| shipped @ EW-matched vol (C3) | +12.1% | 1.063 | 0.955 | −19.4% | 11.4% |
-| shipped (momtilt, control) | +11.8% | 1.069 | 0.958 | −17.9% | 11.0% |
+| shipped @ EW-matched vol (C3) | +12.1% | 1.061 | 0.954 | −19.4% | 11.4% |
+| shipped (momtilt, control) | +11.8% | 1.068 | 0.956 | −17.9% | 11.0% |
 | equal-weight raw | +16.6% | 1.102 | **1.020** | −29.5% | 15.0% |
 | SPY | +15.0% | 0.914 | 0.842 | −33.7% | 16.8% |
 
@@ -1186,7 +1186,7 @@ closes with no further variants.
 
 **What the failure measured.** The hypothesis held: the HRP+BL construction
 was the drag — swapping the backbone to 1/N while keeping the overlay
-raises raw Sharpe 1.069 → 1.102 and CAGR +11.8% → +13.5%. The overlay's
+raises raw Sharpe 1.068 → 1.102 and CAGR +11.8% → +13.5%. The overlay's
 value is confirmed as risk control: it converts equal-weight's −29.5%
 drawdown into −19.2% at identical raw Sharpe. The tilt still earns its keep
 (C1 vs C2: +0.02 Sharpe, both conventions). Beating 1/N on excess-cash
@@ -1196,3 +1196,20 @@ unlicensed (needs its own quality gate).
 
 **Ledger: N=185 → 188 (three design27 entries charged); DSR/PBO recomputed
 in `research/forensics.json` and restated wherever a Sharpe is quoted.**
+Figures are the reproduction on the committed price snapshot (`live/genesis`,
+digest-verified), the default data source since 2026-10-13; the verdict is
+identical to the first run on the Yahoo cache, two rows moved ≤ 0.002.
+
+**Shipped anyway (owner decision, 2026-10-13).** C1 failed the
+registered beat-1/N bar but dominates the prior default on every
+performance axis except drawdown depth, so the owner made it the shipped
+book (`config.backbone = "ew"`): **Sharpe 1.10 (rf=0) / 1.00 (excess
+cash), CAGR +13.5%, MaxDD −19.2%, financing 0.83%/yr; DSR rises to 0.81
+at N=188** because the shipped series itself improved. The selection
+happened after the registered verdict and is stated as such; it charges
+no new trial (C1 was already one of the three). The shipped book no
+longer consumes the regime engine — the Student-t HMM, the regime-gated
+signals and HRP + Black-Litterman remain as `backbone = "hrp_bl"`, the
+control every future construction must beat. The owner's standing
+instruction is that this is an interim system: the target is a
+materially better one.

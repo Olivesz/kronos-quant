@@ -1,7 +1,7 @@
 <h1 align="center">KRONOS</h1>
 
 <p align="center">
-  <b>A regime-aware quantitative alpha platform — and a market-microstructure research lab — built from first principles.</b><br>
+  <b>A quantitative trading platform — and a market-microstructure research lab — built from first principles.</b><br>
   <sub>Every model hand-implemented on numpy / pandas / scipy. Every estimator validated against synthetic ground truth before it touches a real price.</sub>
 </p>
 
@@ -22,13 +22,15 @@
 
 KRONOS is two things at once:
 
-1. **A production-shaped quant platform** — data → regime detection → alpha
-   sleeves → cost-aware portfolio construction → risk overlay → a
-   self-contained interactive dashboard. It runs end-to-end in ~25s and posts a
-   **net Sharpe of 1.07 at −17.9% max drawdown** — beating the S&P's in-sample
-   Sharpe at just over half its drawdown, sized by a forecast of its own
-   volatility, gated by a fat-tail-aware Student-t regime engine, and tilted
-   by the measured monthly-momentum information budget.
+1. **A production-shaped quant platform** — data → equal-weight backbone →
+   forecast-volatility risk overlay → a self-contained interactive dashboard.
+   It runs end-to-end in ~25s and posts a **net Sharpe of 1.10 at −19.2% max
+   drawdown** (1.00 in excess of cash): equal-weight's Sharpe on the same names
+   at 65% of its drawdown, and a higher Sharpe than the S&P at 57% of its
+   drawdown — sized by a forecast of its own volatility and tilted by the
+   measured monthly-momentum information budget. The regime-gated
+   HRP + Black-Litterman construction it replaced lost to 1/N under a
+   pre-registered test, and the README says so below.
 
 2. **A research program that treats markets like physics.** 35
    experiments ask what quant finance genuinely does not know — *is volatility
@@ -114,39 +116,43 @@ never silently substitutes synthetic data.
 The end-to-end book, `run_kronos.py`:
 
 ```
-prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterman ─▶ risk overlay ─▶ dashboard
-         (Bull/Vol/Bear)  (momentum/rev/low-vol)  (shrunk-cov backbone)   (vol/CVaR/DD)
+shipped:  prices ─▶ equal-weight 1/N backbone ─▶ risk overlay ─────────────────▶ dashboard
+                                                 (HAR vol lever ≤1.5×, CVaR/DD brakes, 21d tilt)
+
+control:  prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterman ─▶ (same overlay)
+                    (Bull/Vol/Bear)  (momentum/rev/low-vol)  (lost to 1/N — DESIGN27)
 ```
 
-- **Regimes** — a **Student-t HMM** (fat tails modeled *within* states, per
-  the X² finding; Gaussian engine available as control), refit walk-forward
-  with hysteresis and minimum-dwell stabilization; decisions use strictly
-  *filtered* (causal) probabilities.
-- **Signals** — 12-1 momentum, short-horizon reversal, and low-volatility,
-  combined with **regime-dependent weights** (Bull → momentum; stress →
-  low-vol / reversal).
-- **Construction** — a Hierarchical-Risk-Parity backbone on a Ledoit-Wolf /
-  EWMA-shrunk covariance, tilted toward the combined signal via Black-Litterman,
-  long-only with a weight cap.
+- **Construction (shipped)** — equal-weight 1/N over the names live at each
+  monthly rebalance, with the same no-trade band, cost model (commission +
+  spread + square-root impact) and drift accounting as every other variant.
+- **Construction (research control, `backbone="hrp_bl"`)** — a **Student-t HMM**
+  regime engine (filtered probabilities, walk-forward) gating 12-1 momentum,
+  reversal and low-vol signals into a Hierarchical-Risk-Parity backbone tilted
+  via Black-Litterman. It lost to 1/N under a pre-registered test
+  ([KRONOS-EWBAR](docs/FINDINGS.md#kronos-ewbar--can-any-licensed-configuration-beat-1n))
+  and is kept, not deleted, as the control every new construction must beat.
 - **Risk** — vol targeting as the *lever* (up to 1.5×, financing charged on the
   levered portion) with the CVaR cap and drawdown throttle as *brakes* — the
   overlay's direction and reach are pinned by their own gate (X27; see
   [KRONOS-EDGE](docs/FINDINGS.md#kronos-edge--fixing-the-engines-structural-drag)).
 
-| Strategy | CAGR | Vol | Sharpe | Max DD | CVaR95 |
-|---|---|---|---|---|---|
-| **KRONOS (+ momentum tilt, shipped)** | +11.8% | 11.0% | **1.07** | **−17.9%** | 1.65% |
-| KRONOS (HAR lever + t-HMM regimes) | +12.0% | 11.3% | 1.05 | −18.8% | 1.70% |
-| KRONOS (HAR lever, Gaussian regimes) | +11.7% | 11.4% | 1.03 | −19.4% | 1.70% |
-| KRONOS (EDGE baseline: EWMA + Gaussian) | +10.9% | 11.6% | 0.95 | −21.3% | 1.76% |
-| SPY (buy & hold) | +15.0% | 16.8% | 0.91 | −33.7% | 2.55% |
+| Strategy (2013-01-14 → 2026-06-04, net of costs) | CAGR | Vol | Sharpe (rf=0) | Sharpe (excess cash) | Max DD | CVaR95 |
+|---|---|---|---|---|---|---|
+| **KRONOS (shipped: 1/N + overlay + tilt)** | +13.5% | 12.1% | **1.10** | **1.00** | **−19.2%** | 1.89% |
+| KRONOS (1/N + overlay, no tilt) | +13.1% | 12.0% | 1.08 | 0.98 | −18.5% | 1.87% |
+| KRONOS (prior default: regime-gated HRP + BL) | +11.8% | 11.0% | 1.07 | 0.96 | −17.9% | 1.65% |
+| Equal-weight (same 48 names, no overlay) | +16.6% | 15.0% | 1.10 | 1.02 | −29.5% | 2.22% |
+| SPY (buy & hold) | +15.0% | 16.8% | 0.91 | 0.84 | −33.7% | 2.55% |
 
-*The honest read: KRONOS still does **not** beat the S&P on raw return — and
-says so. The edge is risk-adjusted: a better Sharpe at just over half the
-drawdown, with financing costs on leverage disclosed (1.26%/yr) and the
-selection-risk caveats (DSR 0.75 over N=188 logged trials; PBO 0.45 over
-140 variants) restated
-rather than hidden.*
+The overlay is risk control, not alpha: it holds equal-weight's Sharpe while
+cutting its drawdown by a third, and nothing in the licensed toolkit beats 1/N
+on excess-cash Sharpe (DESIGN27, reported as a failure). Leverage financing
+costs 0.83%/yr; selection risk is DSR 0.81 over N=188 logged trials; PBO 0.45
+over 140 variants. The 48-name universe is today's large caps (hindsight), so
+these are in-sample figures — every row comes from one run,
+[`research/momtilt.json`](research/momtilt.json), which also commits the daily
+NAV series.
 
 ## The research program
 
@@ -167,7 +173,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [CONSTANTS](docs/FINDINGS.md#kronos-constants--which-market-laws-are-actually-constant) | Do the laws drift over time? | **Mechanism constants are constant**; only crisis *intensity* moves (peaks 2020, reverts). No Adaptive-Markets secular drift. |
 | [DECATHLON](docs/FINDINGS.md#kronos-decathlon--the-minimal-market) | Smallest market that looks real? | A **vol-targeting spiral** buys the wild facts; the ceiling is 5/10 and the missing organ is **expectation** (anticipatory agents). |
 | [DECATHLON-2](docs/FINDINGS.md#kronos-decathlon-2--is-expectation-the-missing-organ) | Is expectation the missing organ? | **Refuted.** A causal, gate-verified anticipator front-running the vol-targeter flow leaves the ceiling at 5/10 — one layer of expectation moves the sign leak a derivative earlier instead of removing it; information-free prices need the *fixed point* of anticipation. |
-| [TRADE](docs/FINDINGS.md#kronos-trade--the-deployable-system) | What system does the science license? | Forecast-vol targeting + regime-gated risk parity + mechanical crash control — risk control, never direction timing. |
+| [TRADE](docs/FINDINGS.md#kronos-trade--the-deployable-system) | What system does the science license? | Forecast-vol targeting + regime-gated risk parity + mechanical crash control — risk control, never direction timing. (The live forward ledger tracks this unlevered system.) |
 | [TRANSFER](docs/FINDINGS.md#kronos-transfer--does-market-structure-cross-borders) | Do the laws cross borders? | **Mechanism universal, calibration local** — see below. |
 | [CRYPTO](docs/FINDINGS.md#kronos-crypto--do-the-laws-survive-outside-equities) | Do the laws survive outside equities? | Mostly yes — but the **leverage effect inverts** (crypto +0.03 vs equities −0.04; 8/10 coins flip). Mechanism universal; one law is equity-specific. |
 | [FX](docs/FINDINGS.md#kronos-fx--the-third-vertex-of-the-microstructure-triangle) | Where does FX sit on the leverage triangle? | **Statistically zero** (+0.005, z vs equities 3.89) — the triangle equity −0.04 / FX ≈ 0 / crypto +0.03 is monotone in microstructure; yen crosses carry the safe-haven tilt. |

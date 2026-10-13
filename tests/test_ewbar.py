@@ -91,10 +91,16 @@ else:
         ew = json.load(fh)
     with open(os.path.join(ROOT, "research", "momtilt.json")) as fh:
         mt = json.load(fh)
-    for k in ("sharpe", "max_dd", "cagr"):
-        a = ew["rows"]["shipped_tilted"][k]
-        b = mt["rows"]["shipped_tilted"][k]
-        assert abs(a - b) < 1e-6, f"ewbar shipped row drifted on {k}: {a} vs {b}"
-    print("X38d anchor: ewbar shipped row == momtilt.json on sharpe/max_dd/cagr")
+    # after the 2026-10-13 ship: C1 (ew_overlay) IS the shipped system, and
+    # the registration-time default lives on as momtilt's hrp_bl_tilted row
+    for ew_key, mt_key in (("ew_overlay", "shipped_tilted"),
+                           ("shipped_tilted", "hrp_bl_tilted")):
+        for k in ("sharpe", "max_dd", "cagr"):
+            a = ew["rows"][ew_key][k]
+            b = mt["rows"][mt_key][k]
+            assert abs(a - b) < 1e-6, (f"ewbar {ew_key} != momtilt {mt_key} "
+                                       f"on {k}: {a} vs {b}")
+    print("X38d anchor: ewbar C1 == momtilt shipped; ewbar pre-ship == "
+          "momtilt hrp_bl_tilted (sharpe/max_dd/cagr)")
 
 print("GATE X38 PASSED")

@@ -88,11 +88,29 @@ Run complete; artifact `research/ewbar.json`; gate X38 passed before
 results were read. **Program verdict: FAILURE under the registered rule.**
 C1 (`ew_overlay`) ties equal-weight's raw Sharpe (1.102) at 65% of its
 drawdown (−19.2% vs −29.5%) and beats the shipped system on CAGR
-(+13.5% vs +11.8%) and raw Sharpe (1.102 vs 1.069), but its excess-cash
+(+13.5% vs +11.8%) and raw Sharpe (1.102 vs 1.068), but its excess-cash
 Sharpe is 1.001 vs equal-weight's 1.020 — short by 0.019; C2 −0.039; C3
-−0.065. The DD leg passes for all three (ratios 0.651 / 0.628 / 0.658).
+−0.066. The DD leg passes for all three (ratios 0.651 / 0.628 / 0.658).
 The line closes per the kill criterion: no further variants, no grids.
 The hypothesis (the backbone, not the overlay, is what 1/N beats) is
 confirmed and recorded in FINDINGS (KRONOS-EWBAR). Whether C1 replaces
 the shipped default despite failing the EW bar is the owner's decision,
 outside this registration.
+
+## Amendment (post-run, 2026-10-13): owner decision
+
+The owner shipped C1 as the default despite the FAILURE verdict (it
+beats the prior default on raw/excess Sharpe and CAGR). Recorded as an
+owner selection after the registered verdict, not a registered outcome;
+no new ledger entry (C1 already charged). `exp_ewbar` now pins both
+backbones explicitly so the DESIGN27 record reproduces byte-identically
+after the default moved.
+
+## Amendment (2026-10-13): reproduced on the pinned snapshot
+
+The data layer now reads the committed snapshot (`live/genesis`,
+digest-verified) by default instead of the Yahoo cache. `exp_ewbar` was
+re-run on it: every verdict is identical; the prior-default and C3 rows
+moved by at most 0.002 Sharpe (the cache and the snapshot differ by
+2.3e-6 relative in prices). Figures above and in FINDINGS are the pinned
+reproduction.

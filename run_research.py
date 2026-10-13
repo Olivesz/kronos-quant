@@ -3168,19 +3168,61 @@ def exp_momtilt(force: bool = False) -> dict:
     rg = walkforward_regimes(mkt, CFG)
     pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
 
-    rows = {}
+    import hashlib
+
+    from kronos.metrics import dtb3_daily, sharpe_excess
+
+    rows, navs, cut, ew_raw = {}, {}, None, None
     for label, cfg in (("shipped_tilted", CFG),
-                       ("untilted_control", replace(CFG, mom_tilt=0.0))):
+                       ("untilted_control", replace(CFG, mom_tilt=0.0)),
+                       ("hrp_bl_tilted", replace(CFG, backbone="hrp_bl"))):
         bt = run_backtest(px, rg["regime"], cfg)
-        net = (bt["net"] + pairs).loc[bt["warmup_end"]:]
+        cut = bt["warmup_end"] if cut is None else cut
+        net = (bt["net"] + pairs).loc[cut:]
         rows[label] = M.summary(net, label)
         rows[label]["max_exposure_realized"] = float(
             bt["exposure_applied"].max())
+        rows[label]["financing_ann"] = float(
+            bt["financing"].loc[cut:].mean() * 252)
+        navs[label] = net
+        if label == "shipped_tilted" and cfg.backbone == "ew":
+            # equal-weight benchmark: the shipped 1/N book, no overlay, no sleeve
+            ew_raw = (bt["gross"] - bt["costs"]).loc[cut:]
+    rows["equal_weight_raw"] = M.summary(ew_raw, "equal_weight_raw")
+    navs["equal_weight_raw"] = ew_raw
+    rows["spy"] = M.summary(mkt.loc[cut:], "spy")
+    navs["spy"] = mkt.loc[cut:]
+    rf = dtb3_daily(navs["shipped_tilted"].index)
+    for label in rows:
+        rows[label]["sharpe_excess"] = round(sharpe_excess(navs[label], rf), 4)
         print(f"[momtilt] {label:18s} CAGR {rows[label]['cagr']:+.1%} "
               f"Sharpe {rows[label]['sharpe']:.3f} "
+              f"(excess {rows[label]['sharpe_excess']:.3f}) "
               f"MaxDD {rows[label]['max_dd']:.1%}")
-    out = {"source": src, "mom_tilt": CFG.mom_tilt, "rows": rows,
-           "note": "PBO 0.45 / DSR 0.75 at N=185 apply (see forensics.json)"}
+    idx = navs["shipped_tilted"].index
+    # code_digest: sha256 over the exact source that produced this artifact
+    # (config.py, run_research.py, kronos/*.py) — verifiable at any commit
+    import glob
+    h = hashlib.sha256()
+    for f in ["config.py", "run_research.py"] + sorted(
+            os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "kronos", "*.py"))):
+        h.update(f.encode())
+        with open(os.path.join(ROOT, f), "rb") as fh:
+            h.update(fh.read())
+    out = {"source": src, "backbone": CFG.backbone, "mom_tilt": CFG.mom_tilt,
+           "span": [str(idx[0].date()), str(idx[-1].date())],
+           "code_digest": h.hexdigest()[:16],
+           "input_digest": hashlib.sha256(
+               px.round(8).to_csv().encode()).hexdigest()[:16],
+           "rows": rows,
+           "daily": {"dates": [d.strftime("%Y-%m-%d") for d in idx],
+                     "nav": {k: (1 + v.reindex(idx).fillna(0.0)).cumprod()
+                             .round(6).tolist() for k, v in navs.items()}},
+           "conventions": {"sharpe": "rf=0", "sharpe_excess": "net minus FRED "
+                           "DTB3 daily (data/dtb3.csv), ACT/360"},
+           "note": "selection-risk caveats: see research/forensics.json "
+                   "(DSR, PBO, N trials); shipped backbone chosen after "
+                   "DESIGN27 (owner decision), see FINDINGS KRONOS-EWBAR"}
     print(f"[momtilt] done in {time.time()-t0:.0f}s")
     save("momtilt", out)
     return out
@@ -3211,10 +3253,12 @@ def exp_ewbar(force: bool = False) -> dict:
         net = bt["net"] + (pairs if with_sleeve else 0.0)
         return bt, net
 
-    # shipped system first, asserted against the canonical artifact
-    bt_ship, net_ship = book(CFG)
+    # the system shipped AT REGISTRATION (HRP+BL backbone), pinned explicitly
+    # so a --force rerun reproduces this record after the default moved to 1/N
+    pre = replace(CFG, backbone="hrp_bl")
+    bt_ship, net_ship = book(pre)
     cut = bt_ship["warmup_end"]
-    stored = load_cached("momtilt")["rows"]["shipped_tilted"]
+    stored = load_cached("momtilt")["rows"]["hrp_bl_tilted"]
     ship_sum = M.summary(net_ship.loc[cut:], "shipped")
     for k in ("sharpe", "max_dd", "cagr"):
         if abs(ship_sum[k] - stored[k]) > 1e-6:
@@ -3226,7 +3270,7 @@ def exp_ewbar(force: bool = False) -> dict:
     # EW raw benchmark: 1/N book, same cadence/costs, no overlay, no sleeve
     ew_raw = (bt1["gross"] - bt1["costs"]).loc[cut:]
     ew_vol = float(ew_raw.std() * np.sqrt(252))
-    bt3, net_c3 = book(replace(CFG, vol_target=round(ew_vol, 4)))
+    bt3, net_c3 = book(replace(pre, vol_target=round(ew_vol, 4)))
 
     rf = dtb3_daily(net_ship.loc[cut:].index)
     rows, series = {}, {}
