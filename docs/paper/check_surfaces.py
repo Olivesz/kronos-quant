@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 52
+EXPECTED_LOCAL_ASSERTIONS = 53
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -206,6 +206,36 @@ def main():
     hits = count_and_values(readme, r"financing\s+costs ([\d.]+)%/yr")
     check("README", "leverage financing %/yr vs momtilt.json", hits == [fin],
           f"expected [{fin}], saw {hits}")
+
+    # ---- live forward ledger: README as-of figures vs live/performance.json --
+    # The file grows daily; the README states an as-of date, so the check
+    # recomputes from the daily series truncated at that date.
+    perf = json.load(open(os.path.join(ROOT, "live", "performance.json")))
+    m_live = re.search(rf"As of (\d{{4}}-\d{{2}}-\d{{2}}), (\d+)\s+trading days: KRONOS-TRADE ([{MINUS}+][\d.]+)%, "
+                       rf"SPY ([{MINUS}+][\d.]+)%, equal-weight ([{MINUS}+][\d.]+)%; max\s+drawdown "
+                       rf"([{MINUS}+][\d.]+)%, ([{MINUS}+][\d.]+)%, ([{MINUS}+][\d.]+)%", readme)
+
+    def spct(x):
+        return ("+" if x >= 0 else MINUS) + f"{abs(x) * 100:.2f}%"
+
+    want = None
+    if m_live:
+        dates = perf["daily"]["dates"]
+        k = sum(1 for d in dates if d <= m_live.group(1))
+        want = [str(k)]
+        cums, dds = [], []
+        for col in ("kronos", "spy", "equal_weight"):
+            nav, peak, dd = 1.0, 1.0, 0.0
+            for r in perf["daily"][col][:k]:
+                nav *= 1.0 + r
+                peak = max(peak, nav)
+                dd = min(dd, nav / peak - 1.0)
+            cums.append(spct(nav - 1.0))
+            dds.append(spct(dd))
+        want += cums + dds
+    got = [m_live.group(i) + ("" if i == 2 else "%") for i in range(2, 9)] if m_live else None
+    check("README", "live forward figures vs live/performance.json (as-of recompute)",
+          m_live is not None and got == want, f"expected {want}, saw {got}")
 
     forensics = json.load(open(os.path.join(ROOT, "research", "forensics.json")))
     m_sel = re.search(r"DSR ([\d.]+) over N=(\d+) logged trials; PBO ([\d.]+)\s+"

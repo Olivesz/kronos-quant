@@ -84,6 +84,19 @@ def main():
                  f"{row.get('exposure', 0):.0%}"))
         return 0 if row["status"] in ("LIVE", "REANCHOR") else 1
 
+    if mode == "--performance":
+        from kronos.live import write_performance
+        doc = write_performance(CFG)
+        sm = doc["summary"]
+        if not doc["first_live"]:
+            print("[live] no LIVE rows yet — performance.json empty")
+            return 0
+        print(f"[live] realized {doc['first_live']}..{doc['as_of']} "
+              f"({sm['kronos']['n_days']} days): KRONOS-TRADE "
+              f"{sm['kronos']['cum_return']:+.2%} | SPY {sm['spy']['cum_return']:+.2%}"
+              f" | EW {sm['equal_weight']['cum_return']:+.2%} (display only)")
+        return 0
+
     # --check
     ledger = read_ledger()
     live_rows = [r for r in ledger if r.get("status") == "LIVE"]

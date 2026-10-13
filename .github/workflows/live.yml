@@ -39,6 +39,11 @@ jobs:
       - name: Congruence check (report-only; breaches surface in the log)
         run: python run_live.py --check || true
 
+      - name: Rebuild realized forward P&L (display only)
+        id: perf
+        continue-on-error: true
+        run: python run_live.py --performance
+
       - name: Commit the row
         run: |
           git config user.name "Oliver Zhang"
@@ -55,4 +60,10 @@ jobs:
         if: steps.emit.outcome == 'failure'
         run: |
           echo "emit wrote a GAP row (committed above) — marking run red for visibility"
+          exit 1
+
+      - name: Surface performance rebuild failure
+        if: steps.perf.outcome == 'failure'
+        run: |
+          echo "live/performance.json was not rebuilt — marking run red"
           exit 1

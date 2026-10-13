@@ -1213,3 +1213,41 @@ signals and HRP + Black-Litterman remain as `backbone = "hrp_bl"`, the
 control every future construction must beat. The owner's standing
 instruction is that this is an interim system: the target is a
 materially better one.
+
+## KRONOS-LIVE — the forward ledger, now with realized returns
+
+[DESIGN23](design/DESIGN23.md) put the deployable system (KRONOS-TRADE:
+unlevered, forecast-vol targeted) on a daily CI job on 2026-08-17: before
+each session it appends the system's target weights to
+`live/ledger.jsonl`, computed only from the committed genesis panel plus
+append-only daily bars, so every row is reproducible bit for bit (gate X35
+covers reproduction, GAP rows and corporate-action re-anchoring).
+
+**Realized returns** (`kronos/live.py:forward_returns`, gate X41, rebuilt
+daily into `live/performance.json`): the weights recorded at close t earn
+the return over (t, t+1]; holdings drift until the recorded target changes;
+trades are costed with the backtest's own cost model; uninvested cash earns
+zero. Benchmarks on the same days are SPY and a daily 1/N over the same
+48 names. As of 2026-10-12, 35 trading days:
+
+| | Return | Ann. vol | Max DD |
+|---|---|---|---|
+| KRONOS-TRADE (live weights) | −2.38% | 7.4% | −4.98% |
+| SPY | +0.70% | 10.0% | −2.47% |
+| Equal-weight (48 names) | −2.25% | 8.2% | −4.77% |
+
+Thirty-five days say nothing about skill; the registered horizon for any
+claim is three years. The number exists so that it can be checked, not
+celebrated.
+
+**Why every LIVE row says "Bear" while exposure sits at 1.0.** Exposure is
+pinned at 1.0 because KRONOS-TRADE is unlevered and its forecast vol
+(~7.5%) is below the 10% target, so the vol lever hits its cap. The label
+is a naming artifact: the regime engine names its three states by rank
+(`kronos/regime.py:_canonicalize` — Bear is simply the state with the
+lowest mean), and in the latest walk-forward fit all three states are
+bullish — annualized means +23%, +20% and +18% with vols 6.5%, 18% and
+11%. The "Bear" state is a +18%, 11%-vol uptrend. Because the label also
+selects the live system's signal weights, renaming it mid-test would change
+the system under test; a sign-aware label rule is noted for the next
+registered revision instead.

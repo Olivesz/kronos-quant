@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-44%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-45%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -40,7 +40,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 44 such gates run in
+passes a gate on data where the answer is already known.** 45 such gates run in
 CI on every commit — on the committed real prices with nothing skipped, and again
 on a synthetic market. That is the whole point — the platform grades its own
 homework.
@@ -74,7 +74,7 @@ python run_research.py all        # 35 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 44 verification gates (~3min)
+python tests/run_all.py           # all 45 verification gates (~3min)
 ```
 
 Runs fully offline on real prices: every real-data result reads the
@@ -87,7 +87,7 @@ never silently substitutes synthetic data.
 
 ## Highlights
 
-- **44 verification gates**, run in CI on real prices and on a synthetic
+- **45 verification gates**, run in CI on real prices and on a synthetic
   market. Most prove an estimator has correct *size* (doesn't fire on null
   worlds) and *power* (detects planted effects) on synthetic ground truth
   before any real-data claim is made. On the committed real-price snapshot
@@ -161,6 +161,16 @@ over 140 variants. The 48-name universe is today's large caps (hindsight), so
 these are in-sample figures — every row comes from one run,
 [`research/momtilt.json`](research/momtilt.json), which also commits the daily
 NAV series.
+
+**Live since 2026-08-17.** A daily CI job records the unlevered KRONOS-TRADE
+system's target weights before each session in an append-only ledger
+([`live/ledger.jsonl`](live/ledger.jsonl), every row reproducible from the
+committed bars) and rebuilds its realized returns
+([`live/performance.json`](live/performance.json)). As of 2026-10-12, 35
+trading days: KRONOS-TRADE −2.38%, SPY +0.70%, equal-weight −2.25%; max
+drawdown −4.98%, −2.47%, −4.77%. Too short to mean anything yet: the
+pre-registered horizon for any verdict is three years
+([DESIGN23](docs/design/DESIGN23.md)).
 
 ## The research program
 
@@ -256,7 +266,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    44 gates — run on real prices and on a synthetic market
+tests/                    45 gates — run on real prices and on a synthetic market
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

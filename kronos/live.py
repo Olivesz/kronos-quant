@@ -259,3 +259,90 @@ def l3_bands(ledger: list[dict], floor: float = 0.0, cap: float = 1.0) -> dict:
     gaps = [r["date"] for r in ledger if r.get("status") == "GAP"]
     return {"n": len(rows), "band_violations": bad, "n_gaps": len(gaps),
             "verdict": "BREACH" if bad else "OK"}
+
+
+# ---------------------------------------------------------------------------
+# realized forward performance (display only — DESIGN23 L4: no pass/fail
+# claim before the pre-registered 3-year horizon)
+# ---------------------------------------------------------------------------
+
+def forward_returns(ledger: list[dict], close: pd.DataFrame, costs,
+                    market: str = "SPY") -> pd.DataFrame:
+    """Daily realized net returns of the ledger's own weights.
+
+    Timing: the weights a LIVE row records at close t earn the return over
+    (t, t+1] — the same T+1 convention as the backtest. Holdings drift with
+    prices while the ledger's target is unchanged; when the target changes
+    the book trades to it at close t, costed with the backtest's cost model
+    (kronos.backtest._trade_costs) and charged on t+1. The un-invested
+    remainder (1 - exposure * sum(w)) is held as cash at zero return. GAP
+    days carry the last holdings through. Benchmarks on the same days: SPY,
+    and equal-weight over the panel's tickers (daily 1/N, no costs).
+    """
+    from kronos.backtest import _trade_costs
+
+    live = sorted((r for r in ledger
+                   if r.get("status") == "LIVE" and r.get("weights")),
+                  key=lambda r: r["date"])
+    cols = ["kronos", "spy", "equal_weight"]
+    if not live:
+        return pd.DataFrame(columns=cols)
+    targets = {}
+    for r in live:
+        w = pd.Series(r["weights"], dtype=float).reindex(close.columns).fillna(0.0)
+        targets[pd.Timestamp(r["date"])] = w * float(r.get("exposure", 1.0))
+    rets = close.pct_change()
+    dvol = rets.rolling(60).std()
+    t0 = min(targets)
+    dates = close.index[close.index >= t0]
+    pos, last_tgt, rows = None, None, []
+    for d_prev, d in zip(dates[:-1], dates[1:]):
+        cost = 0.0
+        tgt = targets.get(d_prev)
+        if tgt is not None and (last_tgt is None
+                                or float((tgt - last_tgt).abs().max()) > 1e-6):
+            held = pos if pos is not None else pd.Series(0.0, index=close.columns)
+            cost = _trade_costs(tgt - held, dvol.loc[d_prev].fillna(0.02), costs)
+            pos, last_tgt = tgt.copy(), tgt.copy()
+        r = rets.loc[d].fillna(0.0)
+        gross = float((pos * r).sum())
+        rows.append({"date": d, "kronos": gross - cost,
+                     "spy": float(r[market]) if market in r else np.nan,
+                     "equal_weight": float(r.mean())})
+        pos = pos * (1.0 + r) / (1.0 + gross)
+    return pd.DataFrame(rows).set_index("date")[cols]
+
+
+def performance_summary(fr: pd.DataFrame) -> dict:
+    out = {}
+    for c in fr.columns:
+        s = fr[c].dropna()
+        nav = (1.0 + s).cumprod()
+        out[c] = {"n_days": int(len(s)),
+                  "cum_return": float(nav.iloc[-1] - 1.0) if len(s) else 0.0,
+                  "ann_vol": float(s.std() * np.sqrt(252)) if len(s) > 1 else 0.0,
+                  "max_dd": float((nav / nav.cummax() - 1.0).min()) if len(s) else 0.0}
+    return out
+
+
+def write_performance(costs, live_dir: str = LIVE_DIR) -> dict:
+    """Rebuild live/performance.json from the ledger and the archived bars."""
+    ledger = read_ledger(live_dir)
+    close = reconstruct_panel(live_dir)["close"]
+    fr = forward_returns(ledger, close, costs)
+    doc = {
+        "first_live": str(fr.index[0].date()) if len(fr) else None,
+        "as_of": str(fr.index[-1].date()) if len(fr) else None,
+        "system": "KRONOS-TRADE (DESIGN12): unlevered, forecast-vol targeted; "
+                  "the ledger's recorded weights, not a re-simulation",
+        "conventions": "net of the backtest cost model; weights at close t earn "
+                       "(t, t+1]; drift between target changes; cash at 0%; "
+                       "benchmarks gross (SPY; daily 1/N over the panel)",
+        "status": "display only (DESIGN23 L4): no pass/fail before 3 years",
+        "summary": performance_summary(fr),
+        "daily": {"dates": [d.strftime("%Y-%m-%d") for d in fr.index],
+                  **{c: [round(float(v), 8) for v in fr[c]] for c in fr.columns}},
+    }
+    with open(os.path.join(live_dir, "performance.json"), "w") as fh:
+        json.dump(doc, fh, indent=1)
+    return doc

@@ -64,6 +64,8 @@ GATES = [
     "test_pinned.py",
     # headline regression gate (X40): recompute the shipped book vs momtilt.json
     "test_headline.py",
+    # live forward P&L gate (X41): ledger weights -> realized returns vs hand arithmetic
+    "test_live_pnl.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).
