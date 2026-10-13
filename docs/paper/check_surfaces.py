@@ -39,7 +39,7 @@ REPO = "Olivesz/kronos-quant"
 # Pinned totals, maintained like check_numbers.py's assertion count: if a
 # surface legitimately stops echoing a claim, this constant moves in the same
 # commit — silently losing an assertion is the dropout failure mode itself.
-EXPECTED_LOCAL_ASSERTIONS = 57
+EXPECTED_LOCAL_ASSERTIONS = 61
 
 MINUS = "−"  # README and paper use the true minus sign, not a hyphen
 
@@ -164,6 +164,20 @@ def main():
     hits = count_and_values(readme, r"(\d+) experiments, pre-registered")
     check("README", "research-program experiment count", hits == [str(n_exps)], f"expected [{n_exps}], saw {hits}")
 
+    hits = count_and_values(readme, r"run_research\.py\s+(\d+) experiments, cached")
+    check("README", "layout experiment count", hits == [str(n_exps)], f"expected [{n_exps}], saw {hits}")
+
+    # ---- package size (derived from the tree) ------------------------------
+    import glob
+    mods = sorted(glob.glob(os.path.join(ROOT, "kronos", "*.py")))
+    n_lines = sum(sum(1 for _ in open(m)) for m in mods)
+    m_sz = re.search(r"kronos/\s+(\d+) modules, ~([\d,]+) lines", readme)
+    stated = int(m_sz.group(2).replace(",", "")) if m_sz else -1
+    check("README", "kronos/ module count (derived)", bool(m_sz) and int(m_sz.group(1)) == len(mods),
+          f"expected {len(mods)}, saw {m_sz.group(1) if m_sz else None}")
+    check("README", "kronos/ line count within 5% (derived)", bool(m_sz) and abs(stated - n_lines) <= 0.05 * n_lines,
+          f"actual {n_lines}, README says ~{stated}")
+
     # ---- shipped headline --------------------------------------------------
     hits = count_and_values(readme, rf"net Sharpe of ([\d.]+) at {MINUS}([\d.]+)% max\s+drawdown")
     check("README", "prose headline Sharpe", bool(hits) and hits[0][0] == shipped["sharpe"],
@@ -252,6 +266,24 @@ def main():
             dds.append(spct(dd))
         want += cums + dds
     got = [m_live.group(i) + ("" if i == 2 else "%") for i in range(2, 9)] if m_live else None
+    if m_live:
+        import statistics
+        k_ser = perf["daily"]["kronos"][:k]
+        s_ser = perf["daily"]["spy"][:k]
+        se_k = statistics.stdev(k_ser) * len(k_ser) ** 0.5
+        se_d = statistics.stdev([a - b for a, b in zip(k_ser, s_ser)]) * len(k_ser) ** 0.5
+        gap = 1.0
+        for a in k_ser:
+            gap *= 1.0 + a
+        g2 = 1.0
+        for b in s_ser:
+            g2 *= 1.0 + b
+        m_se = re.search(rf"standard error of about ±([\d.]+)% for KRONOS-TRADE, and its\s+"
+                         rf"([{MINUS}+][\d.]+)% gap to SPY has\s+one of about ±([\d.]+)%", readme)
+        want_se = [f"{se_k * 100:.2f}", spct(gap - g2)[:-1], f"{se_d * 100:.2f}"]
+        check("README", "live standard errors vs performance.json (derived)",
+              m_se is not None and list(m_se.groups()) == want_se,
+              f"expected {want_se}, saw {m_se.groups() if m_se else None}")
     check("README", "live forward figures vs live/performance.json (as-of recompute)",
           m_live is not None and got == want, f"expected {want}, saw {got}")
 

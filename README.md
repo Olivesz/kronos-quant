@@ -74,7 +74,7 @@ python run_research.py all        # 35 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 45 verification gates (~3min)
+python tests/run_all.py           # all 45 verification gates (~5 min)
 ```
 
 Runs fully offline on real prices: every real-data result reads the
@@ -168,9 +168,13 @@ system's target weights before each session in an append-only ledger
 committed bars) and rebuilds its realized returns
 ([`live/performance.json`](live/performance.json)). As of 2026-10-12, 35
 trading days: KRONOS-TRADE −2.38%, SPY +0.70%, equal-weight −2.25%; max
-drawdown −4.98%, −2.47%, −4.77%. Too short to mean anything yet: the
-pre-registered horizon for any verdict is three years
-([DESIGN23](docs/design/DESIGN23.md)).
+drawdown −4.98%, −2.47%, −4.77%. At this sample size a 35-day return has a
+standard error of about ±2.75% for KRONOS-TRADE, and its −3.08% gap to SPY has
+one of about ±3.11%: the gap is about one standard error, so the forward record
+can neither confirm nor refute the backtest yet. The pre-registered horizon for
+any verdict is three years ([DESIGN23](docs/design/DESIGN23.md)). This record
+measures the unlevered KRONOS-TRADE book, not the shipped backtest above; a
+second stream for the shipped book starts when it is registered.
 
 ## The research program
 
@@ -263,9 +267,9 @@ licenses the sign reading.)
 ```
 config.py                 every knob; pre-registered parameters
 run_kronos.py             v1 pipeline -> dashboard (+ --research tab)
-run_research.py           21 KRONOS-X experiments, cached in research/*.json
+run_research.py           35 experiments, cached in research/*.json
 run_trade.py              the deployable system -> today's target portfolio
-kronos/                   37 modules, ~7,500 LOC
+kronos/                   44 modules, ~9,200 lines
   data.py                 prices + OHLC, caching, seeded synthetic fallback
   regime.py / dhmm.py     Gaussian HMM (log-space EM, walk-forward) + duration-HMM
   thmm.py / sjm.py        Student-t HMM (own ECM) + statistical jump model
