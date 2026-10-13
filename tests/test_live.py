@@ -14,7 +14,6 @@
 (e) L3: an out-of-band exposure row is a BREACH.
 Fully synthetic, tmpdir-isolated, no network.
 """
-import json
 import os
 import shutil
 import sys
@@ -25,9 +24,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 import pandas as pd
 
-from kronos.live import (append_row, emit, l1_reproduce, l2_null_band,
-                         l2_vol_tracking, l3_bands, read_ledger,
-                         reconstruct_panel, write_genesis)
+from kronos.live import (
+    append_row,
+    emit,
+    l1_reproduce,
+    l2_null_band,
+    l3_bands,
+    read_ledger,
+    reconstruct_panel,
+    write_genesis,
+)
 
 rng = np.random.default_rng(4)
 TICKERS = ["AA", "BB", "CC"]

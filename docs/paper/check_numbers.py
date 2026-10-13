@@ -93,12 +93,12 @@ def row_cells(line_regex):
 
 
 def cell_events(cell):
-    return set(int(x) for x in re.findall(r"E(\d+)", cell))
+    return {int(x) for x in re.findall(r"E(\d+)", cell)}
 
 
 def failed_set(events_dict):
-    return set(int(re.match(r"E(\d+)_", k).group(1))
-               for k, v in events_dict.items() if not v)
+    return {int(re.match(r"E(\d+)_", k).group(1))
+               for k, v in events_dict.items() if not v}
 
 
 def check_row(label, line_regex, score, failed, bits, score_cell=1,

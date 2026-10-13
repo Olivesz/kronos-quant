@@ -26,8 +26,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 
-from kronos.decathlon import (CONFIGS, CONFIGS2, DEFAULTS, _flow_forecast,
-                              maker_quote_path, simulate_abm)
+from kronos.decathlon import (
+    CONFIGS,
+    CONFIGS2,
+    DEFAULTS,
+    _flow_forecast,
+    maker_quote_path,
+    simulate_abm,
+)
 
 t0 = time.time()
 

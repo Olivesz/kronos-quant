@@ -28,11 +28,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Real Yahoo Finance data path. Omit it and the platform runs end-to-end on a
-# seeded synthetic regime-switching market (see KRONOS_SYNTHETIC).
+# Yahoo refresh path (KRONOS_DATA=yahoo) and the live-ledger job. Real-data
+# results read the committed snapshot and do not need it.
 data = ["yfinance>=0.2.40"]
-# Development tooling (linting).
-dev = ["ruff>=0.5"]
+# Development tooling: lint and the pytest entry point over the gate suite.
+dev = ["ruff>=0.5", "pytest>=8"]
 
 [project.urls]
 Homepage = "https://github.com/Olivesz/kronos-quant"
@@ -49,6 +49,23 @@ target-version = "py311"
 [tool.ruff.lint]
 # Pragmatic set: pyflakes, pycodestyle, isort, bugbear, comprehensions, pyupgrade.
 select = ["E", "F", "I", "B", "C4", "UP"]
-# The research code favors terse math; allow ambiguous single-letter names and
-# the occasional long formula line that reads better unbroken.
-ignore = ["E741", "E501"]
+# The research code favors terse math, so a few style rules are off by design:
+#   E741 ambiguous single-letter names (l, I in formulas)
+#   E501 long formula lines that read better unbroken
+#   E702 several short statements on one line (`a = 1; b = 2` in setup blocks)
+#   C408 dict(...) calls for parameter sets
+#   UP031 %-formatting in a few report strings
+#   E731 small named lambdas for estimators
+#   B905 zip() without strict= (every zip pairs arrays built to the same length;
+#        adding strict= everywhere is noise, not a check)
+ignore = ["E741", "E501", "E702", "C408", "UP031", "E731", "B905"]
+
+[tool.ruff.lint.per-file-ignores]
+# gates import after their hermetic-mode skip or sys.path setup, on purpose
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+# The gates are scripts (they run at import); pytest collects only the entry
+# point, which runs each gate in its own process.
+testpaths = ["tests"]
+python_files = ["test_gates_pytest.py"]

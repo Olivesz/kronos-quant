@@ -63,9 +63,10 @@ def _xcorr(x: np.ndarray, y: np.ndarray, tau: int) -> float:
     return float(np.mean((a - a.mean()) * (b - b.mean())) / (sa * sb))
 
 
-def zumbach_stat(r: np.ndarray, v: np.ndarray, taus=range(1, 21)) -> float:
+def zumbach_stat(r: np.ndarray, v: np.ndarray, taus=None) -> float:
     """Z = sum_tau corr(r2_t, v_{t+tau}) - corr(v_t, r2_{t+tau}).
     Positive = time's arrow points the Zumbach way."""
+    taus = range(1, 21) if taus is None else taus
     r2 = r * r
     return float(sum(_xcorr(r2, v, t) - _xcorr(v, r2, t) for t in taus))
 

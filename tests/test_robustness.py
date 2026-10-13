@@ -32,8 +32,7 @@ import numpy as np
 import pandas as pd
 
 from kronos.decathlon import CONFIGS, battery, simulate_abm
-from kronos.robustness import (THRESHOLDS, ar1_whiten, e9_bits,
-                               e9_decomposition, rescore_events)
+from kronos.robustness import THRESHOLDS, ar1_whiten, e9_bits, e9_decomposition, rescore_events
 
 t0 = time.time()
 

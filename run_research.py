@@ -928,7 +928,7 @@ def exp_bits(force: bool = False) -> dict:
     print(f"[bits] KRONOS uses {used:.4f} bits/day "
           f"(realized SR {sr_real:.2f}) ({time.time()-t0:.0f}s)")
 
-    out = {"direction": {str(h): {k: v for k, v in dir_res[h].items()}
+    out = {"direction": {str(h): dict(dir_res[h].items())
                          for h in dir_res},
            "direction_cross": {"median_bits": med_dir, "n_sig": n_sig,
                                "n_assets": len(per_asset),
@@ -1260,10 +1260,10 @@ def exp_decathlon3(force: bool = False) -> dict:
         passes = [k for k, v in rec["events"].items() if v]
         print(f"[decathlon3] {name:13s}: {rec['score']}/10  "
               f"({', '.join(p_.split('_')[0] for p_ in passes)})")
-    print(f"[decathlon3] dir_bits medians: "
+    print("[decathlon3] dir_bits medians: "
           + ", ".join(f"{n}={b['median']:.4f}" for n, b in bits.items())
           + f", K5_TUNED={tuned_rec['median_stats']['dir_bits']:.4f}")
-    print(f"[decathlon3] forecastable-flow fraction (toy): "
+    print("[decathlon3] forecastable-flow fraction (toy): "
           + ", ".join(f"{k}={v['toy_beta']:.3f}" for k, v in ff.items()))
     print(f"[decathlon3] done ({time.time()-t0:.0f}s)")
     save("decathlon3", out)
@@ -1398,7 +1398,7 @@ def exp_battery_audit(force: bool = False) -> dict:
     t0 = time.time()
     px, ohlc, gk, src = get_data()
     series = {t: px[t].pct_change().dropna() for t in ("QQQ", "DIA", "IWM")}
-    sources = {t: src for t in series}
+    sources = dict.fromkeys(series, src)
     for uni, mk in (("japan", "1306.T"), ("europe", "EXW1.DE"),
                     ("asia_em", "2800.HK")):
         u = load_universe(uni, "2010-01-01", "2026-06-05")
@@ -1639,8 +1639,7 @@ def _rob_r1(d3: dict) -> dict:
 def _rob_r2(d3: dict, d4: dict) -> dict:
     """R2: E9 attribution — per-feature MI decomposition + AR(1) whitening."""
     from kronos.decathlon import _acf, simulate_abm
-    from kronos.robustness import (ar1_whiten, e9_bits, e9_decomposition,
-                                   sign_ac1)
+    from kronos.robustness import ar1_whiten, e9_bits, e9_decomposition, sign_ac1
 
     base = dict(fundamentalists=True, chartists=True, voltargeters=True,
                 marketmakers=True)
@@ -2759,8 +2758,7 @@ def exp_crypto(force: bool = False) -> dict:
     if not force and (c := load_cached("crypto")):
         print("[crypto] cached")
         return c
-    from kronos.crypto import (CRYPTO_UNIVERSE, leverage_contrast, load_crypto,
-                               per_asset_leverage)
+    from kronos.crypto import leverage_contrast, load_crypto, per_asset_leverage
     from kronos.hawkes import recovery_curve
     from kronos.transfer import battery, transfer_tests
 
@@ -3274,7 +3272,7 @@ def exp_ewbar(force: bool = False) -> dict:
 
     rf = dtb3_daily(net_ship.loc[cut:].index)
     rows, series = {}, {}
-    for label, net, sleeve in (
+    for label, net, _sleeve in (
             ("shipped_tilted", net_ship, True),
             ("ew_overlay", net_c1, True),
             ("ew_overlay_untilted", net_c2, True),
@@ -3372,7 +3370,7 @@ def main():
     which = args[0] if args else "all"
     t0 = time.time()
     if which == "all":
-        for name, fn in EXPERIMENTS.items():
+        for _name, fn in EXPERIMENTS.items():
             fn(force=force)
     else:
         EXPERIMENTS[which](force=force)

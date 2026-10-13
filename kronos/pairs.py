@@ -51,7 +51,7 @@ def select_pairs(px: pd.DataFrame, t: pd.Timestamp, cfg) -> list[tuple[str, str,
     cands.sort(reverse=True)
 
     picked, used = [], set()
-    for c, a, b in cands[:120]:  # cap the stationarity tests for speed
+    for _c, a, b in cands[:120]:  # cap the stationarity tests for speed
         if a in used or b in used:
             continue
         ya, xb = logp[a].to_numpy(), logp[b].to_numpy()

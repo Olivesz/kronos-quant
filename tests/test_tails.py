@@ -23,12 +23,16 @@ POWER (fat-tailed world, K=3 still correct):    the Gaussian family's held-out
 Pure-synthetic and deterministic (all seeds fixed inside tails.py); no real
 data, so it runs unchanged under CI's hermetic mode.
 """
-import sys, os, time
+import os
+import sys
+import time
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from kronos.tails import mc_khallucination, gen_world, generic_walkforward
+
 from kronos.regime import GaussianHMM
+from kronos.tails import gen_world, generic_walkforward, mc_khallucination
 
 np.random.seed(0)  # belt-and-suspenders; tails.py seeds everything internally
 

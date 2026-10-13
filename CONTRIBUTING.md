@@ -43,7 +43,8 @@ pattern. A finding without a gate is not a finding.
   it needs a causality gate (see `tests/test_trade.py`).
 - Report negative results as prominently as positive ones. The project's
   credibility rests on it.
-- `ruff check .` should pass (config in `pyproject.toml`).
+- `ruff check .` must pass; CI runs it (config and the deliberate ignores in
+  `pyproject.toml`). `pytest -q` runs every gate as its own test item.
 
 ## Adding a research experiment
 

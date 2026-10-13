@@ -50,7 +50,7 @@ def fit_hawkes(times: np.ndarray, T: float | None = None,
     rate0 = len(t) / T
     rng = np.random.default_rng(seed)
     best = None
-    for s in range(n_starts):
+    for _s in range(n_starts):
         x0 = np.array([np.log(rate0 * (0.5 + rng.random())),
                        rng.uniform(-1.0, 1.0),
                        np.log(1.0 / (5 + 20 * rng.random()))])

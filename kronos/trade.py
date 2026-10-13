@@ -96,7 +96,6 @@ class TradingSystem:
         target_log, sw_log = {}, {}
         current = pd.Series(0.0, index=px.columns)
         costs = np.zeros(n)
-        daily_vol_for_cost = rets.rolling(60).std()
 
         for i in rebal:
             t = dates[i]
@@ -133,7 +132,6 @@ class TradingSystem:
         vol_src = har_vol if c.forecast_vol else realized_vol
         # forecast portfolio vol = sqrt(w' D R D w), D=diag(per-asset vol fc),
         # R = recent return correlation (causal)
-        corr = rets.rolling(c.cov_window).corr()       # causal rolling corr
         fc_pvol = np.full(n, np.nan)
         for i in range(warmup, n):
             w = weights.iloc[i].to_numpy()

@@ -155,7 +155,6 @@ def trend_test(t_centers: np.ndarray, means: np.ndarray, sds: np.ndarray,
 
 
 def classify(vr: dict, trend: dict, span_years: float) -> str:
-    drift_total = trend["slope"] * span_years if np.isfinite(trend["slope"]) else 0
     trend_sig = (np.isfinite(trend["ci"][0]) and
                  (trend["ci"][0] > 0 or trend["ci"][1] < 0))
     vr_sig = np.isfinite(vr["p"]) and vr["p"] < 0.10

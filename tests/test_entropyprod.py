@@ -46,7 +46,7 @@ ep_est = ngram_ep(s, n=3) * 3 / 2            # slope correction for Markov
 # null via coin-flip block reversal (the corrected surrogate)
 rng2 = np.random.default_rng(7)
 nulls = []
-for i in range(100):
+for _i in range(100):
     out = s.copy()
     for a in range(0, T, 126):
         if rng2.random() < 0.5:

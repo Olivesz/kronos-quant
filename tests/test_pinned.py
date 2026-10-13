@@ -28,8 +28,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 
 from config import CFG
-from kronos.data import (MANIFEST_PATH, PINNED_DIR, DataUnavailable,
-                         _pinned_window, load_pinned_ohlc, pinned_digest)
+from kronos.data import (
+    MANIFEST_PATH,
+    PINNED_DIR,
+    DataUnavailable,
+    _pinned_window,
+    load_pinned_ohlc,
+    pinned_digest,
+)
 
 
 def refused(fn, label):
@@ -63,7 +69,7 @@ try:
         raw = bytearray(open(path, "rb").read())
         raw[len(raw) // 2] ^= 0x01
         open(path, "wb").write(bytes(raw))
-        refused(lambda: load_pinned_ohlc((f,), pinned_dir=d), f"byte flip in {f}")
+        refused(lambda f=f, d=d: load_pinned_ohlc((f,), pinned_dir=d), f"byte flip in {f}")
     print("X39b every field verified: a one-byte change in any file is refused")
 
     # (c) relabel two tickers, values untouched
@@ -100,6 +106,7 @@ try:
           f"universe tickers served (META excluded per {os.path.basename(MANIFEST_PATH)})")
     # (g) the transfer study's foreign panels (data/pinned/) under the same rule
     import json
+
     from kronos.data import PINNED_EXTRA_DIR, load_pinned_panel
     with open(os.path.join(PINNED_EXTRA_DIR, "MANIFEST.json")) as fh:
         extra = sorted(json.load(fh)["files"])

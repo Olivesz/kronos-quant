@@ -74,8 +74,7 @@ def load_universe(name: str, start: str, end: str, seed: int = 42) -> dict:
     synthetic market only with KRONOS_SYNTHETIC=1. A failed load raises.
     Returns {"close", "gk", "source"}.
     """
-    from kronos.data import (DataUnavailable, _data_mode, _force_synthetic,
-                             load_pinned_panel)
+    from kronos.data import DataUnavailable, _data_mode, _force_synthetic, load_pinned_panel
 
     spec = UNIVERSES[name]
     tickers = list(dict.fromkeys(spec["tickers"] + [spec["market"]]))
@@ -173,9 +172,8 @@ def frozen_system(px: pd.DataFrame, market: str, cfg_base) -> dict:
     on a universe with every hyperparameter exactly as tuned on the US."""
     from kronos import metrics as M
     from kronos.backtest import run_backtest
-    from kronos.regime import walkforward_regimes
-
     from kronos.pairs import run_pairs_sleeve
+    from kronos.regime import walkforward_regimes
 
     cfg = replace(cfg_base, universe=list(px.columns), market=market)
     mkt = px[market].pct_change().dropna()

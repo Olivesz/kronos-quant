@@ -60,7 +60,7 @@ class GaussianNull:
         for i, rho in enumerate(rho_grid):
             stats_q = {q: [] for q in qs}
             stats_a = []
-            for s in range(n_sims):
+            for _s in range(n_sims):
                 z1 = rng.normal(size=T)
                 z2 = rho * z1 + np.sqrt(1 - rho ** 2) * rng.normal(size=T)
                 for q in qs:

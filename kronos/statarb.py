@@ -112,10 +112,7 @@ def run_statarb_sleeve(px: pd.DataFrame, cfg) -> dict:
     rets = px.pct_change().fillna(0.0)
     dates = px.index
     T, N = rets.shape
-    names = list(px.columns)
-
     sleeve = np.zeros(T)
-    position = pd.Series(0.0, index=names)      # +1 long / -1 short per name
     net_w = np.zeros(N)                          # hedged name-level weights
     n_open_hist, m_hist, s_example = [], [], []
     trades = 0

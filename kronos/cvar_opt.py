@@ -88,7 +88,6 @@ def cvar_bakeoff(rets: pd.DataFrame, regime: pd.Series, cfg,
     port = {e: np.zeros(T) for e in engines}
     prev = dict.fromkeys(engines)
     turn = dict.fromkeys(engines, 0.0)
-    realized = {e: [] for e in engines}
     cost_bps = 3.5
 
     half = 63
@@ -98,7 +97,6 @@ def cvar_bakeoff(rets: pd.DataFrame, regime: pd.Series, cfg,
     for i in range(start, T, rebalance):
         sub = rets.iloc[i - window:i]
         scen = sub.to_numpy()
-        N = scen.shape[1]
 
         ws = {}
         cov = shrunk_cov(sub, cfg.cov_ewma_halflife, window)
