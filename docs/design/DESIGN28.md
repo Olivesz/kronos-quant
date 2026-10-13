@@ -617,3 +617,12 @@ Every DOI below was fetched and matched (title, first author) against Crossref o
 - Bailey & López de Prado (2014). JPM 40(5):94–107. doi:10.3905/jpm.2014.40.5.094
 - Bailey, Borwein, López de Prado & Zhu (2017). J. Computational Finance 20(4):39–69. doi:10.21314/JCF.2016.322
 - Politis & Romano (1994). JASA 89(428):1303–1313. doi:10.1080/01621459.1994.10476870
+#### Amendment 1 — seal (2026-10-13, registration)
+
+- `docs/design/DESIGN28.md` as registered in commit c42a9b9: SHA-256
+  `2ea002af83ea2bc1d207f34b10451f5f5fe56dd4d009309271a0237136ae1303`.
+- Registration commit tree: `442401381c03a30f30be8594a877ae504cb868e3`.
+- Code at registration (sha256 over `config.py`, `run_research.py`,
+  `kronos/*.py`, the `code_digest` convention): `83591b16131a0a23477eed6277e32187f5ccfa22d79491b3cf6671610ceaf987`.
+- No 1995–2009 data had been fetched by KRONOS at registration; the first
+  such pull is Stage 1's snapshot, recorded in a later amendment.
