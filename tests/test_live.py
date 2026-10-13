@@ -12,6 +12,9 @@
 (d) REANCHOR path: a simulated split (adjusted overlap at 0.5x) produces an
     explicit REANCHOR event, and L1 remains exact afterwards.
 (e) L3: an out-of-band exposure row is a BREACH.
+(f) BACKFILL: a hole in the archived bars is repaired as a logged event; the
+    repaired panel equals the truth, an earlier row still reproduces exactly
+    from the input it recorded, and a new row reproduces on the repaired panel.
 Fully synthetic, tmpdir-isolated, no network.
 """
 import os
@@ -25,7 +28,10 @@ import numpy as np
 import pandas as pd
 
 from kronos.live import (
+    _digest,
+    append_bar,
     append_row,
+    backfill,
     emit,
     l1_reproduce,
     l2_null_band,
@@ -140,6 +146,52 @@ append_row({"date": "2026-01-12", "status": "LIVE", "exposure": 1.2,
 l3 = l3_bands(read_ledger(d))
 assert l3["verdict"] == "BREACH" and "2026-01-12" in l3["band_violations"]
 print("X35e: out-of-band exposure -> BREACH")
+shutil.rmtree(d)
+
+# --- (f) BACKFILL: a hole in the archived bars, repaired as a logged event ------
+# genesis ends at day 199 on an OLDER adjustment basis for one ticker (x0.98,
+# as if a dividend had since been back-adjusted); bars resume at day 230, so
+# days 200..229 are a hole the reconstruction reads as one return.
+full = toy_panel(T=260, seed=3)
+old_basis = {f: v.iloc[:200].copy() for f, v in full.items()}
+for f in old_basis:
+    old_basis[f][TICKERS[0]] *= 0.98
+d = make_live_dir(old_basis)
+for i in range(230, 240):
+    append_bar(str(full["close"].index[i].date()), bar_from(full, i), live_dir=d)
+day_a = str(full["close"].index[240].date())
+row_a = emit(lambda: (bar_from(full, 240), full["close"].iloc[234:241]),
+             toy_recommend, day=day_a, live_dir=d)
+assert row_a["status"] == "LIVE"
+gapped = reconstruct_panel(d)["close"]
+assert (gapped.index[1:] - gapped.index[:-1]).max() > pd.Timedelta(days=20), "hole not planted"
+
+record = str(full["close"].index[241].date())
+missing = {f: v.iloc[199:230] for f, v in full.items()}       # anchor day 199 + hole
+ev = backfill(missing, record_date=record, applies_before=str(full["close"].index[200].date()),
+              reason="toy hole", live_dir=d)
+assert ev["status"] == "BACKFILL" and ev["n_days"] == 30, ev
+assert set(ev["factors"]) == {TICKERS[0]} and abs(ev["factors"][TICKERS[0]] - 1 / 0.98) < 1e-12, ev
+fixed = reconstruct_panel(d)["close"]
+truth = full["close"].iloc[:241]
+assert list(fixed.index) == list(truth.index), "backfilled panel still has a hole"
+err = float((fixed - truth).abs().max().max() / truth.abs().max().max())
+assert err < 1e-12, f"repaired panel != truth (rel err {err:.1e})"
+
+# the earlier row still reproduces from the gapped input it actually used ...
+l1a = l1_reproduce(row_a, toy_recommend, live_dir=d)
+assert l1a["ok"] and l1a["kind"] == "EXACT", f"old row no longer reproduces: {l1a}"
+# ... and that requires the as-of rebuild: the full panel would not reproduce it
+assert _digest(reconstruct_panel(d)["close"].loc[:day_a]) != row_a["input_digest"]
+# a new row is computed on the repaired panel and reproduces too
+row_b = emit(lambda: (bar_from(full, 241), full["close"].iloc[235:242]),
+             toy_recommend, day=record, live_dir=d)
+assert row_b["status"] == "LIVE"
+l1b = l1_reproduce(row_b, toy_recommend, live_dir=d)
+assert l1b["ok"] and l1b["kind"] == "EXACT", f"post-backfill row: {l1b}"
+print("X35f: BACKFILL repairs the hole (panel == truth, basis re-anchored "
+      f"x{ev['factors'][TICKERS[0]]:.4f}); the earlier row still reproduces EXACTLY "
+      "from its recorded input; the full panel would not; a new row reproduces")
 shutil.rmtree(d)
 
 # --- (a) L2 size and power on synthetic tracks ----------------------------------

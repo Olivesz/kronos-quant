@@ -175,7 +175,9 @@ one of about ±3.11%: the gap is about one standard error, so the forward record
 can neither confirm nor refute the backtest yet. The pre-registered horizon for
 any verdict is three years ([DESIGN23](docs/design/DESIGN23.md)). This record
 measures the unlevered KRONOS-TRADE book, not the shipped backtest above; a
-second stream for the shipped book starts when it is registered.
+second stream for the shipped book starts when it is registered. Its decisions
+before 2026-10-13 were made on a panel with a 74-day hole, since repaired as a
+logged event ([FINDINGS](docs/FINDINGS.md#kronos-live--the-forward-ledger-now-with-realized-returns)).
 
 ## The research program
 

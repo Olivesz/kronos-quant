@@ -1330,3 +1330,14 @@ realized figures above measure the system on gapped inputs. The registered
 repair (DESIGN23 amendment) backfills the missing bars as a logged event,
 keeps every earlier row reproducible from the input it actually used, and
 re-computes nothing.
+*Repaired the same day.* The BACKFILL event (ledger row of 2026-10-13)
+appended the 49 missing trading days, level-matched at the raw 2026-08-17 bar
+(median factor 1.0029), and re-anchored the genesis history of the 16 names
+whose adjustment basis had moved by more than 0.5% since the snapshot was
+taken — dividend back-adjustments for the income names (0.6–1.7%) and a
+4.6% corporate-action adjustment for HON. The largest gap in the panel is now
+a holiday weekend; the repaired June-5 returns match Yahoo's own series within
+0.45% (a real tech sell-off: INTC −11.3%, ORCL −9.6%). The panel as recorded
+by 2026-10-12 is byte-identical to the pre-repair panel, so every earlier row
+still reproduces from the input it used (gate X35f). The realized figures above
+are unchanged to 1e-5.

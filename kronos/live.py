@@ -54,8 +54,14 @@ def write_genesis(ohlc: dict, live_dir: str = LIVE_DIR) -> str:
     return dig
 
 
-def reconstruct_panel(live_dir: str = LIVE_DIR) -> dict:
-    """genesis + bars (+ re-anchor factors) -> the as-of OHLC panel."""
+def reconstruct_panel(live_dir: str = LIVE_DIR,
+                      recorded_by: str | None = None) -> dict:
+    """genesis + bars (+ re-anchor factors) -> the as-of OHLC panel.
+
+    recorded_by: rebuild from exactly the bars and ledger events recorded on
+    or before that date — the input an earlier row actually saw — so a later
+    BACKFILL or REANCHOR never changes how an old row reproduces. Bars without
+    a `recorded` column were recorded on their own date."""
     gdir = os.path.join(live_dir, "genesis")
     ohlc = {f: pd.read_csv(os.path.join(gdir, f"{f}.csv.gz"),
                            index_col=0, parse_dates=True,
@@ -64,20 +70,71 @@ def reconstruct_panel(live_dir: str = LIVE_DIR) -> dict:
     if os.path.exists(bars_path):
         bars = pd.read_csv(bars_path, parse_dates=["date"],
                            float_precision="round_trip")
+        if recorded_by is not None:
+            rec = (pd.to_datetime(bars["recorded"]) if "recorded" in bars
+                   else bars["date"]).fillna(bars["date"])
+            bars = bars[rec <= pd.Timestamp(recorded_by)]
         for f in FIELDS:
             wide = bars.pivot(index="date", columns="ticker", values=f)
             wide = wide.reindex(columns=ohlc[f].columns)
             ohlc[f] = pd.concat([ohlc[f], wide]).sort_index()
             ohlc[f] = ohlc[f][~ohlc[f].index.duplicated(keep="last")]
-    # apply logged re-anchor factors to history BEFORE each event date
+    # apply logged re-anchor factors to history BEFORE each event's anchor date
+    # (a REANCHOR anchors at its own date; a BACKFILL names `applies_before`)
     for ev in read_ledger(live_dir):
-        if ev.get("status") == "REANCHOR":
-            t0 = pd.Timestamp(ev["date"])
-            for tk, fac in ev["factors"].items():
-                if tk in ohlc["close"].columns:
-                    for f in FIELDS:
-                        ohlc[f].loc[ohlc[f].index < t0, tk] *= fac
+        if ev.get("status") not in ("REANCHOR", "BACKFILL") or not ev.get("factors"):
+            continue
+        if recorded_by is not None and ev["date"] > recorded_by:
+            continue
+        t0 = pd.Timestamp(ev.get("applies_before", ev["date"]))
+        for tk, fac in ev["factors"].items():
+            if tk in ohlc["close"].columns:
+                for f in FIELDS:
+                    ohlc[f].loc[ohlc[f].index < t0, tk] *= fac
     return ohlc
+
+
+def backfill(missing: dict, record_date: str, applies_before: str,
+             reason: str, live_dir: str = LIVE_DIR) -> dict:
+    """Append bars for a hole in the panel as one logged event (DESIGN23
+    amendment, 2026-10-13). `missing` is {field: date x ticker} for the hole
+    only, already level-matched by the caller to the raw archived bars after
+    it. Names whose genesis level disagrees with the backfill at the hole's
+    first edge by more than ADJ_TOL get a re-anchor factor on all history
+    before `applies_before`, exactly as a corporate action would."""
+    # raw genesis (no bars, no events): later re-anchors scale genesis and the
+    # backfilled bars alike, so only the raw ratio at the edge is invariant
+    raw = reconstruct_panel(live_dir, recorded_by="1900-01-01")
+    edge = pd.Timestamp(applies_before)
+    before = raw["close"].loc[raw["close"].index < edge]
+    last = before.index[-1]
+    if last not in missing["close"].index:
+        raise ValueError(f"backfill must include the anchor day {last.date()}")
+    ratio = (missing["close"].loc[last] / before.loc[last]).dropna()
+    factors = {k: float(v) for k, v in ratio.items() if abs(v - 1.0) > ADJ_TOL}
+    hole = {f: v.loc[v.index >= edge] for f, v in missing.items()}
+    long = []
+    for d in hole["close"].index:
+        for tk in hole["close"].columns:
+            long.append({"date": d.strftime("%Y-%m-%d"), "ticker": tk,
+                         **{f: float(hole[f].loc[d, tk]) for f in FIELDS},
+                         "recorded": record_date})
+    bars_path = os.path.join(live_dir, "bars.csv")
+    old = pd.read_csv(bars_path, float_precision="round_trip") \
+        if os.path.exists(bars_path) else pd.DataFrame()
+    if len(old) and "recorded" not in old:
+        old["recorded"] = old["date"]
+    new = pd.concat([old, pd.DataFrame(long)], ignore_index=True)
+    new = new.sort_values(["date", "ticker"], kind="mergesort")
+    new.to_csv(bars_path, index=False)
+    row = {"date": record_date, "status": "BACKFILL",
+           "range": [str(hole["close"].index[0].date()),
+                     str(hole["close"].index[-1].date())],
+           "n_days": int(len(hole["close"])), "applies_before": applies_before,
+           "factors": factors, "reason": reason,
+           "code_version": code_version()}
+    append_row(row, live_dir)
+    return row
 
 
 def append_bar(day: str, bar: pd.DataFrame, live_dir: str = LIVE_DIR) -> None:
@@ -86,6 +143,12 @@ def append_bar(day: str, bar: pd.DataFrame, live_dir: str = LIVE_DIR) -> None:
     rec = bar.reset_index().rename(columns={"index": "ticker"})
     rec.insert(0, "date", day)
     path = os.path.join(live_dir, "bars.csv")
+    if os.path.exists(path):
+        with open(path) as fh:
+            header = fh.readline().strip().split(",")
+        if "recorded" in header:
+            rec["recorded"] = day
+        rec = rec[header]
     rec.to_csv(path, mode="a", header=not os.path.exists(path), index=False)
 
 
@@ -188,7 +251,7 @@ def l1_reproduce(row: dict, recommend_fn, live_dir: str = LIVE_DIR,
     """Recompute the row from the reconstructed as-of panel; must match
     exactly. A digest mismatch means the reconstruction itself changed
     (should be impossible barring repo tampering) and is flagged distinctly."""
-    recon = reconstruct_panel(live_dir)
+    recon = reconstruct_panel(live_dir, recorded_by=row["date"])
     upto = {f: v.loc[:row["date"]] for f, v in recon.items()}
     if _digest(upto["close"]) != row["input_digest"]:
         return {"ok": False, "kind": "DIGEST_MISMATCH"}
