@@ -58,6 +58,8 @@ GATES = [
     "test_live.py",
     # KRONOS-MOMTILT gate (momentum tilt: mechanism-disappears + cap safety)
     "test_momtilt.py",
+    # DESIGN27 gate (EW backbone identity, causality, DTB3 machinery)
+    "test_ewbar.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).

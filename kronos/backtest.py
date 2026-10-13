@@ -55,10 +55,18 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
         if reg < 0:
             reg = 1
         combo = combined_signal(px, t, reg, cfg)
-        cov = shrunk_cov(rets.loc[:t].iloc[-cfg.cov_window:],
-                         cfg.cov_ewma_halflife, cfg.cov_window)
-        port = construct_portfolio(cov, combo["combined"], cfg)
-        target = port["weights"]
+        if getattr(cfg, "backbone", "hrp_bl") == "ew":
+            # DESIGN27: equal-weight backbone — 1/N over names with a live
+            # price at t; signals/HRP/BL are bypassed, everything downstream
+            # (no-trade band, costs, drift, overlay) is unchanged.
+            live = px.loc[t].notna()
+            target = pd.Series(np.where(live, 1.0 / live.sum(), 0.0),
+                               index=px.columns)
+        else:
+            cov = shrunk_cov(rets.loc[:t].iloc[-cfg.cov_window:],
+                             cfg.cov_ewma_halflife, cfg.cov_window)
+            port = construct_portfolio(cov, combo["combined"], cfg)
+            target = port["weights"]
 
         # no-trade band: skip dust trades
         dw = target - current

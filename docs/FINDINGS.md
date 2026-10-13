@@ -1149,3 +1149,50 @@ Sharpe up net of the search. PBO remains **0.45** and is restated here per the
 standing rule: the edge over sibling configurations is still not certifiable;
 this arm's claim rests on its pre-registration, its mechanism gate, and its
 split-half — not on the point estimate alone.
+
+## KRONOS-EWBAR — can any licensed configuration beat 1/N?
+
+Prompted by the owner: equal-weight on the book's own 48 names carries a
+higher raw Sharpe (1.10) than the shipped system (1.07). Rather than
+reframe, [DESIGN27](design/DESIGN27.md) pre-registered three candidates
+from the already-licensed machinery — no grids, one variant each, three
+ledger entries — and a decision rule fixed before any run: **WIN iff
+excess-over-cash Sharpe ≥ equal-weight's AND MaxDD ≤ 0.85× equal-weight's.**
+This study introduces the excess-over-cash convention (FRED DTB3, committed
+at `data/dtb3.csv`); raw rf=0 Sharpe is reported alongside. **Gate X38**
+licenses the machinery first: EW-backbone identity to 1e-12, exact
+causality on target weights, the DTB3 loader and a hand-computed
+excess-Sharpe fixture, and the shipped row anchored to `momtilt.json`.
+
+**Result (same days, net of costs and financing; artifact
+`research/ewbar.json`):**
+
+| Configuration | CAGR | Sharpe (rf=0) | Sharpe (excess) | MaxDD | Vol |
+|---|---|---|---|---|---|
+| **EW + shipped overlay (C1)** | **+13.5%** | **1.102** | 1.001 | **−19.2%** | 12.1% |
+| EW + overlay, no tilt (C2) | +13.1% | 1.083 | 0.981 | −18.5% | 12.0% |
+| shipped @ EW-matched vol (C3) | +12.1% | 1.063 | 0.955 | −19.4% | 11.4% |
+| shipped (momtilt, control) | +11.8% | 1.069 | 0.958 | −17.9% | 11.0% |
+| equal-weight raw | +16.6% | 1.102 | **1.020** | −29.5% | 15.0% |
+| SPY | +15.0% | 0.914 | 0.842 | −33.7% | 16.8% |
+
+**Verdict: FAILURE under the registered rule — stated as such.** The best
+candidate, C1, ties equal-weight's raw Sharpe exactly (1.102) at **65% of
+its drawdown**, but its excess-cash Sharpe lands 0.019 below (financing on
+the levered portion is paid at 3.5% while the cash benchmark earns ~2%:
+leverage that merely matches cash-adjusted efficiency cannot clear an
+excess-Sharpe bar). No candidate wins; per the kill criterion the line
+closes with no further variants.
+
+**What the failure measured.** The hypothesis held: the HRP+BL construction
+was the drag — swapping the backbone to 1/N while keeping the overlay
+raises raw Sharpe 1.069 → 1.102 and CAGR +11.8% → +13.5%. The overlay's
+value is confirmed as risk control: it converts equal-weight's −29.5%
+drawdown into −19.2% at identical raw Sharpe. The tilt still earns its keep
+(C1 vs C2: +0.02 Sharpe, both conventions). Beating 1/N on excess-cash
+Sharpe with these names requires a new licensed alpha source, not another
+arrangement of the current levers; the intraday dataset lead is named but
+unlicensed (needs its own quality gate).
+
+**Ledger: N=185 → 188 (three design27 entries charged); DSR/PBO recomputed
+in `research/forensics.json` and restated wherever a Sharpe is quoted.**

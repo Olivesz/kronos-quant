@@ -22,6 +22,27 @@ def sharpe(rets: pd.Series) -> float:
     return float(rets.mean() / v * np.sqrt(ANN)) if v > 0 else 0.0
 
 
+def dtb3_daily(index: pd.DatetimeIndex, path: str = "data/dtb3.csv") -> pd.Series:
+    """Daily cash rate from the committed FRED DTB3 snapshot (DESIGN27).
+
+    Discount yields in percent, forward-filled to the given trading days,
+    ACT/360 to a daily simple rate. Raises if the file is missing or the
+    span does not cover the index — never silently substitutes zero."""
+    df = pd.read_csv(path, parse_dates=[0], index_col=0).iloc[:, 0]
+    df = pd.to_numeric(df, errors="coerce").dropna()
+    if index.min() < df.index.min() or index.max() > df.index.max() + pd.Timedelta(days=14):
+        raise ValueError(f"DTB3 snapshot does not cover {index.min()}..{index.max()}")
+    daily = (df / 100.0 / 360.0).reindex(index.union(df.index)).ffill().reindex(index)
+    return daily.rename("rf_daily")
+
+
+def sharpe_excess(rets: pd.Series, rf_daily: pd.Series) -> float:
+    """Annualized Sharpe of returns in excess of cash (DESIGN27 convention)."""
+    ex = rets - rf_daily.reindex(rets.index).fillna(0.0)
+    v = ex.std()
+    return float(ex.mean() / v * np.sqrt(ANN)) if v > 0 else 0.0
+
+
 def sortino(rets: pd.Series) -> float:
     down = rets[rets < 0].std()
     return float(rets.mean() / down * np.sqrt(ANN)) if down and down > 0 else 0.0

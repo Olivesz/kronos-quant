@@ -97,6 +97,8 @@ class Config:
     mom_tilt: float = 0.15            # DESIGN21: +/-15% exposure tilt on 21d
                                       # market momentum (survived kill criteria;
                                       # 0 = control)
+    backbone: str = "hrp_bl"          # DESIGN27: "ew" = equal-weight 1/N
+                                      # backbone (same cadence/costs/overlay)
 
     # backtest
     rebalance_every: int = 21

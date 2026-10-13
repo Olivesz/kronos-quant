@@ -43,6 +43,7 @@ arc, or jump to a finding.
 | 22 | [DESIGN22.md](design/DESIGN22.md) | Price-setting rationality — the line closes | A maker that QUOTES against the forecastable flow (exact impact absorption, gate-verified to the identity) scores **1/10** — the leak doesn't close, the wildness dies, and per the pre-registered closure clause **the 5/10 ceiling is declared structural and the DESIGN8 line closes**. |
 | 25 | [DESIGN25.md](design/DESIGN25.md) | Referee attribution & robustness | The published inversion **dies on attribution**: at matched effective strength depth adds nothing (p = 0.0028), and the bits-rise is induced one-lag reversal scored as sign information — under AR(1) whitening the rises reverse. What survives is sharper: rationality **converts** a genuine nonlinear leak into reversal (0.0197 → 0.0036 whitened, never to zero), wildness is flow-generated (t(3) fundamentals don't save it), the ceiling survives kM re-equilibration (best re-tuned Q world: bits 0.0016, score **2/10**) and ±20% threshold perturbation. |
 | 26 | [DESIGN26.md](design/DESIGN26.md) | Follow-up: whitening order, power, real benchmarks, orientation | The control's leak is nonlinear **through lag 21** (AR(21)-whitened 0.0183, 8/8) and the whitened falls stand at 32 seeds (0/32) — but the **"cannot close" clause dies**: exact absorption's AR(21) residue is 0.0001 bits (2/8) and the re-equilibrated world is indistinguishable from closure at the real market's T (3/8 at T=4100). Bonus: orientation-normalizing FX flips its "zero" to **−0.022 (z=−3.3)** — one signed flight-to-quality flow, averaged away by quote convention. |
+| 27 | [DESIGN27.md](design/DESIGN27.md) | The equal-weight bar | Three pre-registered candidates from licensed machinery vs 1/N, scored **excess-over-cash** (DTB3 committed): **FAILURE under the registered rule, stated as such** — the best (EW backbone + shipped overlay) ties EW's raw Sharpe 1.102 at **65% of its drawdown** but lands 0.019 short on excess Sharpe (financing vs cash). The backbone, not the overlay, is what 1/N beats; DSR/PBO recomputed at N=188. |
 
 ## How the research maps to code
 
@@ -73,5 +74,6 @@ before real data ever touches the estimator:
 | FX (17) | `kronos/fx.py` | reuses X24 + X26; runtime real-range guard in `load_fx` |
 | Harvest (19) | `kronos/harvest.py` | `tests/test_harvest.py` (X31) |
 | Momtilt (21) | `kronos/risk.py`, `kronos/backtest.py` | `tests/test_momtilt.py` (X33) |
+| EWBAR (27) | `kronos/backtest.py` (EW backbone), `kronos/metrics.py` (DTB3) | `tests/test_ewbar.py` (X38) |
 
 See the top-level [README](../README.md) for the full results tables.

@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-41%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-42%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -30,7 +30,7 @@ KRONOS is two things at once:
    volatility, gated by a fat-tail-aware Student-t regime engine, and tilted
    by the measured monthly-momentum information budget.
 
-2. **A research program that treats markets like physics.** 34
+2. **A research program that treats markets like physics.** 35
    experiments ask what quant finance genuinely does not know — *is volatility
    rough? how many bits/day does the past leak about the future? are crashes
    critical transitions or shocks? is the market's near-criticality real?* —
@@ -38,7 +38,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 41 such gates run in
+passes a gate on data where the answer is already known.** 42 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -66,11 +66,11 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[data]"          # or: pip install -r requirements.txt
 
 python run_kronos.py              # full pipeline -> output/dashboard.html  (~25s)
-python run_research.py all        # 34 research experiments, cached to research/*.json
+python run_research.py all        # 35 research experiments, cached to research/*.json
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 41 verification gates (~3min)
+python tests/run_all.py           # all 42 verification gates (~3min)
 ```
 
 Runs fully offline: without `yfinance` or a network, a seeded synthetic
@@ -79,7 +79,7 @@ regime-switching market drives the entire pipeline. Force it anywhere with
 
 ## Highlights
 
-- **41 verification gates** — 39 proving an estimator has correct *size*
+- **42 verification gates** — 40 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -140,13 +140,13 @@ prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Black-Litterm
 *The honest read: KRONOS still does **not** beat the S&P on raw return — and
 says so. The edge is risk-adjusted: a better Sharpe at just over half the
 drawdown, with financing costs on leverage disclosed (1.26%/yr) and the
-selection-risk caveats (DSR 0.75 over N=185 logged trials; PBO 0.45 over
+selection-risk caveats (DSR 0.75 over N=188 logged trials; PBO 0.45 over
 140 variants) restated
 rather than hidden.*
 
 ## The research program
 
-34 experiments, pre-registered in [`docs/design/`](docs/design) and gated
+35 experiments, pre-registered in [`docs/design/`](docs/design) and gated
 before real data. The one-line answers — **full write-ups, tables, and methods
 in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 
@@ -169,6 +169,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [FX](docs/FINDINGS.md#kronos-fx--the-third-vertex-of-the-microstructure-triangle) | Where does FX sit on the leverage triangle? | **Statistically zero** (+0.005, z vs equities 3.89) — the triangle equity −0.04 / FX ≈ 0 / crypto +0.03 is monotone in microstructure; yen crosses carry the safe-haven tilt. |
 | [EDGE](docs/FINDINGS.md#kronos-edge--fixing-the-engines-structural-drag) | Why is CAGR half the risk budget? | Diagnosis found an **inverted drawdown throttle** (braking at peaks, releasing into crashes) and an unreachable vol target. Fixed + gated: Sharpe 0.94 → 1.02 unlevered; CAGR 6.4% → 10.9% levered. |
 | [EDGE2](docs/FINDINGS.md#kronos-edge2--the-research-licensed-performance-program) | What had the research already licensed? | The **HAR forecast lever** (X28) and the **t-HMM engine** (X29), each surviving its kill criterion, stacking to **Sharpe 1.05 @ −18.8% MaxDD**. |
+| [EWBAR](docs/FINDINGS.md#kronos-ewbar--can-any-licensed-configuration-beat-1n) | Can any licensed configuration beat 1/N? | **No — stated as a FAILURE** under the pre-registered rule. Best candidate (EW backbone + shipped overlay) ties equal-weight's raw Sharpe **1.10** at **65% of its drawdown**, but excess-over-cash lands 0.019 short: leverage financing cannot clear a cash-adjusted bar. The backbone, not the overlay, is what 1/N beats. |
 
 ## Cross-market transfer
 
@@ -237,7 +238,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    41 gates (39 synthetic ground truth + 2 real-data calibration)
+tests/                    42 gates (40 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

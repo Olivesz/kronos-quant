@@ -397,6 +397,7 @@ def exp_forensics(force: bool = False) -> dict:
         "design15_edge_variants": 2,   # fix-only + fix+lev1.5 (DESIGN15)
         "design16_variants": 3,        # HAR lever + t-HMM engine + joint (DESIGN16)
         "design21_momtilt": 1,         # momentum exposure tilt (DESIGN21)
+        "design27_ewbar": 3,           # EW backbone x2 + risk-matched (DESIGN27)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:
@@ -3185,6 +3186,103 @@ def exp_momtilt(force: bool = False) -> dict:
     return out
 
 
+def exp_ewbar(force: bool = False) -> dict:
+    """DESIGN27: the equal-weight bar. Three registered candidates against
+    equal-weight on the same names/days, scored excess-over-cash (DTB3).
+    Reports WIN or FAILURE per the pre-registered rule; no grids."""
+    if not force and (c := load_cached("ewbar")):
+        print("[ewbar] cached")
+        return c
+    from dataclasses import replace
+
+    from kronos.backtest import run_backtest
+    from kronos.metrics import dtb3_daily, sharpe_excess
+    from kronos.pairs import run_pairs_sleeve
+    from kronos.regime import walkforward_regimes
+
+    px, src = load_prices(CFG)
+    mkt = px[CFG.market].pct_change().dropna()
+    t0 = time.time()
+    rg = walkforward_regimes(mkt, CFG)
+    pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
+
+    def book(cfg, with_sleeve=True):
+        bt = run_backtest(px, rg["regime"], cfg)
+        net = bt["net"] + (pairs if with_sleeve else 0.0)
+        return bt, net
+
+    # shipped system first, asserted against the canonical artifact
+    bt_ship, net_ship = book(CFG)
+    cut = bt_ship["warmup_end"]
+    stored = load_cached("momtilt")["rows"]["shipped_tilted"]
+    ship_sum = M.summary(net_ship.loc[cut:], "shipped")
+    for k in ("sharpe", "max_dd", "cagr"):
+        if abs(ship_sum[k] - stored[k]) > 1e-6:
+            raise RuntimeError(f"ewbar: shipped row drifted from momtilt.json "
+                               f"on {k}: {ship_sum[k]} != {stored[k]}")
+
+    bt1, net_c1 = book(replace(CFG, backbone="ew"))
+    bt2, net_c2 = book(replace(CFG, backbone="ew", mom_tilt=0.0))
+    # EW raw benchmark: 1/N book, same cadence/costs, no overlay, no sleeve
+    ew_raw = (bt1["gross"] - bt1["costs"]).loc[cut:]
+    ew_vol = float(ew_raw.std() * np.sqrt(252))
+    bt3, net_c3 = book(replace(CFG, vol_target=round(ew_vol, 4)))
+
+    rf = dtb3_daily(net_ship.loc[cut:].index)
+    rows, series = {}, {}
+    for label, net, sleeve in (
+            ("shipped_tilted", net_ship, True),
+            ("ew_overlay", net_c1, True),
+            ("ew_overlay_untilted", net_c2, True),
+            ("shipped_hivol", net_c3, True),
+            ("equal_weight_raw", ew_raw, False),
+            ("spy", mkt, False)):
+        n = net.loc[cut:] if label != "equal_weight_raw" else net
+        rows[label] = M.summary(n, label)
+        rows[label]["sharpe_excess"] = round(sharpe_excess(n, rf), 4)
+        nav = (1 + n).cumprod()
+        dd = nav / nav.cummax() - 1
+        series[label] = {"nav": nav.round(6).iloc[::5].tolist(),
+                         "drawdown": dd.round(6).iloc[::5].tolist()}
+        print(f"[ewbar] {label:20s} CAGR {rows[label]['cagr']:+.1%} "
+              f"Sharpe {rows[label]['sharpe']:.3f} "
+              f"(excess {rows[label]['sharpe_excess']:.3f}) "
+              f"MaxDD {rows[label]['max_dd']:.1%}")
+
+    ew = rows["equal_weight_raw"]
+    verdicts = {}
+    for cand in ("ew_overlay", "ew_overlay_untilted", "shipped_hivol"):
+        r = rows[cand]
+        win = (r["sharpe_excess"] >= ew["sharpe_excess"]
+               and abs(r["max_dd"]) <= 0.85 * abs(ew["max_dd"]))
+        verdicts[cand] = {
+            "wins": bool(win),
+            "sharpe_excess_vs_ew": round(r["sharpe_excess"]
+                                         - ew["sharpe_excess"], 4),
+            "maxdd_ratio_vs_ew": round(abs(r["max_dd"]) / abs(ew["max_dd"]), 3)}
+    any_win = any(v["wins"] for v in verdicts.values())
+    out = {"source": src, "design": "DESIGN27",
+           "convention": "sharpe_excess = (net - DTB3 daily)/vol; raw rf=0 "
+                         "sharpe reported alongside",
+           "ew_realized_vol_used_for_c3": round(ew_vol, 4),
+           "dates_every5": net_ship.loc[cut:].index[::5].strftime(
+               "%Y-%m-%d").tolist(),
+           "rows": rows, "series": series, "verdicts": verdicts,
+           "program_verdict": ("WIN: a licensed configuration beats the "
+                               "equal-weight bar under the registered rule"
+                               if any_win else
+                               "FAILURE: no licensed configuration beats "
+                               "equal-weight under the registered rule; "
+                               "headline falls back to risk control "
+                               "(DESIGN27 kill criterion)"),
+           "note": "trial ledger charged 3 (design27_ewbar); rerun "
+                   "exp_forensics for DSR/PBO at the new N"}
+    print(f"[ewbar] {out['program_verdict']}")
+    print(f"[ewbar] done in {time.time()-t0:.0f}s")
+    save("ewbar", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -3203,6 +3301,7 @@ EXPERIMENTS = {
     "robustness": exp_robustness,
     "robustness2": exp_robustness2,
     "momtilt": exp_momtilt,
+    "ewbar": exp_ewbar,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,
