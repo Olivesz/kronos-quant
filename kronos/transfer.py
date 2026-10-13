@@ -98,7 +98,8 @@ def load_universe(name: str, start: str, end: str, seed: int = 42) -> dict:
         paths = {f: os.path.join(CACHE_DIR, f"transfer_{name}_{f}_{start}_{end}.csv")
                  for f in fields}
         if all(os.path.exists(p) for p in paths.values()):
-            ohlc = {f: pd.read_csv(p, index_col=0, parse_dates=True)
+            ohlc = {f: pd.read_csv(p, index_col=0, parse_dates=True,
+                                   float_precision="round_trip")
                     for f, p in paths.items()}
         else:
             ohlc = fetch_yahoo_ohlc(tickers, start, end)

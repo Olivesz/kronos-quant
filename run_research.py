@@ -3146,6 +3146,19 @@ def exp_harvest(force: bool = False) -> dict:
     return out
 
 
+def _input_digest(src: str, px: pd.DataFrame) -> str:
+    """Identity of the price input: the committed snapshot file's own SHA-256
+    when pinned (byte-level, so no parser or platform can perturb it), else a
+    digest of the parsed panel, marked unpinned."""
+    import hashlib
+
+    from kronos.data import MANIFEST_PATH
+    if src == "pinned":
+        with open(MANIFEST_PATH) as fh:
+            return json.load(fh)["sha256"]["close.csv.gz"][:16]
+    return "unpinned:" + hashlib.sha256(px.round(8).to_csv().encode()).hexdigest()[:16]
+
+
 def exp_momtilt(force: bool = False) -> dict:
     """DESIGN21: canonical artifact for the shipped momentum-tilt headline.
     Reproduces the registered comparison (tilted shipped system vs untilted
@@ -3210,8 +3223,7 @@ def exp_momtilt(force: bool = False) -> dict:
     out = {"source": src, "backbone": CFG.backbone, "mom_tilt": CFG.mom_tilt,
            "span": [str(idx[0].date()), str(idx[-1].date())],
            "code_digest": h.hexdigest()[:16],
-           "input_digest": hashlib.sha256(
-               px.round(8).to_csv().encode()).hexdigest()[:16],
+           "input_digest": _input_digest(src, px),
            "rows": rows,
            "daily": {"dates": [d.strftime("%Y-%m-%d") for d in idx],
                      "nav": {k: (1 + v.reindex(idx).fillna(0.0)).cumprod()

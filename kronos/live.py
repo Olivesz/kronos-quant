@@ -58,10 +58,12 @@ def reconstruct_panel(live_dir: str = LIVE_DIR) -> dict:
     """genesis + bars (+ re-anchor factors) -> the as-of OHLC panel."""
     gdir = os.path.join(live_dir, "genesis")
     ohlc = {f: pd.read_csv(os.path.join(gdir, f"{f}.csv.gz"),
-                           index_col=0, parse_dates=True) for f in FIELDS}
+                           index_col=0, parse_dates=True,
+                           float_precision="round_trip") for f in FIELDS}
     bars_path = os.path.join(live_dir, "bars.csv")
     if os.path.exists(bars_path):
-        bars = pd.read_csv(bars_path, parse_dates=["date"])
+        bars = pd.read_csv(bars_path, parse_dates=["date"],
+                           float_precision="round_trip")
         for f in FIELDS:
             wide = bars.pivot(index="date", columns="ticker", values=f)
             wide = wide.reindex(columns=ohlc[f].columns)

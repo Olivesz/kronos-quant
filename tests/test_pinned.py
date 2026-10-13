@@ -14,7 +14,9 @@ snapshot and requires a loud DataUnavailable for each attack:
       beyond the snapshot -> refused (never silently truncated);
   (f) the documented exclusion (META, below min_coverage) is allowed;
   (g) the transfer study's foreign panels (data/pinned/) load verified, and a
-      flipped byte in one is refused.
+      flipped byte in one is refused;
+  (h) every parse of a committed CSV is correctly rounded, so floats (and the
+      META digest) are identical on x86-64 and arm64.
 Runs from committed files only, so it runs identically in the hermetic job.
 """
 import os
@@ -121,6 +123,21 @@ try:
     open(victim, "wb").write(bytes(raw))
     refused(lambda: load_pinned_panel(extra[0], pinned_dir=d), f"byte flip in {extra[0]}")
     print(f"X39g {len(extra)} foreign transfer panels verified; a flipped byte is refused")
+    # (h) correctly-rounded parsing: pandas' default parser rounds through long
+    # double (80-bit on x86-64, 64-bit on arm64), so the same file parses to
+    # different floats on different machines and the META digest check fails
+    # on one of them. Static check, because an arm64 run cannot see the drift.
+    import inspect
+
+    import kronos.data as kdata
+    import kronos.live as klive
+    assert kdata.FLOAT_PARSE == "round_trip"
+    for fn in (kdata.load_pinned_ohlc, kdata.load_pinned_panel, klive.reconstruct_panel):
+        src = inspect.getsource(fn)
+        n_read = src.count("read_csv(")
+        n_rt = src.count("float_precision=FLOAT_PARSE") + src.count('float_precision="round_trip"')
+        assert n_read and n_read == n_rt, f"{fn.__name__}: {n_read} read_csv, {n_rt} correctly rounded"
+    print("X39h every committed-CSV parse is correctly rounded (arch-independent floats)")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

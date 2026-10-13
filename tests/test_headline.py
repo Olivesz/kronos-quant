@@ -11,7 +11,6 @@ pinned snapshot this checkout carries (input digest).
 Real data only; under KRONOS_SYNTHETIC it prints SKIPPED, and the real-data
 CI job fails on any SKIPPED line.
 """
-import hashlib
 import json
 import os
 import sys
@@ -37,9 +36,10 @@ if not is_real(src):
 with open(os.path.join(ROOT, "research", "momtilt.json")) as fh:
     art = json.load(fh)
 
-digest = hashlib.sha256(px.round(8).to_csv().encode()).hexdigest()[:16]
-assert digest == art["input_digest"], \
-    f"artifact built from different prices: {art['input_digest']} vs this checkout {digest}"
+with open(os.path.join(ROOT, "data", "pinned_manifest.json")) as fh:
+    digest = json.load(fh)["sha256"]["close.csv.gz"][:16]
+assert src == "pinned" and digest == art["input_digest"], \
+    f"artifact built from different prices: {art['input_digest']} vs snapshot {digest} ({src})"
 assert art["backbone"] == CFG.backbone, \
     f"artifact backbone {art['backbone']!r} != shipped default {CFG.backbone!r}"
 

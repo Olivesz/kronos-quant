@@ -1309,3 +1309,14 @@ returns throughout); the accrual fix moved every excess figure down by
 unchanged: FAILURE** — the shipped book now beats equal-weight on raw Sharpe
 (1.122 vs 1.102) but is 0.010 short on excess-cash Sharpe, the registered
 convention. Neither fix is a selection among variants; no trial is charged.
+
+**Platform-independent parsing (2026-10-13).** pandas' default CSV float
+parser rounds through `long double`, which is 80-bit on x86-64 and 64-bit on
+arm64, so the committed price files parsed to slightly different floats on
+CI's Linux runners than on an Apple-silicon laptop (verified under an x86-64
+interpreter: default parse digest `97f60ca2…` vs the snapshot's
+`d5b73b93…`; the correctly rounded parser reproduces it on both). Every
+committed CSV is now parsed with `float_precision="round_trip"` (gate X39h).
+The ledger rows written before this change were digested by the x86 cron with
+the default parser, so their L1 reproduction is exact only in that original
+environment; rows from the next emit on are reproducible on any machine.

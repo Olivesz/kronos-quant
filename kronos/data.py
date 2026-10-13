@@ -24,6 +24,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_DIR = os.path.join(ROOT, "data", "cache")
 PINNED_DIR = os.path.join(ROOT, "live", "genesis")
 OHLC_FIELDS = ("open", "high", "low", "close")
+# pandas' default "high" float parser rounds through long double, which is
+# 80-bit on x86-64 and 64-bit on arm64, so the same CSV parses to different
+# floats on different machines. "round_trip" is correctly rounded everywhere.
+FLOAT_PARSE = "round_trip"
 
 
 class DataUnavailable(RuntimeError):
@@ -220,7 +224,8 @@ def load_pinned_ohlc(fields=OHLC_FIELDS, pinned_dir: str = PINNED_DIR,
                                   f"{got[:16]}… != manifest "
                                   f"{man['sha256'][name][:16]}…")
         out[f] = pd.read_csv(io.BytesIO(raw), compression="gzip",
-                             index_col=0, parse_dates=True)
+                             index_col=0, parse_dates=True,
+                             float_precision=FLOAT_PARSE)
     if "close" in out:
         with open(os.path.join(pinned_dir, "META.json")) as fh:
             meta = json.load(fh)
@@ -248,7 +253,7 @@ def load_pinned_panel(basename: str, pinned_dir: str = PINNED_EXTRA_DIR) -> pd.D
         raise DataUnavailable(f"pinned panel modified: sha256({basename}) = "
                               f"{got[:16]}… != manifest {expected[:16]}…")
     return pd.read_csv(io.BytesIO(raw), compression="gzip", index_col=0,
-                       parse_dates=True)
+                       parse_dates=True, float_precision=FLOAT_PARSE)
 
 
 def _pinned_window(df: pd.DataFrame, cfg,
@@ -282,7 +287,8 @@ def load_prices(cfg) -> tuple[pd.DataFrame, str]:
     os.makedirs(CACHE_DIR, exist_ok=True)
     cache = _cache_path(cfg.start, cfg.end)
     if os.path.exists(cache):
-        px = pd.read_csv(cache, index_col=0, parse_dates=True)
+        px = pd.read_csv(cache, index_col=0, parse_dates=True,
+                         float_precision=FLOAT_PARSE)
         return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "yahoo"
     px = fetch_yahoo(cfg.universe, cfg.start, cfg.end)
     if px is not None and px.notna().mean().mean() > 0.80 and len(px) > 1000:
@@ -333,7 +339,8 @@ def load_ohlc(cfg) -> tuple[dict, str]:
     paths = {f: os.path.join(CACHE_DIR, f"ohlc_{f}_{cfg.start}_{cfg.end}.csv")
              for f in OHLC_FIELDS}
     if all(os.path.exists(p) for p in paths.values()):
-        out = {f: pd.read_csv(p, index_col=0, parse_dates=True)
+        out = {f: pd.read_csv(p, index_col=0, parse_dates=True,
+                              float_precision=FLOAT_PARSE)
                for f, p in paths.items()}
         return out, "yahoo"
     out = fetch_yahoo_ohlc(cfg.universe, cfg.start, cfg.end)
