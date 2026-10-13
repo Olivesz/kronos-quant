@@ -109,7 +109,12 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
     if mt > 0:
         logr = np.log(px[cfg.market] / px[cfg.market].shift(1))
         tilt = 1.0 + mt * np.sign(logr.rolling(21).sum()).fillna(0.0)
-    expo = exposure_series(gross_rets, cfg, tilt=tilt)
+    # The overlay's estimators (HAR lever, CVaR, drawdown) see only the book's
+    # own returns: the zero-padded warmup is not data, and training the HAR on
+    # it pinned the lever at its cap for the first months of the evaluation.
+    live = gross_rets.iloc[warmup + 1:]
+    expo = exposure_series(live, cfg, tilt=tilt).reindex(gross_rets.index)
+    expo = expo.fillna(1.0)
     exposure_lag = expo["exposure"].shift(1).fillna(1.0)
     fin_rate = getattr(cfg, "financing_rate_ann", 0.0)
     financing = (exposure_lag - 1.0).clip(lower=0.0) * (fin_rate / 252.0)

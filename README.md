@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-45%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-46%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -24,9 +24,10 @@ KRONOS is two things at once:
 
 1. **A production-shaped quant platform** — data → equal-weight backbone →
    forecast-volatility risk overlay → a self-contained interactive dashboard.
-   It runs end-to-end in ~25s and posts a **net Sharpe of 1.10 at −19.2% max
-   drawdown** (1.00 in excess of cash): equal-weight's Sharpe on the same names
-   at 65% of its drawdown, and a higher Sharpe than the S&P at 57% of its
+   It runs end-to-end in ~25s and posts a **net Sharpe of 1.12 at −18.7% max
+   drawdown** (0.97 in excess of cash): about equal-weight's Sharpe on
+   the same names (1.10; 0.98 in excess of cash) at 64% of its
+   drawdown, and a higher Sharpe than the S&P at 56% of its
    drawdown — sized by a forecast of its own volatility and tilted by the
    measured monthly-momentum information budget. The regime-gated
    HRP + Black-Litterman construction it replaced lost to 1/N under a
@@ -40,7 +41,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 45 such gates run in
+passes a gate on data where the answer is already known.** 46 such gates run in
 CI on every commit — on the committed real prices with nothing skipped, and again
 on a synthetic market. That is the whole point — the platform grades its own
 homework.
@@ -74,7 +75,7 @@ python run_research.py all        # 35 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 45 verification gates (~5 min)
+python tests/run_all.py           # all 46 verification gates (~5 min)
 ```
 
 Runs fully offline on real prices: every real-data result reads the
@@ -87,7 +88,7 @@ never silently substitutes synthetic data.
 
 ## Highlights
 
-- **45 verification gates**, run in CI on real prices and on a synthetic
+- **46 verification gates**, run in CI on real prices and on a synthetic
   market. Most prove an estimator has correct *size* (doesn't fire on null
   worlds) and *power* (detects planted effects) on synthetic ground truth
   before any real-data claim is made. On the committed real-price snapshot
@@ -147,16 +148,16 @@ control:  prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Bla
 
 | Strategy (2013-01-14 → 2026-06-04, net of costs) | CAGR | Vol | Sharpe (rf=0) | Sharpe (excess cash) | Max DD | CVaR95 |
 |---|---|---|---|---|---|---|
-| **KRONOS (shipped: 1/N + overlay + tilt)** | +13.5% | 12.1% | **1.10** | **1.00** | **−19.2%** | 1.89% |
-| KRONOS (1/N + overlay, no tilt) | +13.1% | 12.0% | 1.08 | 0.98 | −18.5% | 1.87% |
-| KRONOS (prior default: regime-gated HRP + BL) | +11.8% | 11.0% | 1.07 | 0.96 | −17.9% | 1.65% |
-| Equal-weight (same 48 names, no overlay) | +16.6% | 15.0% | 1.10 | 1.02 | −29.5% | 2.22% |
-| SPY (buy & hold) | +15.0% | 16.8% | 0.91 | 0.84 | −33.7% | 2.55% |
+| **KRONOS (shipped: 1/N + overlay + tilt)** | +13.6% | 12.0% | **1.12** | **0.97** | **−18.7%** | 1.86% |
+| KRONOS (1/N + overlay, no tilt) | +13.2% | 11.8% | 1.11 | 0.96 | −18.0% | 1.82% |
+| KRONOS (prior default: regime-gated HRP + BL) | +11.8% | 11.0% | 1.07 | 0.90 | −17.8% | 1.65% |
+| Equal-weight (same 48 names, no overlay) | +16.6% | 15.0% | 1.10 | 0.98 | −29.5% | 2.22% |
+| SPY (buy & hold) | +15.0% | 16.8% | 0.91 | 0.81 | −33.7% | 2.55% |
 
 The overlay is risk control, not alpha: it holds equal-weight's Sharpe while
 cutting its drawdown by a third, and nothing in the licensed toolkit beats 1/N
 on excess-cash Sharpe (DESIGN27, reported as a failure). Leverage financing
-costs 0.83%/yr; selection risk is DSR 0.81 over N=188 logged trials; PBO 0.45
+costs 0.77%/yr; selection risk is DSR 0.83 over N=188 logged trials; PBO 0.45
 over 140 variants. The 48-name universe is today's large caps (hindsight), so
 these are in-sample figures — every row comes from one run,
 [`research/momtilt.json`](research/momtilt.json), which also commits the daily
@@ -201,7 +202,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [FX](docs/FINDINGS.md#kronos-fx--the-third-vertex-of-the-microstructure-triangle) | Where does FX sit on the leverage triangle? | **Statistically zero** (+0.005, z vs equities 3.89) — the triangle equity −0.04 / FX ≈ 0 / crypto +0.03 is monotone in microstructure; yen crosses carry the safe-haven tilt. |
 | [EDGE](docs/FINDINGS.md#kronos-edge--fixing-the-engines-structural-drag) | Why is CAGR half the risk budget? | Diagnosis found an **inverted drawdown throttle** (braking at peaks, releasing into crashes) and an unreachable vol target. Fixed + gated: Sharpe 0.94 → 1.02 unlevered; CAGR 6.4% → 10.9% levered. |
 | [EDGE2](docs/FINDINGS.md#kronos-edge2--the-research-licensed-performance-program) | What had the research already licensed? | The **HAR forecast lever** (X28) and the **t-HMM engine** (X29), each surviving its kill criterion, stacking to **Sharpe 1.05 @ −18.8% MaxDD**. |
-| [EWBAR](docs/FINDINGS.md#kronos-ewbar--can-any-licensed-configuration-beat-1n) | Can any licensed configuration beat 1/N? | **No — stated as a FAILURE** under the pre-registered rule. Best candidate (EW backbone + shipped overlay) ties equal-weight's raw Sharpe **1.10** at **65% of its drawdown**, but excess-over-cash lands 0.019 short: leverage financing cannot clear a cash-adjusted bar. The backbone, not the overlay, is what 1/N beats. |
+| [EWBAR](docs/FINDINGS.md#kronos-ewbar--can-any-licensed-configuration-beat-1n) | Can any licensed configuration beat 1/N? | **No — stated as a FAILURE** under the pre-registered rule. Best candidate (EW backbone + shipped overlay) beats equal-weight's raw Sharpe (**1.12** vs 1.10) at **64% of its drawdown**, but excess-over-cash lands 0.010 short: leverage financing cannot clear a cash-adjusted bar. The backbone, not the overlay, is what 1/N beats. |
 
 ## Cross-market transfer
 
@@ -226,13 +227,13 @@ leg reproduces the headline exactly):
 
 | Market | KRONOS Sharpe | Equal-weight Sharpe | Index Sharpe | KRONOS MaxDD | Equal-weight MaxDD | Index MaxDD |
 |---|---|---|---|---|---|---|
-| Japan | 0.82 | 0.95 | 0.79 | −17.8% | −29.4% | −32.7% |
-| Europe | 0.43 | 0.71 | 0.59 | −18.2% | −37.4% | −38.5% |
-| Asia-EM | 0.78 | 0.96 | 0.30 | −23.6% | −29.0% | −49.4% |
+| Japan | 0.78 | 0.95 | 0.79 | −15.6% | −29.4% | −32.7% |
+| Europe | 0.47 | 0.71 | 0.59 | −17.4% | −37.4% | −38.5% |
+| Asia-EM | 0.78 | 0.96 | 0.30 | −22.1% | −29.0% | −49.4% |
 
 Out of sample, the book keeps a positive Sharpe and roughly half the local
 index's drawdown everywhere, but equal-weight on the same names beats its
-Sharpe in all three markets, and in Europe the index does too. The transferable
+Sharpe in all three markets, and in Japan and Europe the index does too. The transferable
 claim is risk control, not alpha. An earlier run of this study, on the
 unlevered system before the drawdown-throttle fix
 ([`research/transfer.json` at 2a732c1](https://github.com/Olivesz/kronos-quant/blob/2a732c1/research/transfer.json)),
@@ -291,7 +292,7 @@ kronos/                   44 modules, ~9,200 lines
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    45 gates — run on real prices and on a synthetic market
+tests/                    46 gates — run on real prices and on a synthetic market
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

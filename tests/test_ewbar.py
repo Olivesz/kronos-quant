@@ -10,7 +10,9 @@
     research/momtilt.json (real data only; SKIPPED under KRONOS_SYNTHETIC).
 """
 import os
+import shutil
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -60,11 +62,32 @@ diff = max(float((targets[t] - bt2["targets"][t]).abs().max()) for t in shared)
 assert diff == 0.0, f"EW causality leak: max target diff {diff}"
 print(f"X38b causality: max target-weight diff on {len(shared)} shared dates = {diff:.2e}")
 
-# (c) DTB3 loader + fixture
+# (c) DTB3 loader + fixtures
 idx = pd.bdate_range("2020-01-02", periods=300)
 rf = dtb3_daily(idx, path=os.path.join(ROOT, "data", "dtb3.csv"))
 assert rf.notna().all() and float(rf.min()) >= -1e-5 and float(rf.max()) < 25e-4, \
     f"DTB3 daily rate out of range: {rf.min()}..{rf.max()}"
+# accrual fixture: a step from 5.00 to 6.00 (discount %) on Thu 2021-01-07
+tmpd = tempfile.mkdtemp(prefix="kronos_x38_")
+csv = os.path.join(tmpd, "dtb3.csv")
+cal = pd.date_range("2020-12-01", "2021-02-01", freq="D")
+pd.DataFrame({"DTB3": np.where(cal < pd.Timestamp("2021-01-07"), 5.0, 6.0)},
+             index=cal.rename("observation_date")).to_csv(csv)
+fx_idx = pd.bdate_range("2021-01-04", "2021-01-15")
+acc = dtb3_daily(fx_idx, path=csv)
+y5 = 0.05 / (1 - 0.05 * 91 / 360)
+y6 = 0.06 / (1 - 0.06 * 91 / 360)
+hand = {"2021-01-04": y5 * 1 / 360,             # first day: one day at the known rate
+        "2021-01-07": y5 * 1 / 360,             # step printed Thu: accrues from Fri
+        "2021-01-08": y6 * 1 / 360,
+        "2021-01-11": y6 * 3 / 360}             # Monday accrues the weekend
+for day, want in hand.items():
+    assert abs(acc.loc[day] - want) < 1e-15, f"accrual {day}: {acc.loc[day]} != {want}"
+shutil.rmtree(tmpd, ignore_errors=True)
+# a flat-rate year accrues the full bill return, not 252/360 of it
+flat_idx = pd.bdate_range("2023-01-03", "2023-12-29")
+flat = dtb3_daily(flat_idx, path=os.path.join(ROOT, "data", "dtb3.csv"))
+assert 0.045 < float(flat.sum()) < 0.056, f"2023 cash accrual {flat.sum():.4f} not a full year"
 fix = pd.Series([0.01, -0.005, 0.002],
                 index=pd.bdate_range("2021-01-04", periods=3))
 rf_fix = pd.Series(0.0001, index=fix.index)
@@ -72,15 +95,15 @@ ex = fix - rf_fix
 expect = float(ex.mean() / ex.std() * np.sqrt(252))
 got = sharpe_excess(fix, rf_fix)
 assert abs(got - expect) < 1e-12, f"excess-Sharpe fixture: {got} != {expect}"
-# and the loader must refuse an uncovered span
 try:
     dtb3_daily(pd.bdate_range("1890-01-01", periods=5),
                path=os.path.join(ROOT, "data", "dtb3.csv"))
     raise AssertionError("DTB3 loader accepted an uncovered span")
 except ValueError:
     pass
-print(f"X38c DTB3: {len(rf)} daily rates in range; fixture {got:.4f} exact; "
-      "uncovered span refused")
+print(f"X38c DTB3: discount->money-market yield, calendar-day accrual (weekend x3, "
+      f"step applies next day) exact; 2023 accrues {flat.sum():.2%}; excess-Sharpe "
+      f"fixture exact; uncovered span refused")
 
 # (d) shipped-row anchor against the canonical artifact (real data only)
 if not is_real(src):

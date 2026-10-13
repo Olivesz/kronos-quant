@@ -1,6 +1,8 @@
 """Performance metrics. rf = 0 throughout (stated in the dashboard)."""
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -23,17 +25,27 @@ def sharpe(rets: pd.Series) -> float:
 
 
 def dtb3_daily(index: pd.DatetimeIndex, path: str = "data/dtb3.csv") -> pd.Series:
-    """Daily cash rate from the committed FRED DTB3 snapshot (DESIGN27).
+    """Daily cash return from the committed FRED DTB3 snapshot (DESIGN27).
 
-    Discount yields in percent, forward-filled to the given trading days,
-    ACT/360 to a daily simple rate. Raises if the file is missing or the
-    span does not cover the index — never silently substitutes zero."""
+    DTB3 is a bank-discount yield d (percent, 360-day basis). It is converted
+    to the money-market yield y = d / (1 - d*91/360), and each trading day t
+    accrues the rate known at the previous trading day over the CALENDAR days
+    since then: y_{t-1} * days(t-1, t) / 360. A year therefore accrues about
+    y * 365/360 — the full bill return, weekends and holidays included — and a
+    rate print on day t only affects accrual from t+1. Raises if the snapshot
+    does not cover the index; never substitutes zero."""
+    if not os.path.isabs(path):
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path)
     df = pd.read_csv(path, parse_dates=[0], index_col=0).iloc[:, 0]
-    df = pd.to_numeric(df, errors="coerce").dropna()
-    if index.min() < df.index.min() or index.max() > df.index.max() + pd.Timedelta(days=14):
+    d = pd.to_numeric(df, errors="coerce").dropna() / 100.0
+    if index.min() - pd.Timedelta(days=14) < d.index.min() or \
+            index.max() > d.index.max() + pd.Timedelta(days=14):
         raise ValueError(f"DTB3 snapshot does not cover {index.min()}..{index.max()}")
-    daily = (df / 100.0 / 360.0).reindex(index.union(df.index)).ffill().reindex(index)
-    return daily.rename("rf_daily")
+    y = d / (1.0 - d * 91.0 / 360.0)
+    rate = y.reindex(index.union(y.index)).ffill().reindex(index)
+    days = index.to_series().diff().dt.days.fillna(1.0)
+    prev = rate.shift(1).fillna(rate)
+    return (prev * days / 360.0).rename("rf_daily")
 
 
 def sharpe_excess(rets: pd.Series, rf_daily: pd.Series) -> float:

@@ -206,16 +206,17 @@ def main():
     ship_dd = abs(R["shipped_tilted"]["max_dd"])
     pct_ew = round(100 * ship_dd / abs(R["equal_weight_raw"]["max_dd"]))
     pct_spy = round(100 * ship_dd / abs(R["spy"]["max_dd"]))
-    hits = count_and_values(readme, r"equal-weight's Sharpe on the same names\s+at (\d+)% of its drawdown")
-    check("README", "drawdown % vs equal-weight (derived)", hits == [str(pct_ew)],
-          f"expected [{pct_ew}], saw {hits}")
+    m_h = re.search(r"about equal-weight's Sharpe on\s+the same names \(([\d.]+); ([\d.]+) in excess of cash\) at (\d+)% of its\s+drawdown", readme)
+    want_h = [f"{R['equal_weight_raw']['sharpe']:.2f}", f"{R['equal_weight_raw']['sharpe_excess']:.2f}", str(pct_ew)]
+    check("README", "hero: equal-weight figures and drawdown % (derived)",
+          m_h is not None and list(m_h.groups()) == want_h, f"expected {want_h}, saw {m_h.groups() if m_h else None}")
     hits = count_and_values(readme, r"higher Sharpe than the S&P at (\d+)% of its\s+drawdown")
     check("README", "drawdown % vs SPY (derived)", hits == [str(pct_spy)],
           f"expected [{pct_spy}], saw {hits}")
-    check("README", "Sharpe ties/beats SPY as claimed",
+    check("README", "'about equal-weight's Sharpe' and 'higher than the S&P' hold",
           R["shipped_tilted"]["sharpe"] > R["spy"]["sharpe"]
-          and abs(R["shipped_tilted"]["sharpe"] - R["equal_weight_raw"]["sharpe"]) < 0.005,
-          "hero claims EW's Sharpe and higher than SPY's")
+          and abs(R["shipped_tilted"]["sharpe"] - R["equal_weight_raw"]["sharpe"]) < 0.05,
+          "hero claims about-equal to EW (|d| < 0.05) and higher than SPY")
     fin = f"{R['shipped_tilted']['financing_ann'] * 100:.2f}"
     hits = count_and_values(readme, r"financing\s+costs ([\d.]+)%/yr")
     check("README", "leverage financing %/yr vs momtilt.json", hits == [fin],

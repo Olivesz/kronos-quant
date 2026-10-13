@@ -66,6 +66,8 @@ GATES = [
     "test_headline.py",
     # live forward P&L gate (X41): ledger weights -> realized returns vs hand arithmetic
     "test_live_pnl.py",
+    # overlay-warmup gate (X42): the overlay sees only the book's own returns
+    "test_overlay_warmup.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).

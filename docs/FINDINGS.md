@@ -778,13 +778,14 @@ verified, gate X39). The US leg reproduces `research/momtilt.json` exactly.
 
 | Market | KRONOS Sharpe | Equal-weight | Index | KRONOS MaxDD | Equal-weight | Index |
 |---|---|---|---|---|---|---|
-| Japan | 0.82 | 0.95 | 0.79 | −17.8% | −29.4% | −32.7% |
-| Europe | 0.43 | 0.71 | 0.59 | −18.2% | −37.4% | −38.5% |
-| Asia-EM | 0.78 | 0.96 | 0.30 | −23.6% | −29.0% | −49.4% |
+| Japan | 0.78 | 0.95 | 0.79 | −15.6% | −29.4% | −32.7% |
+| Europe | 0.47 | 0.71 | 0.59 | −17.4% | −37.4% | −38.5% |
+| Asia-EM | 0.78 | 0.96 | 0.30 | −22.1% | −29.0% | −49.4% |
 
 TR2a (positive Sharpe everywhere) and TR2b (shallower drawdown than the local
 index everywhere) still pass. But out of sample the shipped book loses to
-equal-weight on Sharpe in every foreign market, loses to the index in Europe,
+equal-weight on Sharpe in every foreign market, loses to the index in Japan
+and Europe,
 and is weaker abroad than the pre-fix system was (0.83 / 0.67 / 0.93). The
 in-sample gain from the throttle fix, leverage and the 1/N backbone did not
 transfer; what transfers is drawdown control. A plausible but untested cause is
@@ -885,7 +886,7 @@ was run).
 | baseline (bug, cap 1.0) | 6.4% | 6.9% | 0.94 | −14.0% | — |
 | **fix-only (cap 1.0)** | 8.8% | 8.7% | **1.02** | −16.4% | — |
 | **fix + lever 1.5** | 10.9% | 11.6% | 0.95 | −21.3% | 1.26%/yr |
-| SPY | 15.0% | 16.8% | 0.91 | −33.7% | — |
+| SPY | +15.0% | 0.914 | 0.808 | −33.7% | 16.8% |
 
 Every pre-registered expectation landed in its stated range, and both kill
 criteria passed: the fix *raised* Sharpe (the inverted throttle was pure drag —
@@ -1192,27 +1193,28 @@ excess-Sharpe fixture, and the shipped row anchored to `momtilt.json`.
 
 | Configuration | CAGR | Sharpe (rf=0) | Sharpe (excess) | MaxDD | Vol |
 |---|---|---|---|---|---|
-| **EW + shipped overlay (C1)** | **+13.5%** | **1.102** | 1.001 | **−19.2%** | 12.1% |
-| EW + overlay, no tilt (C2) | +13.1% | 1.083 | 0.981 | −18.5% | 12.0% |
-| shipped @ EW-matched vol (C3) | +12.1% | 1.061 | 0.954 | −19.4% | 11.4% |
-| shipped (momtilt, control) | +11.8% | 1.068 | 0.956 | −17.9% | 11.0% |
-| equal-weight raw | +16.6% | 1.102 | **1.020** | −29.5% | 15.0% |
+| **EW + shipped overlay (C1)** | **+13.6%** | **1.122** | 0.972 | **−18.7%** | 12.0% |
+| EW + overlay, no tilt (C2) | +13.2% | 1.114 | 0.961 | −18.0% | 11.8% |
+| shipped @ EW-matched vol (C3) | +12.2% | 1.061 | 0.904 | −19.2% | 11.4% |
+| shipped (momtilt, control) | +11.8% | 1.067 | 0.904 | −17.8% | 11.0% |
+| equal-weight raw | +16.6% | 1.102 | **0.982** | −29.5% | 15.0% |
 | SPY | +15.0% | 0.914 | 0.842 | −33.7% | 16.8% |
 
 **Verdict: FAILURE under the registered rule — stated as such.** The best
-candidate, C1, ties equal-weight's raw Sharpe exactly (1.102) at **65% of
-its drawdown**, but its excess-cash Sharpe lands 0.019 below (financing on
-the levered portion is paid at 3.5% while the cash benchmark earns ~2%:
-leverage that merely matches cash-adjusted efficiency cannot clear an
-excess-Sharpe bar). No candidate wins; per the kill criterion the line
-closes with no further variants.
+candidate, C1, beats equal-weight's raw Sharpe (1.122 vs 1.102) at
+**64% of its drawdown**, but its excess-cash Sharpe lands
+0.010 below (financing on the levered portion is paid at 3.5% while the
+cash benchmark earns less: leverage that only matches cash-adjusted efficiency
+cannot clear an excess-Sharpe bar). No candidate wins; per the kill criterion
+the line closes with no further variants. (Figures are the corrected run —
+see the two measurement fixes below; the verdict did not change.)
 
 **What the failure measured.** The hypothesis held: the HRP+BL construction
 was the drag — swapping the backbone to 1/N while keeping the overlay
-raises raw Sharpe 1.068 → 1.102 and CAGR +11.8% → +13.5%. The overlay's
+raises raw Sharpe 1.067 → 1.122 and CAGR +11.8% → +13.6%. The overlay's
 value is confirmed as risk control: it converts equal-weight's −29.5%
-drawdown into −19.2% at identical raw Sharpe. The tilt still earns its keep
-(C1 vs C2: +0.02 Sharpe, both conventions). Beating 1/N on excess-cash
+drawdown into −18.7% at about the same raw Sharpe. The tilt still earns its keep
+(C1 vs C2: +0.008 raw, +0.011 excess). Beating 1/N on excess-cash
 Sharpe with these names requires a new licensed alpha source, not another
 arrangement of the current levers; the intraday dataset lead is named but
 unlicensed (needs its own quality gate).
@@ -1226,8 +1228,8 @@ identical to the first run on the Yahoo cache, two rows moved ≤ 0.002.
 **Shipped anyway (owner decision, 2026-10-13).** C1 failed the
 registered beat-1/N bar but dominates the prior default on every
 performance axis except drawdown depth, so the owner made it the shipped
-book (`config.backbone = "ew"`): **Sharpe 1.10 (rf=0) / 1.00 (excess
-cash), CAGR +13.5%, MaxDD −19.2%, financing 0.83%/yr; DSR rises to 0.81
+book (`config.backbone = "ew"`): **Sharpe 1.12 (rf=0) / 0.97 (excess
+cash), CAGR +13.6%, MaxDD −18.7%, financing 0.77%/yr; DSR rises to 0.83
 at N=188** because the shipped series itself improved. The selection
 happened after the registered verdict and is stated as such; it charges
 no new trial (C1 was already one of the three). The shipped book no
@@ -1274,3 +1276,36 @@ bullish — annualized means +23%, +20% and +18% with vols 6.5%, 18% and
 selects the live system's signal weights, renaming it mid-test would change
 the system under test; a sign-aware label rule is noted for the next
 registered revision instead.
+
+**Two measurement bugs, found by the DESIGN28 design panel and fixed
+(2026-10-13).** Both were verified in the code before any fix:
+
+1. *Cash accrual.* `kronos.metrics.dtb3_daily` (introduced with DESIGN27)
+   credited the T-bill rate ÷ 360 per *trading* day, about 70% of the annual
+   rate, so every excess-over-cash Sharpe was overstated. It now converts
+   DTB3's bank-discount yield to a money-market yield and accrues it over
+   calendar days, using the rate known the day before (2023 accrues 5.15%).
+   Gate X38c pins the arithmetic: weekend accrual, a rate step applying the
+   next day, and a full-year total; the old formula fails it.
+2. *Overlay warmup.* `run_backtest` pads the 762 pre-warmup days with zero
+   returns, and the overlay (HAR lever, CVaR and drawdown brakes) was fitted
+   on them as if they were history, opening the lever at its cap. The overlay
+   now sees only the book's own returns. Gate X42 pins this and shows the
+   padded input differs; the old engine fails it. The live ledger's system
+   (`kronos/trade.py`) sizes from ex-ante per-asset forecasts and is
+   unaffected.
+
+| Row (same days) | Sharpe rf=0 before → after | Excess Sharpe before → after | MaxDD before → after |
+|---|---|---|---|
+| Shipped (1/N + overlay + tilt) | 1.102 → 1.122 | 1.001 → 0.972 | −19.2% → −18.7% |
+| 1/N + overlay, no tilt | 1.083 → 1.114 | 0.981 → 0.961 | −18.5% → −18.0% |
+| Prior default (HRP + BL) | 1.068 → 1.067 | 0.956 → 0.904 | −17.9% → −17.8% |
+| Equal-weight | 1.102 → 1.102 | 1.020 → 0.982 | −29.5% → −29.5% |
+| SPY | 0.914 → 0.914 | 0.842 → 0.808 | −33.7% → −33.7% |
+
+The warmup fix moved the shipped book *up* (its HAR now trains on real
+returns throughout); the accrual fix moved every excess figure down by
+0.03–0.05. Re-read on the corrected numbers, **DESIGN27's verdict is
+unchanged: FAILURE** — the shipped book now beats equal-weight on raw Sharpe
+(1.122 vs 1.102) but is 0.010 short on excess-cash Sharpe, the registered
+convention. Neither fix is a selection among variants; no trial is charged.

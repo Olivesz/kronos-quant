@@ -114,3 +114,14 @@ re-run on it: every verdict is identical; the prior-default and C3 rows
 moved by at most 0.002 Sharpe (the cache and the snapshot differ by
 2.3e-6 relative in prices). Figures above and in FINDINGS are the pinned
 reproduction.
+
+## Amendment (2026-10-13): two measurement bugs fixed, verdict re-read
+
+The DESIGN28 design panel found, and the code confirmed, that `dtb3_daily`
+credited only ~70% of the bill rate (÷360 per trading day) and that the
+overlay was fitted on the 762 zero-padded warmup days. Both are fixed and
+gated (X38c, X42). Re-run on correctly computed inputs, every verdict is
+unchanged — FAILURE. Corrected gaps to equal-weight's excess Sharpe: C1
+−0.010, C2 −0.021, C3 −0.078; drawdown ratios 0.635 / 0.609 / 0.650. C1 now
+beats equal-weight on raw Sharpe (1.122 vs 1.102) while still failing the
+registered excess-cash bar.
