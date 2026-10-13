@@ -1320,3 +1320,13 @@ committed CSV is now parsed with `float_precision="round_trip"` (gate X39h).
 The ledger rows written before this change were digested by the x86 cron with
 the default parser, so their L1 reproduction is exact only in that original
 environment; rows from the next emit on are reproducible on any machine.
+
+**A data hole in the live panel (found 2026-10-13).** The genesis snapshot
+ends 2026-06-04 and the first archived daily bar is 2026-08-17, so the live
+system read the 74-day gap as a single day's return — median |r| 4.2% per
+name (2.7 daily sd), ORCL +38% (13.8 sd). Every LIVE decision since 2026-08-17
+used vol and correlation estimates containing that phantom day, so the
+realized figures above measure the system on gapped inputs. The registered
+repair (DESIGN23 amendment) backfills the missing bars as a logged event,
+keeps every earlier row reproducible from the input it actually used, and
+re-computes nothing.

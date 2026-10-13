@@ -83,3 +83,30 @@ GAP row and never a stale-as-live row.
 - This arm charges **zero** Sharpe-ledger entries (measurement
   infrastructure; no variant selection). PBO 0.45 restated wherever live
   performance is displayed.
+
+*Amendment (2026-10-13, registered before implementation): the 74-day hole.
+The genesis snapshot ends 2026-06-04 — the research panel's end — but the
+first archived bar is 2026-08-17, so `reconstruct_panel` read the gap as one
+daily return: median |r| 4.2% per name (2.7 daily standard deviations), ORCL
++38% (13.8 sd), SPY +2.1% (2.5 sd). Every LIVE row since 2026-08-17 computed
+its vol and correlation estimates from inputs containing that phantom day.
+Repair: a one-time BACKFILL event appends the missing bars 2026-06-05 ..
+2026-08-14, fetched once and level-matched per ticker to the existing bar of
+2026-08-17; `live/bars.csv` gains a `recorded` date, and `reconstruct_panel`
+can rebuild the panel from exactly the bars recorded by a given date, so
+every earlier row still reproduces from the gapped input it actually used.
+The event is a ledger row. Nothing in the record is re-computed: rows from
+2026-08-17 to the backfill are reported as decisions made on gapped inputs.
+No system parameter changes. The second stream (the shipped book, below)
+starts only after the backfill.*
+
+*Amendment (2026-10-13): a second stream for the shipped book. The ledger
+above tracks KRONOS-TRADE (unlevered), not the backtest the README headlines
+(the 1/N backbone with the levered overlay and the pairs sleeve). A separate
+append-only file, `live/shipped_ledger.jsonl`, records that book's next-day
+decision before each session: exposure, equity holdings, pair-sleeve legs,
+the next day's trading cost and financing. Its realized return is the
+decision applied to the next day's bars; gate X45 requires that replaying the
+decisions day by day reproduces the backtest's net returns exactly, so the
+stream measures the headlined system and nothing else. Same L1/L3 discipline;
+L2 null bands recalibrated for its vol before its first row.*
