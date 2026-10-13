@@ -5,11 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kronos-quant"
 version = "1.0.0"
-description = "Regime-aware quantitative alpha platform and market-microstructure research lab, built from first principles on numpy/pandas/scipy."
+description = "Quantitative trading platform and market-microstructure research lab, built from first principles on numpy/pandas/scipy."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "oliverz" }]
 keywords = [
     "quantitative-finance", "regime-switching", "hidden-markov-model",
     "volatility", "rough-volatility", "hawkes-process", "backtesting",
