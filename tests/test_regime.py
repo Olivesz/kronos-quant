@@ -45,7 +45,7 @@ print("filtered state accuracy: %.1f%%" % (100 * acc))
 assert acc > 0.80, "filtered accuracy too low"
 
 # --- real data walk-forward --------------------------------------------------
-from kronos.data import load_prices
+from kronos.data import is_real, load_prices
 
 px, src = load_prices(CFG)
 mkt = px[CFG.market].pct_change().dropna()
@@ -59,7 +59,7 @@ names = {0: "Bull", 1: "Volatile", 2: "Bear"}
 counts = reg[reg >= 0].map(names).value_counts()
 print(counts.to_string())
 
-if src == "yahoo":
+if is_real(src):
     # March 2020 must be overwhelmingly Bear/Volatile
     covid = reg.loc["2020-03-01":"2020-04-15"]
     frac = (covid >= 1).mean()
@@ -70,5 +70,7 @@ if src == "yahoo":
     frac_bull = (calm == 0).mean()
     print("2017 Bull fraction: %.0f%%" % (100 * frac_bull))
     assert frac_bull > 0.7, "2017 calm bull not detected"
+else:
+    print("SKIPPED (synthetic data): COVID-2020 and 2017 real-market regime checks")
 
 print("\nGATE 2 PASSED")

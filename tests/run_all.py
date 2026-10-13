@@ -60,6 +60,8 @@ GATES = [
     "test_momtilt.py",
     # DESIGN27 gate (EW backbone identity, causality, DTB3 machinery)
     "test_ewbar.py",
+    # pinned-data integrity gate (file hashes, relabel/shift attacks, fail-closed)
+    "test_pinned.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).

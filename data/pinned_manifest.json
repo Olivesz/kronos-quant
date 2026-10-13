@@ -1,0 +1,17 @@
+{
+ "snapshot": "live/genesis",
+ "committed_in": "e1d7e98 (2026-08-19); unchanged since",
+ "sha256": {
+  "open.csv.gz": "d5dc30a4448df758d1d9be9704a46adc83b886d78c9eb48d50876049eee8ff12",
+  "high.csv.gz": "ef20c9e122212ac48965953b908276cffce374582a99253b47e3a918ab7c5c62",
+  "low.csv.gz": "b040bb4b68f48f2017eafab1a4abfa443e4b9acd9ff9b345baa36161a115aa33",
+  "close.csv.gz": "cfaa0c316211eec57339fe77cb952d8f196ddc5059032d1b0342dea83edbd1e5"
+ },
+ "span": [
+  "2010-01-04",
+  "2026-06-04"
+ ],
+ "excluded_tickers": {
+  "META": "in config.UNIVERSE but absent from the snapshot: 85% coverage over 2010-2026 (IPO 2012) is below min_coverage 0.95, so clean_panel drops it on every source"
+ }
+}

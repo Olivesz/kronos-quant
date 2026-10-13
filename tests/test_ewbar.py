@@ -21,7 +21,7 @@ import pandas as pd
 
 from config import CFG
 from kronos.backtest import run_backtest
-from kronos.data import load_prices
+from kronos.data import is_real, load_prices
 from kronos.metrics import dtb3_daily, sharpe_excess
 from kronos.regime import walkforward_regimes
 
@@ -83,7 +83,7 @@ print(f"X38c DTB3: {len(rf)} daily rates in range; fixture {got:.4f} exact; "
       "uncovered span refused")
 
 # (d) shipped-row anchor against the canonical artifact (real data only)
-if src != "yahoo":
+if not is_real(src):
     print("X38d SKIPPED (synthetic mode): shipped-row anchor needs real data")
 else:
     import json

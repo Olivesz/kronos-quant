@@ -1,16 +1,33 @@
-"""Data layer: cached Yahoo Finance download with a synthetic-market fallback.
+"""Data layer: the committed price snapshot, an explicit Yahoo refresh path,
+and a hermetic synthetic market.
 
-The rest of the platform is agnostic to the source: both paths emit a clean
-(date x ticker) DataFrame of adjusted close prices with no NaNs.
+Sources, in the only order they are ever chosen:
+  KRONOS_SYNTHETIC=1   seeded synthetic market (CI's hermetic job; labeled)
+  default ("pinned")   live/genesis/*.csv.gz, digest-verified against META.json
+                       — every headline number is computed from this file
+  KRONOS_DATA=yahoo    cache / fresh Yahoo download (drifts with dividend
+                       re-adjustments; for refreshing, not for reproducing)
+A failed real-data load RAISES; nothing silently substitutes synthetic data.
+All paths emit a clean (date x ticker) DataFrame with no NaNs.
 """
 from __future__ import annotations
 
+import hashlib
+import io
+import json
 import os
 
 import numpy as np
 import pandas as pd
 
-CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "cache")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CACHE_DIR = os.path.join(ROOT, "data", "cache")
+PINNED_DIR = os.path.join(ROOT, "live", "genesis")
+OHLC_FIELDS = ("open", "high", "low", "close")
+
+
+class DataUnavailable(RuntimeError):
+    """A real-data load failed. Raised instead of falling back to synthetic."""
 
 
 # ----------------------------------------------------------------------------
@@ -156,24 +173,107 @@ def _force_synthetic() -> bool:
     return os.environ.get("KRONOS_SYNTHETIC", "").lower() in ("1", "true", "yes")
 
 
+def _data_mode() -> str:
+    mode = os.environ.get("KRONOS_DATA", "pinned").lower()
+    if mode not in ("pinned", "yahoo"):
+        raise ValueError(f"KRONOS_DATA must be 'pinned' or 'yahoo', got {mode!r}")
+    return mode
+
+
+def pinned_digest(df: pd.DataFrame) -> str:
+    """Same convention as kronos/live.py: sha256 of the raw float64 buffer."""
+    return hashlib.sha256(df.to_numpy().tobytes()).hexdigest()[:16]
+
+
+MANIFEST_PATH = os.path.join(ROOT, "data", "pinned_manifest.json")
+SPAN_SLACK_DAYS = 7          # cfg.start/end may sit on a non-trading day
+
+
+def _read_manifest(path: str = MANIFEST_PATH) -> dict:
+    if not os.path.exists(path):
+        raise DataUnavailable(f"pinned manifest missing: {path}")
+    with open(path) as fh:
+        return json.load(fh)
+
+
+def load_pinned_ohlc(fields=OHLC_FIELDS, pinned_dir: str = PINNED_DIR,
+                     manifest_path: str = MANIFEST_PATH) -> dict:
+    """The committed snapshot. Every requested file is checked against the
+    manifest's SHA-256 of its exact bytes BEFORE it is parsed (covers dates,
+    tickers and values of all four fields), and the parsed close panel is
+    additionally checked against META.json's value digest."""
+    man = _read_manifest(manifest_path)
+    out = {}
+    for f in fields:
+        name = f"{f}.csv.gz"
+        path = os.path.join(pinned_dir, name)
+        if name not in man["sha256"]:
+            raise DataUnavailable(f"no manifest hash for {name}")
+        try:
+            with open(path, "rb") as fh:
+                raw = fh.read()
+        except OSError as e:
+            raise DataUnavailable(f"pinned snapshot unreadable: {path}: {e}") from e
+        got = hashlib.sha256(raw).hexdigest()
+        if got != man["sha256"][name]:
+            raise DataUnavailable(f"pinned snapshot modified: sha256({name}) = "
+                                  f"{got[:16]}… != manifest "
+                                  f"{man['sha256'][name][:16]}…")
+        out[f] = pd.read_csv(io.BytesIO(raw), compression="gzip",
+                             index_col=0, parse_dates=True)
+    if "close" in out:
+        with open(os.path.join(pinned_dir, "META.json")) as fh:
+            meta = json.load(fh)
+        if pinned_digest(out["close"]) != meta["close_digest"]:
+            raise DataUnavailable("pinned close panel disagrees with META.json")
+    return out
+
+
+def _pinned_window(df: pd.DataFrame, cfg,
+                   manifest_path: str = MANIFEST_PATH) -> pd.DataFrame:
+    """Restrict to cfg's universe and span — refusing, never truncating, when
+    the snapshot cannot serve the request."""
+    man = _read_manifest(manifest_path)
+    excluded = set(man.get("excluded_tickers", {}))
+    missing = [t for t in cfg.universe if t not in df.columns and t not in excluded]
+    if missing:
+        raise DataUnavailable(f"pinned snapshot lacks requested tickers {missing}; "
+                              "use KRONOS_DATA=yahoo for other universes")
+    lo, hi = pd.Timestamp(cfg.start), pd.Timestamp(cfg.end)
+    slack = pd.Timedelta(days=SPAN_SLACK_DAYS)
+    if lo < df.index[0] - slack or hi > df.index[-1] + slack:
+        raise DataUnavailable(f"requested span {cfg.start}..{cfg.end} exceeds the "
+                              f"pinned snapshot {df.index[0].date()}..{df.index[-1].date()}")
+    cols = [c for c in df.columns if c in set(cfg.universe)]
+    return df.loc[lo:hi, cols]
+
+
 def load_prices(cfg) -> tuple[pd.DataFrame, str]:
-    """Returns (prices, source) where source is 'yahoo' or 'synthetic'."""
-    os.makedirs(CACHE_DIR, exist_ok=True)
+    """Returns (prices, source); source is 'pinned', 'yahoo' or 'synthetic'."""
     if _force_synthetic():
         px = generate_synthetic(cfg.universe, cfg.start, cfg.end, cfg.seed)
         return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "synthetic"
+    if _data_mode() == "pinned":
+        close = load_pinned_ohlc(("close",))["close"]
+        return clean_panel(_pinned_window(close, cfg), cfg.min_coverage,
+                           cfg.max_ffill_days), "pinned"
+    os.makedirs(CACHE_DIR, exist_ok=True)
     cache = _cache_path(cfg.start, cfg.end)
     if os.path.exists(cache):
         px = pd.read_csv(cache, index_col=0, parse_dates=True)
         return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "yahoo"
-
     px = fetch_yahoo(cfg.universe, cfg.start, cfg.end)
     if px is not None and px.notna().mean().mean() > 0.80 and len(px) > 1000:
         px.to_csv(cache)
         return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "yahoo"
+    raise DataUnavailable("Yahoo download failed or was too sparse; refusing to "
+                          "substitute synthetic data (set KRONOS_SYNTHETIC=1 to "
+                          "run on the synthetic market deliberately)")
 
-    px = generate_synthetic(cfg.universe, cfg.start, cfg.end, cfg.seed)
-    return clean_panel(px, cfg.min_coverage, cfg.max_ffill_days), "synthetic"
+
+def is_real(src: str) -> bool:
+    """True for real-market sources (pinned snapshot or Yahoo)."""
+    return src in ("pinned", "yahoo")
 
 
 # ----------------------------------------------------------------------------
@@ -199,25 +299,28 @@ def fetch_yahoo_ohlc(tickers: list[str], start: str, end: str) -> dict | None:
 
 
 def load_ohlc(cfg) -> tuple[dict, str]:
-    """Returns ({open,high,low,close}, source); all frames aligned to the
-    cleaned close panel from load_prices."""
-    os.makedirs(CACHE_DIR, exist_ok=True)
+    """Returns ({open,high,low,close}, source) from the same source rules as
+    load_prices (pinned by default; Yahoo only on request; never a silent
+    synthetic fallback)."""
     if _force_synthetic():
         return _synthetic_ohlc(cfg), "synthetic"
+    if _data_mode() == "pinned":
+        raw = load_pinned_ohlc()
+        return {f: _pinned_window(v, cfg) for f, v in raw.items()}, "pinned"
+    os.makedirs(CACHE_DIR, exist_ok=True)
     paths = {f: os.path.join(CACHE_DIR, f"ohlc_{f}_{cfg.start}_{cfg.end}.csv")
-             for f in ("open", "high", "low", "close")}
+             for f in OHLC_FIELDS}
     if all(os.path.exists(p) for p in paths.values()):
         out = {f: pd.read_csv(p, index_col=0, parse_dates=True)
                for f, p in paths.items()}
         return out, "yahoo"
-
     out = fetch_yahoo_ohlc(cfg.universe, cfg.start, cfg.end)
     if out is not None:
         for f, p in paths.items():
             out[f].to_csv(p)
         return out, "yahoo"
-
-    return _synthetic_ohlc(cfg), "synthetic"
+    raise DataUnavailable("Yahoo OHLC download failed; refusing to substitute "
+                          "synthetic data")
 
 
 def _synthetic_ohlc(cfg) -> dict:

@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-42%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-43%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -38,7 +38,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 42 such gates run in
+passes a gate on data where the answer is already known.** 43 such gates run in
 CI. That is the whole point — the platform grades its own homework.
 
 > **Zero heavyweight dependencies.** No scikit-learn, no statsmodels, no
@@ -70,16 +70,20 @@ python run_research.py all        # 35 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 42 verification gates (~3min)
+python tests/run_all.py           # all 43 verification gates (~3min)
 ```
 
-Runs fully offline: without `yfinance` or a network, a seeded synthetic
-regime-switching market drives the entire pipeline. Force it anywhere with
-`KRONOS_SYNTHETIC=1` (this is what CI uses).
+Runs fully offline on real prices: every real-data result reads the
+committed snapshot `live/genesis/*.csv.gz` (daily OHLC 2010–2026, checked
+against its digest on every load), so no network is needed and the numbers
+reproduce exactly. `KRONOS_DATA=yahoo` refreshes from Yahoo instead (adjusted
+prices drift with each dividend re-adjustment); `KRONOS_SYNTHETIC=1` runs
+everything on a seeded synthetic market. A failed real-data load raises — it
+never silently substitutes synthetic data.
 
 ## Highlights
 
-- **42 verification gates** — 40 proving an estimator has correct *size*
+- **43 verification gates** — 41 proving an estimator has correct *size*
   (doesn't fire on null worlds) and *power* (detects planted effects) on
   synthetic ground truth, plus 2 calibrating the battery against the real
   market — all before any real-data claim is made.
@@ -238,7 +242,7 @@ kronos/                   37 modules, ~7,500 LOC
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    42 gates (40 synthetic ground truth + 2 real-data calibration)
+tests/                    43 gates (41 synthetic ground truth + 2 real-data calibration)
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 
@@ -271,16 +275,21 @@ the whole program, and [`CONTRIBUTING.md`](CONTRIBUTING.md) for the one rule.
 
 ## Reproducibility & data
 
-Universe: ~48 liquid US equities/ETFs, 2010–2026, Yahoo adjusted OHLC, cached
-locally (the cache is regenerable and git-ignored). Every random path is
-seeded; every gate is deterministic. The synthetic market is a seeded
-regime-switching factor model with Student-t innovations, so the entire
-platform — pipeline, research, and gates — runs identically offline.
+Data: 48 US large caps and ETFs, daily Yahoo-adjusted OHLC 2010–2026,
+committed as [`live/genesis/`](live/genesis) and verified against
+`META.json` on every load. Every random path is seeded; every gate is
+deterministic. The synthetic market (CI's hermetic job) is a seeded
+regime-switching factor model with Student-t innovations.
 
-> **Not investment advice.** Backtests on today's liquid names carry
-> survivorship bias and do not predict future returns. This is a research and
-> engineering portfolio, not a trading recommendation.
+**The universe was picked with hindsight.** The 36 single stocks are 2026's
+large caps (NVDA, NFLX, CRM and the rest), chosen when the project started, not
+by any rule that could have been applied in 2010. Names that faded or were
+delisted are absent, which flatters every long-only result above, the
+equal-weight benchmark included. It has not been re-picked to hide this.
+
+> **Not investment advice.** This is a research and engineering portfolio, not
+> a trading recommendation.
 
 ## License
 
-[MIT](LICENSE) © oliverz
+[MIT](LICENSE)
