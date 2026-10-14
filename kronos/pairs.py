@@ -188,7 +188,19 @@ def run_pairs_sleeve(px: pd.DataFrame, rebalance_dates: list, cfg) -> dict:
                         kp.dead = True  # structural break -> retire until re-selection
 
     sleeve = pd.Series(sleeve_ret, index=dates, name="pairs")
+    # tomorrow's legs (before sleeve sizing): the positions set on today's z,
+    # unless tomorrow re-selects pairs (new pairs start flat)
+    next_legs: dict[str, float] = {}
+    if active and n - last_selection < 252:
+        live = [kp for kp in active if not kp.dead]
+        per_pair = 1.0 / max(len(live), 1)
+        for kp in live:
+            if kp.position != 0:
+                w = kp.position * per_pair * 0.5
+                next_legs[kp.yname] = next_legs.get(kp.yname, 0.0) + w
+                next_legs[kp.xname] = next_legs.get(kp.xname, 0.0) - w * kp.beta_clamped
     return {"returns": sleeve, "trades": trade_log, "z_history": z_history,
+            "next_legs": next_legs,
             "final_pairs": [(kp.yname, kp.xname, kp.position,
                              round(getattr(kp, "beta_clamped", 1.0), 3), kp.dead)
                             for kp in active]}

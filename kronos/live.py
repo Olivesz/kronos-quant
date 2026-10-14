@@ -152,14 +152,14 @@ def append_bar(day: str, bar: pd.DataFrame, live_dir: str = LIVE_DIR) -> None:
     rec.to_csv(path, mode="a", header=not os.path.exists(path), index=False)
 
 
-def append_row(row: dict, live_dir: str = LIVE_DIR) -> None:
+def append_row(row: dict, live_dir: str = LIVE_DIR, name: str = "ledger.jsonl") -> None:
     os.makedirs(live_dir, exist_ok=True)
-    with open(os.path.join(live_dir, "ledger.jsonl"), "a") as fh:
+    with open(os.path.join(live_dir, name), "a") as fh:
         fh.write(json.dumps(row, sort_keys=True, default=float) + "\n")
 
 
-def read_ledger(live_dir: str = LIVE_DIR) -> list[dict]:
-    path = os.path.join(live_dir, "ledger.jsonl")
+def read_ledger(live_dir: str = LIVE_DIR, name: str = "ledger.jsonl") -> list[dict]:
+    path = os.path.join(live_dir, name)
     if not os.path.exists(path):
         return []
     with open(path) as fh:
@@ -411,3 +411,88 @@ def write_performance(costs, live_dir: str = LIVE_DIR) -> dict:
     with open(os.path.join(live_dir, "performance.json"), "w") as fh:
         json.dump(doc, fh, indent=1)
     return doc
+
+
+# ---------------------------------------------------------------------------
+# the shipped-book stream (DESIGN23 amendment, 2026-10-13): the system the
+# README headlines — 1/N backbone, levered overlay, pairs sleeve
+# ---------------------------------------------------------------------------
+
+SHIPPED = "shipped_ledger.jsonl"
+
+
+def shipped_decision(ohlc: dict, cfg) -> dict:
+    """The shipped book's decision for the day after the panel's last close:
+    exposure, equity holdings, pair-sleeve legs, tomorrow's trading cost and
+    financing — everything its next-day net return depends on."""
+    from kronos.backtest import run_backtest
+    from kronos.data import clean_panel
+    from kronos.pairs import run_pairs_sleeve
+
+    if getattr(cfg, "backbone", None) != "ew":
+        raise ValueError("the shipped stream tracks the 1/N-backbone default only")
+    px = clean_panel(ohlc["close"].copy(), cfg.min_coverage, cfg.max_ffill_days)
+    px = px[[c for c in px.columns if c in set(cfg.universe)]]
+    regime = pd.Series(0, index=px.index)        # the 1/N backbone never reads it
+    bt = run_backtest(px, regime, cfg)
+    legs = run_pairs_sleeve(px, [], cfg)["next_legs"]
+    e = bt["next_exposure"]
+    return {"as_of": str(px.index[-1].date()), "exposure": e,
+            "equity_weights": {k: float(v) for k, v in bt["next_weights"].items() if v != 0.0},
+            "pair_legs": {k: float(v) for k, v in legs.items()},
+            "pairs_gross": float(cfg.pairs_gross_sleeve),
+            "next_cost": bt["next_cost"],
+            "financing_daily": max(e - 1.0, 0.0) * cfg.financing_rate_ann / 252.0}
+
+
+def emit_shipped(day: str, cfg, live_dir: str = LIVE_DIR) -> dict:
+    """Record the shipped book's decision on the panel as it stands after
+    today's bar (call after emit()). A failure writes a GAP row."""
+    try:
+        recon = reconstruct_panel(live_dir)
+        dec = shipped_decision(recon, cfg)
+    except Exception as exc:
+        row = {"date": day, "status": "GAP", "reason": f"compute: {exc}",
+               "code_version": code_version()}
+        append_row(row, live_dir, SHIPPED)
+        return row
+    row = {"date": day, "status": "LIVE", **dec,
+           "input_digest": _digest(recon["close"]), "code_version": code_version()}
+    append_row(row, live_dir, SHIPPED)
+    return row
+
+
+def shipped_l1(row: dict, cfg, live_dir: str = LIVE_DIR, tol: float = 1e-12) -> dict:
+    """Recompute a shipped row from the panel as recorded by its date."""
+    recon = reconstruct_panel(live_dir, recorded_by=row["date"])
+    upto = {f: v.loc[:row["as_of"]] for f, v in recon.items()}
+    if _digest(upto["close"]) != row["input_digest"]:
+        return {"ok": False, "kind": "DIGEST_MISMATCH"}
+    dec = shipped_decision(upto, cfg)
+    diffs = [abs(dec["exposure"] - row["exposure"]), abs(dec["next_cost"] - row["next_cost"])]
+    for key in ("equity_weights", "pair_legs"):
+        ks = set(dec[key]) | set(row[key])
+        diffs += [abs(dec[key].get(k, 0.0) - row[key].get(k, 0.0)) for k in ks]
+    d = max(diffs)
+    return {"ok": d <= tol, "kind": "EXACT" if d <= tol else "DECISION_DRIFT", "max_diff": d}
+
+
+def shipped_returns(rows: list[dict], close: pd.DataFrame) -> pd.Series:
+    """Net return of each recorded decision over the next trading day:
+    exposure x equity holdings + sleeve x pair legs - cost - financing.
+    Days after a GAP row are missing, never filled."""
+    rets = close.pct_change()
+    out = {}
+    for r in rows:
+        if r.get("status") != "LIVE":
+            continue
+        later = close.index[close.index > pd.Timestamp(r["as_of"])]
+        if not len(later):
+            continue
+        d = later[0]
+        rr = rets.loc[d].fillna(0.0)
+        eq = sum(w * float(rr.get(k, 0.0)) for k, w in r["equity_weights"].items())
+        pl = sum(w * float(rr.get(k, 0.0)) for k, w in r["pair_legs"].items())
+        out[d] = (r["exposure"] * eq + r["pairs_gross"] * pl
+                  - r["next_cost"] - r["financing_daily"])
+    return pd.Series(out, name="shipped").sort_index()

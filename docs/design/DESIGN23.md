@@ -110,3 +110,6 @@ decision applied to the next day's bars; gate X45 requires that replaying the
 decisions day by day reproduces the backtest's net returns exactly, so the
 stream measures the headlined system and nothing else. Same L1/L3 discipline;
 L2 null bands recalibrated for its vol before its first row.*
+
+*Label note (2026-10-13): the shipped-stream gate is numbered X43, not X45 —
+the next free label when it landed. DESIGN28's two gates move to X44/X45.*

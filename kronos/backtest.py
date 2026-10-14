@@ -49,6 +49,7 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
     costs = np.zeros(n)
     turnover = np.zeros(n)
 
+    next_cost = 0.0
     for i in rebal_idx:
         t = dates[i]
         reg = int(regime.reindex([t]).fillna(1).iloc[0]) if t in regime.index else 1
@@ -76,11 +77,13 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
             new /= new.sum()
 
         # execute at t+1: cost charged on that day, weights effective t+1
+        tc = _trade_costs(new - current, daily_vol.iloc[i].fillna(0.02), cfg)
         if i + 1 < n:
-            tc = _trade_costs(new - current, daily_vol.iloc[i].fillna(0.02), cfg)
             costs[i + 1] += tc
             turnover[i + 1] = float((new - current).abs().sum())
             cost_total += tc
+        else:
+            next_cost = tc          # a trade decided at the last close, paid tomorrow
         current = new
 
         target_log[t] = target
@@ -135,6 +138,11 @@ def run_backtest(px: pd.DataFrame, regime: pd.Series, cfg) -> dict:
         "strategy_weights": strategy_weight_log,
         "warmup_end": dates[warmup],
         "cost_total": cost_total,
+        # the decision for the day after the last close (the live ledger's
+        # shipped stream records these; gate X45 replays them)
+        "next_weights": current.copy(),
+        "next_cost": float(next_cost),
+        "next_exposure": float(expo["exposure"].iloc[-1]),
     }
 
 

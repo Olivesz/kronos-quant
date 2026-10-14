@@ -626,3 +626,11 @@ Every DOI below was fetched and matched (title, first author) against Crossref o
   `kronos/*.py`, the `code_digest` convention): `83591b16131a0a23477eed6277e32187f5ccfa22d79491b3cf6671610ceaf987`.
 - No 1995–2009 data had been fetched by KRONOS at registration; the first
   such pull is Stage 1's snapshot, recorded in a later amendment.
+
+#### Amendment 2 — gate labels (2026-10-13, administrative)
+
+The label X43 was taken by the live ledger's shipped-stream gate (DESIGN23
+amendment), which landed first. This program's gates are therefore **X44**
+(synthetic and hermetic, `tests/test_premia.py`; the text's "X43") and **X45**
+(data quality, `tests/test_premia_data.py`; the text's "X44"). Labels only:
+no test, threshold, or rule changes.

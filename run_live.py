@@ -10,13 +10,26 @@ compute failure writes a loud GAP row — there is no cached fallback here.
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 import pandas as pd
 
 from config import CFG
 from kronos.data import clean_panel
-from kronos.live import emit, l1_reproduce, l2_vol_tracking, l3_bands, read_ledger
+from kronos.live import (
+    LIVE_DIR,
+    SHIPPED,
+    append_row,
+    emit,
+    emit_shipped,
+    l1_reproduce,
+    l2_vol_tracking,
+    l3_bands,
+    read_ledger,
+    reconstruct_panel,
+    shipped_l1,
+)
 from kronos.trade import TradeConfig, TradingSystem
 
 FIELDS = ("open", "high", "low", "close")
@@ -76,6 +89,14 @@ def main():
             return bar, recent_adj
 
         row = emit(fetch, recommend_from_panel, day=bar_date)
+        if row["status"] == "LIVE":                    # today's bar is archived
+            srow = emit_shipped(row["date"], CFG)
+            print(f"[live] shipped stream {srow['date']}: {srow['status']}"
+                  + (f" — {srow.get('reason', '')}" if srow["status"] == "GAP" else
+                     f" | exposure {srow['exposure']:.2f}"))
+        else:
+            append_row({"date": row["date"], "status": "GAP",
+                        "reason": f"main stream {row['status']}"}, name=SHIPPED)
         print(f"[live] {row['date']}: {row['status']}"
               + (f" — {row.get('reason', '')}" if row["status"] == "GAP" else
                  f" | regime {row.get('regime')} | fc vol "
@@ -84,8 +105,21 @@ def main():
         return 0 if row["status"] in ("LIVE", "REANCHOR") else 1
 
     if mode == "--performance":
-        from kronos.live import write_performance
+        from kronos.live import shipped_returns, write_performance
         doc = write_performance(CFG)
+        srows = read_ledger(name=SHIPPED)
+        sr = shipped_returns(srows, reconstruct_panel()["close"])
+        sdoc = {"system": "the shipped book (1/N backbone, levered overlay, pairs "
+                          "sleeve) — the README headline's system",
+                "status": "display only (DESIGN23): no pass/fail before 3 years",
+                "first": str(sr.index[0].date()) if len(sr) else None,
+                "as_of": str(sr.index[-1].date()) if len(sr) else None,
+                "n_days": int(len(sr)),
+                "cum_return": float((1 + sr).prod() - 1) if len(sr) else 0.0,
+                "daily": {"dates": [d.strftime("%Y-%m-%d") for d in sr.index],
+                          "returns": [round(float(v), 10) for v in sr]}}
+        with open(os.path.join(LIVE_DIR, "shipped_performance.json"), "w") as fh:
+            json.dump(sdoc, fh, indent=1)
         sm = doc["summary"]
         if not doc["first_live"]:
             print("[live] no LIVE rows yet — performance.json empty")
@@ -107,6 +141,10 @@ def main():
     l1 = l1_reproduce(live_rows[-1], recommend_from_panel)
     l2 = l2_vol_tracking(ledger)
     l3 = l3_bands(ledger)
+    srows = [r for r in read_ledger(name=SHIPPED) if r.get("status") == "LIVE"]
+    if srows:
+        sl1 = shipped_l1(srows[-1], CFG)
+        print(f"[live] shipped L1             : {sl1['kind']}")
     print(f"[live] L1 weight reproduction : {l1['kind']}"
           + ("" if l1["ok"] else f" (max diff {l1.get('max_weight_diff')})"))
     print(f"[live] L2 vol tracking        : {l2['verdict']} "

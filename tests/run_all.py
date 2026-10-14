@@ -68,6 +68,8 @@ GATES = [
     "test_live_pnl.py",
     # overlay-warmup gate (X42): the overlay sees only the book's own returns
     "test_overlay_warmup.py",
+    # shipped-stream gate (X43): recorded decisions replay the backtest exactly
+    "test_shipped_stream.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).

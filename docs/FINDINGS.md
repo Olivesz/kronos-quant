@@ -1341,3 +1341,14 @@ a holiday weekend; the repaired June-5 returns match Yahoo's own series within
 by 2026-10-12 is byte-identical to the pre-repair panel, so every earlier row
 still reproduces from the input it used (gate X35f). The realized figures above
 are unchanged to 1e-5.
+
+**A second stream for the shipped book (from 2026-10-14).** The ledger above
+tracks KRONOS-TRADE; the book the README headlines is different (1/N backbone,
+levered overlay, pairs sleeve). `live/shipped_ledger.jsonl` now records that
+book's decision before each session — exposure, equity holdings, pair legs,
+the next day's trading cost and financing — computed from the same archived
+bars. Gate X43 replays such decisions on a synthetic panel with planted pairs
+and requires them to reproduce the backtest's net returns to 1e-12 (achieved:
+7e-18 over 40 days spanning a rebalance and open pair positions), so this
+stream measures the headlined system and nothing else. Its first decision is
+the close of 2026-10-13; no decision is back-dated.
