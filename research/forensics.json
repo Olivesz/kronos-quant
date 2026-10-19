@@ -73,13 +73,13 @@
  "dsr": {
   "sr_daily": 0.06990218665943751,
   "sr_annual": 1.1096628120029313,
-  "sr0_daily": 0.053162793517442464,
-  "sr0_annual": 0.8439331838917772,
-  "dsr": 0.8276036683802253,
-  "z": 0.9447379774321172,
+  "sr0_daily": 0.053618649857334194,
+  "sr0_annual": 0.851169678945331,
+  "dsr": 0.8209549218381192,
+  "z": 0.9190103543996855,
   "skew": -0.7286660467685332,
   "kurt": 6.014011525695081,
-  "n_trials": 188,
+  "n_trials": 202,
   "T": 3368
  },
  "bootstrap": {
@@ -2640,7 +2640,8 @@
   "design15_edge_variants": 2,
   "design16_variants": 3,
   "design21_momtilt": 1,
-  "design27_ewbar": 3
+  "design27_ewbar": 3,
+  "design29_volalpha": 14
  },
- "n_trials": 188
+ "n_trials": 202
 }

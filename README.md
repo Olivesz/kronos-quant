@@ -156,8 +156,11 @@ control:  prices ─▶ HMM regimes ─▶ regime-gated signals ─▶ HRP + Bla
 
 The overlay is risk control, not alpha: it holds equal-weight's Sharpe while
 cutting its drawdown by a third, and nothing in the licensed toolkit beats 1/N
-on excess-cash Sharpe (DESIGN27, reported as a failure). Leverage financing
-costs 0.77%/yr; selection risk is DSR 0.83 over N=188 logged trials; PBO 0.45
+on excess-cash Sharpe (DESIGN27, reported as a failure). A sealed, survivorship-free
+test on French's market from 1926 agrees: the shipped overlay lifts the market's
+Sharpe (0.53 vs 0.39) but its alpha net of FF5, momentum and BAB is −1.19%
+(t −1.18, 1963–2012), so no alpha survives ([VOLALPHA](docs/FINDINGS.md#kronos-volalpha--the-shipped-overlay-on-a-century-of-survivorship-free-factors)). Leverage financing
+costs 0.77%/yr; selection risk is DSR 0.82 over N=202 logged trials; PBO 0.45
 over 140 variants. The 48-name universe is today's large caps (hindsight), so
 these are in-sample figures — every row comes from one run,
 [`research/momtilt.json`](research/momtilt.json), which also commits the daily
@@ -207,6 +210,7 @@ in [`docs/FINDINGS.md`](docs/FINDINGS.md)**:
 | [EDGE](docs/FINDINGS.md#kronos-edge--fixing-the-engines-structural-drag) | Why is CAGR half the risk budget? | Diagnosis found an **inverted drawdown throttle** (braking at peaks, releasing into crashes) and an unreachable vol target. Fixed + gated: Sharpe 0.94 → 1.02 unlevered; CAGR 6.4% → 10.9% levered. |
 | [EDGE2](docs/FINDINGS.md#kronos-edge2--the-research-licensed-performance-program) | What had the research already licensed? | The **HAR forecast lever** (X28) and the **t-HMM engine** (X29), each surviving its kill criterion, stacking to **Sharpe 1.05 @ −18.8% MaxDD**. |
 | [EWBAR](docs/FINDINGS.md#kronos-ewbar--can-any-licensed-configuration-beat-1n) | Can any licensed configuration beat 1/N? | **No — stated as a FAILURE** under the pre-registered rule. Best candidate (EW backbone + shipped overlay) beats equal-weight's raw Sharpe (**1.12** vs 1.10) at **64% of its drawdown**, but excess-over-cash lands 0.010 short: leverage financing cannot clear a cash-adjusted bar. The backbone, not the overlay, is what 1/N beats. |
+| [VOLALPHA](docs/FINDINGS.md#kronos-volalpha--the-shipped-overlay-on-a-century-of-survivorship-free-factors) | Does the shipped overlay earn alpha on a survivorship-free century? | **On the market, no** — Moreira & Muir and Cederburg et al. replicate first, then the sealed 1926–2012 holdout gives a Sharpe gain (0.53 vs 0.39) but a full-model α of −1.19% (t −1.18) net of FF5, UMD and BAB. On factor portfolios the same real-time overlay earns gross alphas that survive Romano-Wolf (UMD, BAB, RMW, HML, CMA) — before their trading costs, which factor data cannot price. |
 
 ## Cross-market transfer
 

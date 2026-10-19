@@ -1409,3 +1409,111 @@ KRONOS's overlay differs from the published rule:
 
 Stage 2 asks whether that rule, unchanged from the shipped one, earns what
 this one does not.
+
+**Stage 2, the reveal: NO ALPHA SURVIVES.** The sealed code (digest
+`7f11903f34b2d52f`, recorded in DESIGN29 amendment 2 before the run) was run
+once (`research/volalpha.json`; gate X47). It ran the shipped overlay,
+unchanged, on French's market from 1926:
+- the HAR lever capped at 1.5×;
+- the CVaR and drawdown brakes;
+- the ±15% 21-day tilt.
+
+That overlay improves the market's Sharpe ratio, but its alpha is spanned by
+the factors.
+
+| Market, shipped overlay | Holdout result |
+|---|---|
+| Sharpe, managed vs market (1927-07 .. 2012-12) | 0.53 vs 0.39; Ledoit-Wolf one-sided p 0.047 |
+| Univariate spanning α (Newey-West t) | 2.67% (2.94), β 0.39 |
+| Full-model α net of FF5 + UMD + BAB (1963-07 .. 2012-12) | **−1.19% (−1.18)**, R² 0.73 |
+| Romano-Wolf adjusted p across the seven alphas | 0.86 |
+| Univariate α by era | 1927–45 4.31 (t 1.97); 1946–62 1.59 (1.85); 1963–87 0.76 (0.64); 1988–2012 1.04 (0.79) |
+| sup-Wald intercept break | 8.67 at 1998-04, p 0.051 |
+| 2013-01 .. 2026-08 (contaminated, descriptive) | α −0.26% (t −0.2); Sharpe 0.73 vs 0.91 |
+
+Two of the four registered criteria hold: the Sharpe gain, and positive alpha
+in all four eras. Two fail: the full-model t ≥ 3 and Romano-Wolf survival.
+The verdict is therefore NO ALPHA SURVIVES.
+
+**Where the alpha goes.** The managed market loads on the defensive and trend
+factors: RMW 0.10, UMD 0.10, BAB 0.06 and CMA 0.06. Once these are in the
+model, nothing is left over. Most of the univariate alpha also comes from
+before 1963. In each era since then it is about 1% a year and statistically
+indistinguishable from zero.
+
+The finding agrees with what the README already says on 2013–2026 data: the
+overlay is risk control, not alpha. That claim now holds on a survivorship-free
+century, net of the factors a referee would name.
+
+**Costs do not decide it.** The overlay turns over 5.25 units of exposure a
+year. At the univariate α, the breakeven one-way cost is 51 bp per unit of
+turnover. Against the full-model α the breakeven is negative, so no cost is low
+enough.
+
+For comparison, the E-mini S&P 500 trades in ticks of 0.25 index points
+($12.50 on a $50-per-point contract; CME Rulebook ch. 358). Half a tick is
+0.125/L of notional, about 0.2 bp at an index level L near 6,000. Cost is
+therefore not what is missing; the alpha is.
+
+The IEX one-venue SPY spread is not measured. It needs the owner's acceptance
+of IEX's data terms, and it could not change this verdict.
+
+**Robustness.**
+- **Bill-rate financing.** Financing leverage at DTB3 instead of French's RF
+  (1954-02 on) leaves the full-model α at −1.23% (t −1.22).
+- **The registered grid** (tilt × cap × brakes, 8 members, charged to the
+  ledger):
+  - Holdout Sharpes range from 0.457 to 0.530. The shipped member is the
+    highest.
+  - CSCV PBO across the grid is **0.80**: the in-sample winner lands below the
+    out-of-sample median in 80% of splits. The ordering among tilt, cap and
+    brake choices does not persist, so the shipped member's top rank is not
+    evidence for those choices.
+- **Selection risk.** The repo-wide PBO of 0.45 over 140 variants is restated
+  here, per house rule.
+- **DSR.** At N = 202 the DSR is 1.00, with SR0 taken from the grid's
+  dispersion. That is uninformative here: it asks whether the managed market's
+  Sharpe exceeds zero, and the market's own Sharpe does.
+- **VIX.** The HAR lever's volatility forecast tracks VIX closely, with
+  correlation 0.86 both in 1990–2012 and after.
+
+**The family: the overlay does earn alpha on factor portfolios.** This is
+reported under the registered Romano-Wolf correction, and it is not the
+decision. Each factor was expressed in the shipped book's volatility units by
+its trailing 10-year vol, then passed through the same overlay.
+
+| Factor | Full-model α (t) | Romano-Wolf | Sharpe, managed vs raw (LW p) |
+|---|---|---|---|
+| SMB | 0.99 (1.14) | not rejected | 0.21 vs 0.15 (0.20) |
+| HML | 5.78 (4.00) | rejected | 0.61 vs 0.43 (0.014) |
+| RMW | 7.43 (4.66) | rejected | 0.75 vs 0.48 (0.015) |
+| CMA | 4.80 (3.54) | rejected | 0.71 vs 0.60 (0.083) |
+| UMD | 8.81 (3.97) | rejected | 0.88 vs 0.46 (< 0.001) |
+| BAB | 12.18 (5.53) | rejected | 1.19 vs 0.81 (< 0.001) |
+
+Hansen's SPA rejects "no managed factor has positive alpha" (p 0.0002). These
+are real-time rules: no full-sample constant, every scale causal. The pattern
+is the one the vol-management literature reports, momentum and BAB strongest.
+
+**What the family result is not.** The alphas are in levered units: the median
+vol scale runs from 1.6× to 3.3× before the overlay's own lever. They also
+carry none of the factors' own trading costs. A long-short factor turns over
+its stock legs every month and pays to short. The overlay adds its own
+rescaling turnover on top. None of this can be priced from factor returns.
+
+**What data would sharpen this, and why it stops here.**
+- *Stock-level CRSP* would let the overlay run on a point-in-time version of
+  the shipped 1/N book itself, rather than on the market proxy. It would also
+  let the factor legs be rebuilt with their turnover, and costed.
+- *TAQ* would supply consolidated effective spreads for those legs, and for
+  SPY in place of a single venue. For the market overlay that cannot change
+  the verdict: no cost is low enough to rescue an alpha of −1.19%. For the
+  family it is the missing half of a net-of-cost claim.
+
+Without either, no net-of-cost claim is made for the factor results. They
+stand as gross, real-time spanning alphas.
+
+**Trial ledger.** `design29_volalpha` charges 14 trials: the 8 grid members
+and the 6 family factors. N goes from 188 to 202, and the shipped book's DSR
+moves from 0.83 to 0.82. DESIGN28, if it runs, would take N to 225 rather than
+the 211 it registered.
