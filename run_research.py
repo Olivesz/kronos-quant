@@ -17,7 +17,7 @@ import pandas as pd
 
 from config import CFG
 from kronos import metrics as M
-from kronos.data import load_ohlc, load_prices
+from kronos.data import FLOAT_PARSE, load_ohlc, load_prices
 from kronos.volest import gk_variance
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -276,14 +276,16 @@ def get_sleeves_and_regime(force: bool = False):
     rg = walkforward_regimes(mkt, replace(CFG, regime_engine="gaussian"))
     regime = rg["regime"]
     if not force and os.path.exists(_SLEEVE_CACHE):
-        sleeves = pd.read_csv(_SLEEVE_CACHE, index_col=0, parse_dates=True)
+        sleeves = pd.read_csv(_SLEEVE_CACHE, index_col=0, parse_dates=True,
+                              float_precision=FLOAT_PARSE)
     else:
         from kronos.backtest import sleeve_backtests
         sl = sleeve_backtests(px, regime, CFG)
         sleeves = pd.DataFrame(sl)
         sa_path = os.path.join(RES, "statarb_returns.csv")
         if os.path.exists(sa_path):
-            sa = pd.read_csv(sa_path, index_col=0, parse_dates=True).iloc[:, 0]
+            sa = pd.read_csv(sa_path, index_col=0, parse_dates=True,
+                             float_precision=FLOAT_PARSE).iloc[:, 0]
             sleeves["statarb"] = sa.reindex(sleeves.index).fillna(0.0)
         sleeves.to_csv(_SLEEVE_CACHE)
     return px, regime, sleeves, rg
@@ -383,7 +385,8 @@ def exp_forensics(force: bool = False) -> dict:
     # the actual shipped strategy: v1 core + statarb overlay
     bt = run_backtest(px, regime, CFG)
     sa_path = os.path.join(RES, "statarb_returns.csv")
-    sa = pd.read_csv(sa_path, index_col=0, parse_dates=True).iloc[:, 0] \
+    sa = pd.read_csv(sa_path, index_col=0, parse_dates=True,
+                     float_precision=FLOAT_PARSE).iloc[:, 0] \
         if os.path.exists(sa_path) else pd.Series(0.0, index=px.index)
     net = (bt["net"] + 0.10 * sa.reindex(bt["net"].index).fillna(0.0)
            ).loc[bt["warmup_end"]:]
@@ -444,7 +447,8 @@ def exp_synthesis(force: bool = False) -> dict:
     bt = run_backtest(px, regime, CFG)
     start = bt["warmup_end"]
     sa = pd.read_csv(os.path.join(RES, "statarb_returns.csv"),
-                     index_col=0, parse_dates=True).iloc[:, 0]
+                     index_col=0, parse_dates=True,
+                     float_precision=FLOAT_PARSE).iloc[:, 0]
     pares = run_pairs_sleeve(px, [], CFG)
 
     v1 = (bt["net"] + CFG.pairs_gross_sleeve * pares["returns"]).loc[start:]

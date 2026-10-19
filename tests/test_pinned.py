@@ -130,14 +130,20 @@ try:
     # dtb3_daily is the committed DTB3 snapshot behind every excess-cash Sharpe;
     # its values parse identically under both parsers on arm64, so only the
     # source can show the parse is the correctly-rounded one.
+    # run_research's readers of the committed research/sleeve_returns.csv and
+    # statarb_returns.csv feed cvar, ensemble, forensics and synthesis; there the
+    # default parse differs in 13,593 cells even on arm64 (|d| <= 1e-16, up to
+    # ~7,400 ulps on the smallest returns).
     import inspect
 
     import kronos.data as kdata
     import kronos.live as klive
     import kronos.metrics as kmetrics
+    import run_research as rr
     assert kdata.FLOAT_PARSE == "round_trip"
     for fn in (kdata.load_pinned_ohlc, kdata.load_pinned_panel, klive.reconstruct_panel,
-               kmetrics.dtb3_daily):
+               kmetrics.dtb3_daily, rr.get_sleeves_and_regime, rr.exp_forensics,
+               rr.exp_synthesis):
         src = inspect.getsource(fn)
         n_read = src.count("read_csv(")
         n_rt = src.count("float_precision=FLOAT_PARSE") + src.count('float_precision="round_trip"')
