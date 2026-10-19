@@ -107,7 +107,8 @@ put("rwSpan", "--".join(rw["span"]))
 put("rwN", str(rw["n"]))
 put("spaP", f"{va['spa']['p']:.4f}")
 eras = []
-for (span, v), lab in zip(va["eras"].items(), ("1927--1945", "1946--1962", "1963--1987", "1988--2012")):
+for span, v in va["eras"].items():
+    lab = f"{span[:4]}--{span.split('..')[1][:4]}"          # "1927-07..1945-12" -> 1927--1945
     eras.append(f"{lab} & {pct(v['alpha'])} & ({num(v['t'])}) & {v['n']} \\\\")
 put("tabEras", "\n".join(eras))
 put("erasPos", str(va["decision"]["eras_positive"]))
