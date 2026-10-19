@@ -311,3 +311,20 @@ written for review by a McCombs finance professor and for posting on SSRN.
   itself, rather than on factor proxies.
 - Nothing about all-venue trading costs: there is no TAQ.
 - Nothing about Liu, Tang & Zhou beyond their abstract.
+
+## Amendment 1 (2026-10-19, before any Stage-1 statistic was computed)
+
+1. **R-MM sample.** Moreira & Muir's Table 1 reports N = 1,065 (Mkt), 1,060
+   (Mom) and 621 (RMW, CMA). Those counts match 1926-08, 1927-01 and 1963-08
+   starts with a **2015-04** end exactly. R-MM therefore ends at 2015-04, not
+   2015-12 as registered above. The first managed month always follows the
+   first month that has daily data, because RV² needs the prior month. That is
+   why RMW and CMA start in 1963-08.
+2. **Gate labels.** X44 and X45 belong to DESIGN28. DESIGN29 uses X46 for the
+   Stage-1 machinery and replication and X47 for the Stage-2 machinery.
+3. **CI.** The vendor files are not committed, so CI cannot recompute Stage 1.
+   In CI, X46 runs its synthetic size, power and causality checks. It then
+   re-applies the registered tolerances to the committed artifact, whose
+   `input_digest` must equal the committed manifest's SHA-256. X46 prints
+   which mode ran. Recomputation from the archived bytes happens locally, and
+   the commit that adds the artifact says so.
