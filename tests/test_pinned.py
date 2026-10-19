@@ -127,12 +127,17 @@ try:
     # double (80-bit on x86-64, 64-bit on arm64), so the same file parses to
     # different floats on different machines and the META digest check fails
     # on one of them. Static check, because an arm64 run cannot see the drift.
+    # dtb3_daily is the committed DTB3 snapshot behind every excess-cash Sharpe;
+    # its values parse identically under both parsers on arm64, so only the
+    # source can show the parse is the correctly-rounded one.
     import inspect
 
     import kronos.data as kdata
     import kronos.live as klive
+    import kronos.metrics as kmetrics
     assert kdata.FLOAT_PARSE == "round_trip"
-    for fn in (kdata.load_pinned_ohlc, kdata.load_pinned_panel, klive.reconstruct_panel):
+    for fn in (kdata.load_pinned_ohlc, kdata.load_pinned_panel, klive.reconstruct_panel,
+               kmetrics.dtb3_daily):
         src = inspect.getsource(fn)
         n_read = src.count("read_csv(")
         n_rt = src.count("float_precision=FLOAT_PARSE") + src.count('float_precision="round_trip"')

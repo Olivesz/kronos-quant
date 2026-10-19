@@ -6,6 +6,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from kronos.data import FLOAT_PARSE
+
 ANN = 252
 
 
@@ -36,7 +38,8 @@ def dtb3_daily(index: pd.DatetimeIndex, path: str = "data/dtb3.csv") -> pd.Serie
     does not cover the index; never substitutes zero."""
     if not os.path.isabs(path):
         path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path)
-    df = pd.read_csv(path, parse_dates=[0], index_col=0).iloc[:, 0]
+    df = pd.read_csv(path, parse_dates=[0], index_col=0,
+                     float_precision=FLOAT_PARSE).iloc[:, 0]
     d = pd.to_numeric(df, errors="coerce").dropna() / 100.0
     if index.min() - pd.Timedelta(days=14) < d.index.min() or \
             index.max() > d.index.max() + pd.Timedelta(days=14):
