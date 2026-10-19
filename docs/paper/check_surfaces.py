@@ -149,13 +149,14 @@ def main():
     hits = count_and_values(methods, r"(\d+) gates at this")
     check("METHODS", "gate count", hits == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
 
-    hits = count_and_values(paper, r"all (\d+) verification gates \(the numbered gates X1--X(\d+)((?: and X\d+)*)")
+    hits = count_and_values(paper, r"all (\d+) verification gates \(the numbered gates X1--X(\d+)((?: and X\d+(?:--X\d+)?)*)")
     check("paper.tex", "gate count", [h[0] for h in hits] == [str(n_gates)], f"expected [{n_gates}], saw {hits}")
     # the numbered labels the paper lists (a contiguous run plus any named extras)
     # must be exactly the GATE labels in the gate sources, one per numbered gate
     found = sorted({int(t) for src in gate_src.values() for t in re.findall(r"GATE X(\d+)\b", src)})
-    listed = (list(range(1, int(hits[0][1]) + 1)) + [int(x) for x in re.findall(r"X(\d+)", hits[0][2])]
-              if hits else [])
+    listed = list(range(1, int(hits[0][1]) + 1)) if hits else []
+    for lo, hi in (re.findall(r"X(\d+)(?:--X(\d+))?", hits[0][2]) if hits else []):
+        listed += list(range(int(lo), int(hi or lo) + 1))
     check("paper.tex", "numbered-gate labels", listed == found and len(found) == n_gates - 4,
           f"paper lists {listed[-3:] if listed else None}…, gate sources carry {found[-3:]}… "
           f"({len(found)} numbered of {n_gates})")

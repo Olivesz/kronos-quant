@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml"><img src="https://github.com/Olivesz/kronos-quant/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/gates-49%20passing-3fb950" alt="gates">
+  <img src="https://img.shields.io/badge/gates-50%20passing-3fb950" alt="gates">
   <img src="https://img.shields.io/badge/python-3.11%2B-3572A5" alt="python">
   <img src="https://img.shields.io/badge/deps-numpy%20%7C%20pandas%20%7C%20scipy-013243" alt="deps">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
@@ -41,7 +41,7 @@ KRONOS is two things at once:
    results as loudly as the positive ones.
 
 What ties them together is one discipline: **no estimator is trusted until it
-passes a gate on data where the answer is already known.** 49 such gates run in
+passes a gate on data where the answer is already known.** 50 such gates run in
 CI on every commit — on the committed real prices with nothing skipped, and again
 on a synthetic market. That is the whole point — the platform grades its own
 homework.
@@ -75,7 +75,7 @@ python run_research.py all        # 37 research experiments, cached to research/
 python run_kronos.py --research   # dashboard with the RESEARCH tab (open output/dashboard.html)
 python run_trade.py               # today's research-grounded target portfolio
 
-python tests/run_all.py           # all 49 verification gates (~5 min)
+python tests/run_all.py           # all 50 verification gates (~5 min)
 ```
 
 Runs fully offline on real prices: every real-data result reads the
@@ -88,7 +88,7 @@ never silently substitutes synthetic data.
 
 ## Highlights
 
-- **49 verification gates**, run in CI on real prices and on a synthetic
+- **50 verification gates**, run in CI on real prices and on a synthetic
   market. Most prove an estimator has correct *size* (doesn't fire on null
   worlds) and *power* (detects planted effects) on synthetic ground truth
   before any real-data claim is made. On the committed real-price snapshot
@@ -182,7 +182,11 @@ second stream ([`live/shipped_ledger.jsonl`](live)) records the shipped book's
 own next-day decisions from 2026-10-14, and replaying them reproduces the backtest
 exactly (gate X43). The first stream's decisions
 before 2026-10-13 were made on a panel with a 74-day hole, since repaired as a
-logged event ([FINDINGS](docs/FINDINGS.md#kronos-live--the-forward-ledger-now-with-realized-returns)).
+logged event ([FINDINGS](docs/FINDINGS.md#kronos-live--the-forward-ledger-now-with-realized-returns)). A third
+stream is built and waiting on the owner's broker paper-account keys: it trades the
+shipped overlay on SPY each day (`run_paper.py`, `.github/workflows/paper.yml`), so
+every order and fill carries the broker's own timestamp; gate X48 pins its decision
+to the shipped overlay and its client to the paper host.
 
 ## The research program
 
@@ -278,7 +282,7 @@ config.py                 every knob; pre-registered parameters
 run_kronos.py             v1 pipeline -> dashboard (+ --research tab)
 run_research.py           37 experiments, cached in research/*.json
 run_trade.py              the deployable system -> today's target portfolio
-kronos/                   47 modules, ~10,200 lines
+kronos/                   48 modules, ~10,400 lines
   data.py                 prices + OHLC, caching, seeded synthetic fallback
   regime.py / dhmm.py     Gaussian HMM (log-space EM, walk-forward) + duration-HMM
   thmm.py / sjm.py        Student-t HMM (own ECM) + statistical jump model
@@ -300,7 +304,7 @@ kronos/                   47 modules, ~10,200 lines
   rmt.py / ensemble.py    Marchenko-Pastur denoising; Hedge/fixed-share learners
   forensics.py            deflated Sharpe, CSCV-PBO, stationary bootstrap
   metrics.py / dashboard.py  performance stats; 1,700-line self-contained HTML
-tests/                    49 gates — run on real prices and on a synthetic market
+tests/                    50 gates — run on real prices and on a synthetic market
 docs/                     METHODS, ATLAS, design notes, FINDINGS, research index
 ```
 

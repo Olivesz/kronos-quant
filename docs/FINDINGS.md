@@ -1517,3 +1517,23 @@ stand as gross, real-time spanning alphas.
 and the 6 family factors. N goes from 188 to 202, and the shipped book's DSR
 moves from 0.83 to 0.82. DESIGN28, if it runs, would take N to 225 rather than
 the 211 it registered.
+
+**Stage 4, the external checks: built, waiting on the owner.**
+- *The broker paper account.* `run_paper.py` and
+  `.github/workflows/paper.yml` trade the shipped overlay on SPY in a broker
+  paper account. The workflow runs each weekday after the close and places
+  whole-share market-on-open orders. It appends `live/paper_ledger.jsonl`
+  with the broker's own `filled_at` timestamps. It stays dormant until the
+  owner adds the paper keys as repository secrets. Gate X48 checks that:
+  - the decision equals the shipped overlay's next-day exposure exactly, on
+    every prefix tested;
+  - the client refuses any host but the paper endpoint;
+  - a dry run posts nothing;
+  - fills are recorded once;
+  - no credential reaches the ledger.
+
+  Seven mutants were killed.
+- *The S&P 500 Daily Risk Control index.* Its levels need a hand export,
+  which only the owner can make.
+- *The IEX one-venue spread.* It needs the owner's acceptance of the IEX
+  Historical Data Terms of Use.

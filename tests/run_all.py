@@ -74,6 +74,8 @@ GATES = [
     "test_volalpha_replication.py",
     # DESIGN29 Stage-2 gate (X47): overlay identity, inference size/power, sealed reveal
     "test_volalpha.py",
+    # DESIGN29 Stage-4 gate (X48): paper-account trader = shipped overlay, paper host only
+    "test_paper.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).
