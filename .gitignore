@@ -29,3 +29,7 @@ docs/paper/*.blg
 # OS / editor
 .DS_Store
 
+
+# DESIGN29: third-party vendor files are archived locally, never committed
+data/vendor/*
+!data/vendor/MANIFEST.json
