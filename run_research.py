@@ -398,6 +398,7 @@ def exp_forensics(force: bool = False) -> dict:
         "design16_variants": 3,        # HAR lever + t-HMM engine + joint (DESIGN16)
         "design21_momtilt": 1,         # momentum exposure tilt (DESIGN21)
         "design27_ewbar": 3,           # EW backbone x2 + risk-matched (DESIGN27)
+        "design29_volalpha": 14,       # Mkt grid x8 + six family factors (DESIGN29)
     }
     n_trials = int(sum(trials.values()))
     with open(os.path.join(RES, "trials.json"), "w") as f:
@@ -3417,6 +3418,30 @@ def volalpha_replication() -> dict:
     return out
 
 
+def exp_volalpha(force: bool = False) -> dict:
+    """DESIGN29 Stage 2, the reveal: the shipped overlay on survivorship-free
+    factors over the sealed 1926-2012 holdout (kronos.volalpha.run_stage2).
+    Gate X47 checks this artifact was produced by the sealed code."""
+    if not force and (c := load_cached("volalpha")):
+        print("[volalpha] cached")
+        return c
+    from kronos import factors as F
+    from kronos.volalpha import run_stage2
+
+    t0 = time.time()
+    out = {"input_digest": F.manifest_digest(), "code_digest": _code_digest(), "n_trials": 202,
+           **run_stage2(CFG)}
+    for k, r in out["full_model"].items():
+        u = out["univariate"][k]
+        print(f"[volalpha] {k:6s} univariate α {u['alpha']*100:6.2f} (t {u['t']:5.2f})  "
+              f"full-model α {r['alpha']*100:6.2f} (t {r['t']:5.2f})  "
+              f"LW p {out['ledoit_wolf'][k]['p_one_sided']:.3f}  RW p {out['romano_wolf']['p_adj'][k]:.3f}")
+    print(f"[volalpha] decision {out['decision']}")
+    print(f"[volalpha] done in {time.time()-t0:.0f}s")
+    save("volalpha", out)
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -3437,6 +3462,7 @@ EXPERIMENTS = {
     "momtilt": exp_momtilt,
     "ewbar": exp_ewbar,
     "volalpha_replication": exp_volalpha_replication,
+    "volalpha": exp_volalpha,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,

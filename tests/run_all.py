@@ -72,6 +72,8 @@ GATES = [
     "test_shipped_stream.py",
     # DESIGN29 Stage-1 gate (X46): vol-managed replication machinery + the replication
     "test_volalpha_replication.py",
+    # DESIGN29 Stage-2 gate (X47): overlay identity, inference size/power, sealed reveal
+    "test_volalpha.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).

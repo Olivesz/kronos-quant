@@ -328,3 +328,51 @@ written for review by a McCombs finance professor and for posting on SSRN.
    `input_digest` must equal the committed manifest's SHA-256. X46 prints
    which mode ran. Recomputation from the archived bytes happens locally, and
    the commit that adds the artifact says so.
+
+## Amendment 2 — the seal (2026-10-19, after Stage 1 passed, before the reveal)
+
+Stage 1 passed under the registered rule (gate X46; FINDINGS,
+KRONOS-VOLALPHA). The Stage-2 code is committed with this amendment. No
+pre-2013 factor return has passed through KRONOS's overlay. The pipeline was
+exercised end to end only on a synthetic, French-shaped panel.
+
+**Seal.** The reveal runs this code once. Gate X47 refuses an artifact whose
+`code_digest` differs from the one recorded here.
+
+- Stage-2 code digest (`code_digest`): `7f11903f34b2d52f`. This is the
+  convention's 16-character SHA-256 prefix over `config.py`,
+  `run_research.py` and `kronos/*.py`.
+- `tests/test_volalpha.py` SHA-256:
+  `e4c89fe0b6647388e9bf251c7fc2db0457fdc31be80a8e9c0ac17f9e7043c5e8`
+- `data/vendor/MANIFEST.json` SHA-256:
+  `ced1495393f2336830e2e68fde7a2797a749f02c27d55e224f71f053be5c4f1e`
+
+**Implementation details the registration left open.** Each is fixed here,
+before any result exists.
+
+1. **BAB calendar.** AQR's calendar lists 382 dates from 1984 that French's
+   does not (US holidays). A BAB observation on such a date is compounded
+   into the next French date. Saturday sessions are then compounded into the
+   next observation for every series.
+2. **Family warmup.** The vol scale needs 252 observations, and the overlay
+   then trains on 252 more. Each family factor is therefore evaluated from
+   its 505th observation. The primary is evaluated from its 253rd.
+3. **Grid "brakes off".** `cvar_target` = 10⁹, `dd_start` = −10⁹ and
+   `dd_floor_at` = −2·10⁹. These pin both brakes at 1. Literal ±∞ would make
+   the drawdown ramp 0/0.
+4. **Joint tests.** Romano-Wolf and SPA use the rows where all seven managed
+   factors and all seven regressors exist, from the latest family start to
+   2012-12. The Romano-Wolf bootstrap is a circular block of 12 months,
+   re-estimating each Newey-West regression on every resample. SPA uses the
+   hedged series managed − β̂′X, with β̂ taken from the full-model fits.
+5. **Ledoit-Wolf.** The original statistic is studentized by a Bartlett HAC
+   SE at 12 lags. Each resample is studentized by the block-sum SE.
+6. **DSR.** Computed on the primary's daily managed excess returns over the
+   holdout at N = 202. SR0 comes from the dispersion of the eight Mkt-grid
+   members' daily Sharpe ratios.
+7. **Breakeven.** The univariate holdout α divided by annual Σ|Δe| is
+   primary. The full-model α version is reported beside it.
+8. **DTB3 robustness.** Runs from 1954-02, the first month the committed
+   DTB3 snapshot covers with its 14-day guard.
+9. **Contaminated window.** Runs from 2013-01 to the last full month in the
+   archive (2026-08).

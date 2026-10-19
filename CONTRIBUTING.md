@@ -11,7 +11,7 @@ line.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.lock   # exact versions CI uses (or: pip install -e ".[data]")
-python tests/run_all.py       # all 48 verification gates (~3min)
+python tests/run_all.py       # all 49 verification gates (~3min)
 ```
 
 To run fully offline (no Yahoo Finance), set `KRONOS_SYNTHETIC=1` — the whole
