@@ -33,3 +33,8 @@ docs/paper/*.blg
 # DESIGN29: third-party vendor files are archived locally, never committed
 data/vendor/*
 !data/vendor/MANIFEST.json
+docs/paper/volalpha/*.aux
+docs/paper/volalpha/*.log
+docs/paper/volalpha/*.out
+docs/paper/volalpha/*.bbl
+docs/paper/volalpha/*.blg

@@ -25,6 +25,7 @@ check:
 	$(PYTHON) check_numbers.py
 	$(PYTHON) check_references.py
 	$(PYTHON) check_surfaces.py
+	$(MAKE) -C volalpha check   # DESIGN29 working paper: numbers fresh, references resolve
 
 # Clean arXiv submission tarball under dist/. Contents: paper.tex, the
 # prebuilt figure PDFs, and paper.bbl (arXiv runs pdflatex, not bibtex, and
