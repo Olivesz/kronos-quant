@@ -1,0 +1,54 @@
+{
+ "design": "DESIGN29",
+ "files": {
+  "Betting-Against-Beta-Equity-Factors-Daily.xlsx": {
+   "bytes": 31458570,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "c34f1ac4130f69dd73440dd62a53caf22df47bc7cc50f5cf544f8e522c28a8c6",
+   "url": "https://www.aqr.com/-/media/AQR/Documents/Insights/Data-Sets/Betting-Against-Beta-Equity-Factors-Daily.xlsx"
+  },
+  "F-F_Momentum_Factor_CSV.zip": {
+   "bytes": 5600,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "c06d1c2e9a5e4f6985879722f23c6bb585f46b34eaf3fcb681d4de887e353f3e",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_CSV.zip"
+  },
+  "F-F_Momentum_Factor_daily_CSV.zip": {
+   "bytes": 85269,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "ecf82b116e6ec56d2b79a2f27bd1d1598c217b5c6c25caa55b945bdd8a2c0b78",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_daily_CSV.zip"
+  },
+  "F-F_Research_Data_5_Factors_2x3_CSV.zip": {
+   "bytes": 11964,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "36756c5c2559648519ac4b22913d860c6afd865cfebce920e3e8927f8e2d10b7",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_CSV.zip"
+  },
+  "F-F_Research_Data_5_Factors_2x3_daily_CSV.zip": {
+   "bytes": 150292,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "7881223b51929ee0d6d23b8a28524aaec478a2c3d4eeca47224955cc845c5186",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip"
+  },
+  "F-F_Research_Data_Factors_CSV.zip": {
+   "bytes": 13065,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "593f4fbef03181bc0b22ff6292f217689dd1fb79355049ca905d95b262040a66",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip"
+  },
+  "F-F_Research_Data_Factors_daily_CSV.zip": {
+   "bytes": 178184,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db",
+   "url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_daily_CSV.zip"
+  },
+  "VIX_History.csv": {
+   "bytes": 473839,
+   "retrieved_utc": "2026-10-19T15:36:11Z",
+   "sha256": "a9742d4deab98f7644bda10df92db0b6afbca17ccc8b64139c52ad2ca0963d42",
+   "url": "https://cdn-api.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
+  }
+ },
+ "note": "Vendor files are archived locally and not redistributed; this manifest defines the data. A loader refuses any file whose bytes do not hash to the value here."
+}

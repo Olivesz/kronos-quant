@@ -3159,6 +3159,20 @@ def _input_digest(src: str, px: pd.DataFrame) -> str:
     return "unpinned:" + hashlib.sha256(px.round(8).to_csv().encode()).hexdigest()[:16]
 
 
+def _code_digest() -> str:
+    """sha256 over the exact source that produced an artifact (config.py,
+    run_research.py, kronos/*.py) — verifiable at any commit."""
+    import glob
+    import hashlib
+    h = hashlib.sha256()
+    for f in ["config.py", "run_research.py"] + sorted(
+            os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "kronos", "*.py"))):
+        h.update(f.encode())
+        with open(os.path.join(ROOT, f), "rb") as fh:
+            h.update(fh.read())
+    return h.hexdigest()[:16]
+
+
 def exp_momtilt(force: bool = False) -> dict:
     """DESIGN21: canonical artifact for the shipped momentum-tilt headline.
     Reproduces the registered comparison (tilted shipped system vs untilted
@@ -3178,8 +3192,6 @@ def exp_momtilt(force: bool = False) -> dict:
     t0 = time.time()
     rg = walkforward_regimes(mkt, CFG)
     pairs = run_pairs_sleeve(px, [], CFG)["returns"] * CFG.pairs_gross_sleeve
-
-    import hashlib
 
     from kronos.metrics import dtb3_daily, sharpe_excess
 
@@ -3211,18 +3223,9 @@ def exp_momtilt(force: bool = False) -> dict:
               f"(excess {rows[label]['sharpe_excess']:.3f}) "
               f"MaxDD {rows[label]['max_dd']:.1%}")
     idx = navs["shipped_tilted"].index
-    # code_digest: sha256 over the exact source that produced this artifact
-    # (config.py, run_research.py, kronos/*.py) — verifiable at any commit
-    import glob
-    h = hashlib.sha256()
-    for f in ["config.py", "run_research.py"] + sorted(
-            os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "kronos", "*.py"))):
-        h.update(f.encode())
-        with open(os.path.join(ROOT, f), "rb") as fh:
-            h.update(fh.read())
     out = {"source": src, "backbone": CFG.backbone, "mom_tilt": CFG.mom_tilt,
            "span": [str(idx[0].date()), str(idx[-1].date())],
-           "code_digest": h.hexdigest()[:16],
+           "code_digest": _code_digest(),
            "input_digest": _input_digest(src, px),
            "rows": rows,
            "daily": {"dates": [d.strftime("%Y-%m-%d") for d in idx],
@@ -3337,6 +3340,83 @@ def exp_ewbar(force: bool = False) -> dict:
     return out
 
 
+def exp_volalpha_replication(force: bool = False) -> dict:
+    """DESIGN29 Stage 1: the replication gate. Moreira & Muir (2017) Table 1,
+    Cederburg et al. (2020) Tables 1 and 5, and the real-time-c managed market
+    (Liu, Tang & Zhou's point), on the archived French vintage. Published
+    strategies only — KRONOS's overlay does not run here. Gate X46 applies the
+    registered tolerances to this artifact."""
+    if not force and (c := load_cached("volalpha_replication")):
+        print("[volalpha_replication] cached")
+        return c
+    t0 = time.time()
+    out = volalpha_replication()
+    for k, r in out["mm_table1"].items():
+        print(f"[volalpha_replication] MM {k:6s} alpha {r['alpha']*100:6.2f} ({r['se']*100:.2f}) "
+              f"beta {r['beta']:.2f} N {r['n']} R2 {r['r2']:.2f}")
+    for k, r in out["cowy_table1"].items():
+        t5 = out["cowy_table5"][k]
+        print(f"[volalpha_replication] COWY {k:6s} T1 SR {r['sr_original']:.2f}->{r['sr_managed']:.2f} "
+              f"({r['sr_diff']:+.2f})  T5 {t5['sr_combination']:.2f} vs {t5['sr_original']:.2f} "
+              f"({t5['sr_diff']:+.2f}, p {t5['p_jk']:.2f})")
+    L = out["ltz_realtime_c"]
+    print(f"[volalpha_replication] LTZ Mkt MaxDD real-time c {L['max_dd_realtime_c']:.1%} "
+          f"vs full-sample c {L['max_dd_fullsample_c']:.1%} (market {L['max_dd_market']:.1%})")
+    print(f"[volalpha_replication] done in {time.time()-t0:.0f}s")
+    save("volalpha_replication", out)
+    return out
+
+
+def volalpha_replication() -> dict:
+    """The Stage-1 computation, pure (no cache, no file writes): gate X46
+    recomputes it and compares with the committed artifact."""
+    from kronos import factors as F
+    from kronos import volmanaged as V
+
+    d, m = F.french("daily"), F.french("monthly")
+    end_mm, end_cowy = pd.Period("2015-04", "M"), pd.Period("2016-12", "M")
+    out = {"input_digest": F.manifest_digest(), "code_digest": _code_digest(),
+           "vintage": "French files built from the 202608 CRSP database",
+           "mm_table1": {}, "cowy_table1": {}, "cowy_table5": {}}
+    for k in ("Mkt-RF", "SMB", "HML", "UMD", "RMW", "CMA"):
+        rv, f = F.monthly_rv(d[k]), m[k].dropna()
+        man, c = V.mm_managed(f.loc[:end_mm], rv)
+        out["mm_table1"][k] = {**V.spanning(man, f, "hc0"), "c": c}
+        man, _ = V.mm_managed(f.loc[:end_cowy], rv)
+        fo = f.reindex(man.index)
+        out["cowy_table1"][k] = {
+            "mean_original": 12 * fo.mean(), "sd_original": np.sqrt(12) * fo.std(ddof=1),
+            "sr_original": V.sharpe(fo), "sr_managed": V.sharpe(man),
+            "sr_diff": V.sharpe(man) - V.sharpe(fo),
+            "span": [str(man.index[0]), str(man.index[-1])], "n": len(man)}
+        rt = V.realtime_combination(f.loc[:end_cowy], rv)
+        a, b = rt["combination"].to_numpy(), rt["original"].to_numpy()
+        cer = lambda x: 100 * 12 * (x.mean() - 2.5 * x.var(ddof=1))  # γ = 5
+        out["cowy_table5"][k] = {
+            "sr_combination": V.sharpe(a), "sr_original": V.sharpe(b),
+            "sr_diff": V.sharpe(a) - V.sharpe(b), "p_jk": V.jobson_korkie(a, b),
+            "cer_combination": cer(a), "cer_original": cer(b),
+            "max_abs_y": float(rt["y_combination"].abs().max()),
+            "span": [str(rt["combination"].index[0]), str(rt["combination"].index[-1])],
+            "n": len(a)}
+    # Liu, Tang & Zhou: the full-sample constant against a real-time one (Mkt,
+    # Cederburg's sample; real-time c expands from K = 120 months)
+    f, rv = m["Mkt-RF"].dropna().loc[:end_cowy], F.monthly_rv(d["Mkt-RF"])
+    full, _ = V.mm_managed(f, rv)
+    real = V.realtime_c_managed(f, rv)
+    full_oos = full.reindex(real.index)
+    out["ltz_realtime_c"] = {
+        "span": [str(real.index[0]), str(real.index[-1])], "n": len(real),
+        "max_dd_realtime_c": V.max_drawdown(real, m["RF"]),
+        "max_dd_fullsample_c": V.max_drawdown(full_oos, m["RF"]),
+        "max_dd_market": V.max_drawdown(f.reindex(real.index), m["RF"]),
+        "sr_realtime_c": V.sharpe(real), "sr_fullsample_c": V.sharpe(full_oos),
+        "alpha_realtime_c": V.spanning(real, f, "hc0"),
+        "max_leverage_realtime_c": float((real / f.reindex(real.index)).abs().max()),
+        "note": "drawdowns of a total-return investor, NAV = prod(1 + excess + RF)"}
+    return out
+
+
 EXPERIMENTS = {
     "horserace": exp_horserace,
     "tails": exp_tails,
@@ -3356,6 +3436,7 @@ EXPERIMENTS = {
     "robustness2": exp_robustness2,
     "momtilt": exp_momtilt,
     "ewbar": exp_ewbar,
+    "volalpha_replication": exp_volalpha_replication,
     "critical": exp_critical,
     "reflex": exp_reflex,
     "constants": exp_constants,

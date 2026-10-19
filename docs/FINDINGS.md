@@ -1352,3 +1352,60 @@ and requires them to reproduce the backtest's net returns to 1e-12 (achieved:
 7e-18 over 40 days spanning a rebalance and open pair positions), so this
 stream measures the headlined system and nothing else. Its first decision is
 the close of 2026-10-13; no decision is back-dated.
+
+## KRONOS-VOLALPHA — the shipped overlay on a century of survivorship-free factors
+
+*Registered as [DESIGN29](design/DESIGN29.md) before any file was fetched. The
+holdout is 1926–2012 and is sealed until the Stage-2 code is hashed. This
+entry records Stage 1. The verdict on KRONOS's overlay comes later, under the
+rule registered in advance.*
+
+**Data.**
+- Ken French's daily and monthly factor files (built from the 202608 CRSP
+  database).
+- AQR's daily US BAB.
+- Cboe's VIX.
+
+All were fetched once on 2026-10-19 and pinned by SHA-256 in
+`data/vendor/MANIFEST.json`. The raw files are archived locally and are not
+redistributed.
+
+**Stage 1: the published strategies replicate, so the program proceeds.** On
+the current French vintage, all of the following land inside the tolerances
+DESIGN29 fixed beforehand (`research/volalpha_replication.json`; gate X46):
+- Moreira & Muir's Table 1;
+- Cederburg et al.'s Tables 1 and 5;
+- the look-ahead point of Liu, Tang & Zhou.
+
+| Check | Published | KRONOS |
+|---|---|---|
+| MM spanning α, Mkt (SE) | 4.86 (1.56), β 0.61 | 4.93 (1.57), β 0.60 |
+| MM spanning α, Mom | 12.51 (1.71), β 0.47 | 12.83 (1.72), β 0.45 |
+| MM α, SMB / HML / RMW / CMA | −0.58 / 1.97 / 2.44 / 0.38 | −0.59 / 1.73 / 2.80 / 0.36 |
+| COWY T1 Mkt Sharpe, original → managed | 0.42 → 0.51 | 0.42 → 0.52 |
+| COWY T1 Mom Sharpe gain | +0.50 | +0.51 |
+| COWY T5 Mkt real-time combination vs original | 0.42 vs 0.46 | 0.44 vs 0.46 (JK p 0.80) |
+| COWY T5 Mom real-time combination vs original | 0.92 vs 0.49 | 0.93 vs 0.48 (p < 0.01) |
+| Real-time-c managed Mkt, max drawdown | ~68–93% (LTZ abstract) | −90.8% (full-sample c: −54.4%) |
+
+**What the replication says about the method.**
+
+The market alpha needs the full-sample constant. With the constant estimated
+in real time (1936-08 .. 2016-12), the spanning alpha falls to 3.40% (SE
+2.30, t 1.5). Leverage then reaches 18.9×, and the −54% drawdown becomes −91%:
+Liu, Tang & Zhou's point, reproduced.
+
+The real-time investor who combines the managed and original factors gains
+nothing on the market either: a Sharpe of 0.44 against 0.46.
+
+Momentum is different. Its gain is large in real time as well.
+
+KRONOS's overlay differs from the published rule:
+- it is capped at 1.5×;
+- it is braked;
+- it forecasts volatility with a HAR model rather than last month's realized
+  variance;
+- it is smoothed and tilted.
+
+Stage 2 asks whether that rule, unchanged from the shipped one, earns what
+this one does not.

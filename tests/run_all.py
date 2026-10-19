@@ -70,6 +70,8 @@ GATES = [
     "test_overlay_warmup.py",
     # shipped-stream gate (X43): recorded decisions replay the backtest exactly
     "test_shipped_stream.py",
+    # DESIGN29 Stage-1 gate (X46): vol-managed replication machinery + the replication
+    "test_volalpha_replication.py",
 ]
 
 # anti-drift: the README badge must state the true gate count (len(GATES)).
