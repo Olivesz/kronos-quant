@@ -1,26 +1,26 @@
 {
  "first_live": "2026-08-18",
- "as_of": "2026-10-28",
+ "as_of": "2026-10-29",
  "system": "KRONOS-TRADE (DESIGN12): unlevered, forecast-vol targeted; the ledger's recorded weights, not a re-simulation",
  "conventions": "net of the backtest cost model; weights at close t earn (t, t+1]; drift between target changes; cash at 0%; benchmarks gross (SPY; daily 1/N over the panel)",
  "status": "display only (DESIGN23 L4): no pass/fail before 3 years",
  "summary": {
   "kronos": {
-   "n_days": 44,
-   "cum_return": -0.008604778667303248,
-   "ann_vol": 0.07958272971349602,
+   "n_days": 45,
+   "cum_return": -0.0034414854614202017,
+   "ann_vol": 0.07970129110514684,
    "max_dd": -0.04980163174795782
   },
   "spy": {
-   "n_days": 44,
-   "cum_return": -0.00046589793770301924,
-   "ann_vol": 0.1050049993425824,
+   "n_days": 45,
+   "cum_return": -0.004283843855467873,
+   "ann_vol": 0.10419992439752537,
    "max_dd": -0.024729355173905176
   },
   "equal_weight": {
-   "n_days": 44,
-   "cum_return": -0.013216626628775208,
-   "ann_vol": 0.07997440116326109,
+   "n_days": 45,
+   "cum_return": -0.014375405212537995,
+   "ann_vol": 0.07908807249836639,
    "max_dd": -0.04768605868682563
   }
  },
@@ -69,7 +69,8 @@
    "2026-10-21",
    "2026-10-22",
    "2026-10-26",
-   "2026-10-28"
+   "2026-10-28",
+   "2026-10-29"
   ],
   "kronos": [
    0.00435077,
@@ -115,7 +116,8 @@
    -0.00153919,
    0.0125484,
    -0.00746365,
-   0.00028693
+   0.00028693,
+   0.00520811
   ],
   "spy": [
    -0.00675576,
@@ -161,7 +163,8 @@
    0.00525329,
    -0.01180976,
    0.00184561,
-   0.00906751
+   0.00906751,
+   -0.00381973
   ],
   "equal_weight": [
    9.848e-05,
@@ -207,7 +210,8 @@
    -0.00090217,
    0.00581001,
    -0.00599037,
-   0.00297692
+   0.00297692,
+   -0.0011743
   ]
  }
 }
