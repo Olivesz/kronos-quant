@@ -2,9 +2,9 @@
  "system": "the shipped book (1/N backbone, levered overlay, pairs sleeve) \u2014 the README headline's system",
  "status": "display only (DESIGN23): no pass/fail before 3 years",
  "first": "2026-10-15",
- "as_of": "2026-11-20",
- "n_days": 25,
- "cum_return": -0.04689108299804268,
+ "as_of": "2026-11-23",
+ "n_days": 26,
+ "cum_return": -0.03039852400522669,
  "daily": {
   "dates": [
    "2026-10-15",
@@ -31,7 +31,8 @@
    "2026-11-17",
    "2026-11-18",
    "2026-11-19",
-   "2026-11-20"
+   "2026-11-20",
+   "2026-11-23"
   ],
   "returns": [
    0.0104772279,
@@ -58,7 +59,8 @@
    -0.0103120202,
    -0.0050086303,
    -0.0118540805,
-   -0.0124151619
+   -0.0124151619,
+   0.0173039604
   ]
  }
 }
